@@ -1,0 +1,15 @@
+# Mengabaikan file Python yang dihasilkan secara otomatis
+__pycache__/
+*.pyc
+*.pyo
+
+# Mengabaikan file log dan database sementara
+*.log
+*.sqlite3
+
+# Mengabaikan file konfigurasi dan dependency yang tidak perlu
+.env
+.DS_Store
+
+# Ignore configuration files
+config.py

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+
+    <title>{{ menu }}</title>
+
+    <link
+      rel="stylesheet"
+      href="/static/plugins/bootstrap/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="/static/plugins/datatables/css/datatables.min.css"
+    />
+
+    <!-- <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    /> -->
+
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Sidebar */
+      #sidebar {
+        width: 250px;
+        height: 100vh;
+        background: #343a40;
+        color: white;
+        transition: all 0.3s ease-in-out;
+        position: fixed;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #sidebar a {
+        color: white;
+        padding: 10px;
+        padding-left: 10%;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        transition: padding-left 0.3s;
+      }
+
+      #sidebar a i {
+        width: 30px;
+        text-align: center;
+        font-size: 20px;
+      }
+
+      #sidebar a span {
+        margin-left: 10px;
+        transition: opacity 0.3s;
+      }
+
+      #sidebar a:hover {
+        background: #495057;
+      }
+
+      #sidebar.closed {
+        width: 0;
+        padding-left: 0;
+      }
+
+      #sidebar.closed a span {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      /* Main Content */
+
+      #content {
+        flex: 1;
+        padding: 10px;
+        margin-left: 250px;
+        transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+        width: calc(100% - 250px);
+        display: flex;
+        flex-direction: column; /* Tetap vertikal */
+      }
+
+      #content.full {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      /* Header */
+      #header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+        background: #0066cc;
+        color: white;
+        margin-left: 250px;
+        width: calc(100% - 250px);
+      }
+
+      #header.full {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      /* Profile Dropdown */
+      #profile-dropdown {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
+      }
+
+      #profile-dropdown img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+
+      .dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 50px;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        z-index: 1000;
+        min-width: 150px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .dropdown-menu a {
+        display: block;
+        padding: 10px;
+        color: #333;
+        text-decoration: none;
+      }
+
+      .dropdown-menu a:hover {
+        background: #f4f4f4;
+      }
+
+      .brand-image {
+        width: 40px;
+        height: 40px;
+      }
+
+      legend.kotak {
+        width: inherit;
+        /* Or auto */
+        padding: 0 10px;
+        font-size: 18px;
+        font-weight: bold;
+        /* To give a bit of padding on the left and right */
+        border-bottom: none;
+      }
+
+      /* Styling untuk Card */
+      .card {
+        margin-bottom: 20px;
+        background: white;
+        /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); */
+      }
+
+      /* SETTING CARD RESPONSIVE */
+      /* Wrapper untuk card yang responsif */
+      .card-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px; /* Jarak antar card */
+      }
+
+      .card-responsive {
+        background: white;
+        padding: 20px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        flex: 1 1 calc(33.33% - 20px); /* 3 kolom per baris */
+        min-width: 300px;
+      }
+
+      /* Jika layar kecil, buat 2 kolom */
+      @media (max-width: 992px) {
+        .card-responsive {
+          flex: 1 1 calc(50% - 20px);
+        }
+      }
+
+      /* Jika layar sangat kecil, buat 1 kolom */
+      @media (max-width: 576px) {
+        .card-responsive {
+          flex: 1 1 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <a href="#">
+        <img
+          src="/static/img/UKSW-Color_outline.png"
+          alt="UKSW Logo"
+          class="brand-image"
+        />
+      </a>
+      <a href="#"><i class="fas fa-home fa-fw"></i> <span>Dashboard</span></a>
+      <a href="#"><i class="fas fa-user fa-fw"></i> <span>Profile</span></a>
+      <a href="#"><i class="fas fa-cog fa-fw"></i> <span>Settings</span></a>
+      <a href="#"
+        ><i class="fas fa-sign-out-alt fa-fw"></i> <span>Logout</span></a
+      >
+    </div>
+
+    <!-- Header -->
+    <div id="header">
+      <button id="toggle-btn" class="btn btn-light">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div id="profile-dropdown">
+        <img src="https://via.placeholder.com/40" alt="Profile Picture" />
+        <span>John Doe</span>
+        <div class="dropdown-menu">
+          <a href="#">Profile</a>
+          <a href="#">Settings</a>
+          <a href="#">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content">
+      <!-- PENGGUNAAN CARD RESPONSIVE -->
+      <!-- <div class="card-wrapper">
+        <div class="card-responsive"></div>
+        <div class="card-responsive"></div>
+        <div class="card-responsive"></div>
+      </div> -->
+
+      <div class="card" style="border: 0px; margin: 0 !important">
+        <div class="card-body">
+          <h1 class="m-0 text-dark">{{ title|safe }}</h1>
+        </div>
+      </div>
+
+      {% block content %}
+      <!-- Konten utama -->
+      {% endblock %}
+    </div>
+
+    <!-- REQUIRED SCRIPTS -->
+    <script src="/static/plugins/jquery/jquery-3.7.1.min.js"></script>
+    <script src="/static/plugins/datatables/datatables.min.js"></script>
+    <script src="/static/plugins/bootstrap/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <!-- <script src="/static/plugins/sweetalert2/sweetalert2.min.js"></script> -->
+
+    <script>
+      $(document).ready(function () {
+        $(document).ready(function () {
+          $("#toggle-btn").click(function () {
+            $("#sidebar").toggleClass("closed");
+            $("#content").toggleClass("full");
+            $("#header").toggleClass("full");
+          });
+
+          // Profile dropdown toggle
+          $("#profile-dropdown").click(function (e) {
+            e.stopPropagation();
+            $(".dropdown-menu").toggle();
+          });
+
+          // Hide dropdown when clicking outside
+          $(document).click(function () {
+            $(".dropdown-menu").hide();
+          });
+        });
+      });
+    </script>
+
+    {% block script %} {% endblock %}
+  </body>
+</html>
