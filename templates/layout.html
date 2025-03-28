@@ -46,6 +46,8 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        justify-content: space-between; /* Memastikan logout tetap di bawah */
+        padding-top: 10px; /* Beri jarak atas */
       }
 
       #sidebar a {
@@ -81,6 +83,18 @@
       #sidebar.closed a span {
         opacity: 0;
         visibility: hidden;
+      }
+
+      /* Beri jarak antara dashboard dan menu dinamis */
+      .sidebar-menu {
+        flex-grow: 1;
+        margin-top: 20px;
+      }
+
+      /* Pastikan logout tetap di bawah */
+      .sidebar-footer {
+        margin-top: auto;
+        margin-bottom: 10px;
       }
 
       /* Main Content */
@@ -213,16 +227,34 @@
   <body>
     <!-- Sidebar -->
     <div id="sidebar">
-      <a href="#">
-        <img
-          src="/static/img/UKSW-Color_outline.png"
-          alt="UKSW Logo"
-          class="brand-image"
-        />
-      </a>
-      <a href="#"><i class="fas fa-home fa-fw"></i> <span>Dashboard</span></a>
-      <a href="#"><i class="fas fa-user fa-fw"></i> <span>Profile</span></a>
-      <a href="#"><i class="fas fa-cog fa-fw"></i> <span>Settings</span></a>
+      <!-- Dashboard harus selalu di atas -->
+      <div class="sidebar-header">
+        <a href="/dashboard">
+          <img
+            src="/static/img/UKSW-Color_outline.png"
+            alt="UKSW Logo"
+            class="brand-image"
+          />
+        </a>
+      </div>
+
+      <!-- Menu dinamis dengan jarak setelah dashboard -->
+      <div class="sidebar-menu">
+        {% if session['menu'] != None %} {% for x in session['menu'] %}
+        <a href="{{ x['url'] }}">
+          <i class="fas fa-circle-dot fa-fw"></i>
+          <span>{{ x['title'] }}</span>
+        </a>
+        {% endfor %} {% endif %}
+      </div>
+
+      <!-- Logout harus selalu di bawah -->
+      <div class="sidebar-footer">
+        <a href="/logout">
+          <i class="fas fa-right-from-bracket fa-fw"></i>
+          <span>Logout</span>
+        </a>
+      </div>
     </div>
 
     <!-- Header -->
@@ -231,7 +263,8 @@
         <i class="fas fa-bars"></i>
       </button>
       <div id="profile-dropdown">
-        <img src="https://via.placeholder.com/40" alt="Profile Picture" />
+        <!-- <img src="static/img/FTI.png" alt="Profile Picture" /> -->
+        <i class="fas fa-circle-user fa-fw"></i>
         <span>John Doe</span>
         <div class="dropdown-menu">
           <a href="#">Profile</a>
