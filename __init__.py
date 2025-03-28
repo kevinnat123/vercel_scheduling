@@ -11,5 +11,13 @@ def create_app():
     
     # Tambahkan konfigurasi tambahan jika diperlukan
     app.config['SAMPLE_CONFIG'] = 'Sample Value'
+
+    # Cache control
+    @app.after_request
+    def add_cache_control(response):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
     
     return app
