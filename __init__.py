@@ -1,8 +1,10 @@
 from flask import Flask
 from flask_login import LoginManager
-from controller.loginController import main_routes
-from dao.loginDao import loginDao
 from userModel import User
+from dao.loginDao import loginDao
+
+from controller.loginController import signin
+from controller.admin.generateJadwalController import generateJadwal
 
 login_manager = LoginManager()
 
@@ -11,7 +13,7 @@ def create_app():
     app = Flask(__name__)
 
     login_manager.init_app(app)
-    login_manager.login_view = 'main_routes.login'
+    login_manager.login_view = 'signin.login'
 
     @login_manager.user_loader
     def load_user(username):
@@ -21,7 +23,8 @@ def create_app():
         return None
     
     # Daftarkan Blueprint
-    app.register_blueprint(main_routes)
+    app.register_blueprint(signin)
+    app.register_blueprint(generateJadwal)
     
     # # Tambahkan konfigurasi tambahan jika diperlukan
     # app.config['SAMPLE_CONFIG'] = 'Sample Value'
