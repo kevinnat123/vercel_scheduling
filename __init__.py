@@ -1,6 +1,6 @@
 from flask import Flask
 
-from controller.first import main_routes
+from controller.loginController import main_routes
 
 # Factory function untuk membuat aplikasi Flask
 def create_app():
