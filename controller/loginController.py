@@ -4,21 +4,21 @@ from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from userModel import User
 
-main_routes = Blueprint('main_routes', __name__)
+signin = Blueprint('signin', __name__)
 loginDao = loginDao()
 
-@main_routes.route("/")
+@signin.route("/")
 def home():
     print('[ CONTROLLER ] render website')
     if session.get('user') and '_id' in session['user']:
-        return redirect(url_for('main_routes.dashboard'))
-    return redirect(url_for('main_routes.login'))
+        return redirect(url_for('signin.dashboard'))
+    return redirect(url_for('signin.login'))
     
-@main_routes.route("/login", methods=['GET', 'POST'])
+@signin.route("/login", methods=['GET', 'POST'])
 def login():
     print('[ CONTROLLER ] login', request.method, session.get('user'))
     if session.get('user') and '_id' in session['user']:
-        return redirect(url_for('main_routes.dashboard'))
+        return redirect(url_for('signin.dashboard'))
     
     if request.method == 'POST':
         req = request.get_json('data')
@@ -34,27 +34,34 @@ def login():
         if user['status']:
             user_obj = User(username, user['data'])
             login_user(user_obj)
-            session['user'] = user['data']
             print('  session        :', session)
             print('  session user   :', session['user'])
-            # return redirect(url_for('main_routes.dashboard'))
-            return jsonify({'status': True, 'redirect_url': url_for('main_routes.dashboard')}), 200
+            print('  session menu   :', session['menu'])
+            # return redirect(url_for('signin.dashboard'))
+            return jsonify({'status': True, 'redirect_url': url_for('signin.dashboard')}), 200
 
         return jsonify({'status': False, 'message': user['message']}), 401
     return render_template('signin.html')
 
-@main_routes.route("/dashboard")
+@signin.route("/dashboard")
 @login_required
 def dashboard():
     print('[ CONTROLLER ] dashboard')
     if not session.get('user') or '_id' not in session['user']:
-        return redirect(url_for('main_routes.login'))
-    return render_template('index.html')
+        return redirect(url_for('signin.login'))
+    
+    menu = loginDao.get_menu(session['user']['role'])
+    session['menu'] = menu if menu else []
+    return render_template(
+        'index.html', 
+        menu = 'Dashboard', 
+        title = 'Dashboard'
+    )
 
-@main_routes.route("/logout")
-@login_required
+@signin.route("/logout")
+# @login_required
 def logout():
     print('[ CONTROLLER ] logout')
     logout_user()
     session.pop('user', None)  # Hapus session dengan aman
-    return redirect(url_for('main_routes.login'))
+    return redirect(url_for('signin.login'))

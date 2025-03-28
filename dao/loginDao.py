@@ -1,5 +1,6 @@
 from dao import Database
-from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users
+from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_URLS_COLLECTION as db_urls
+from flask import session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 class loginDao:
@@ -8,13 +9,26 @@ class loginDao:
 
     def signUp(self, username, password):
         print('  [ DAO ] sign up user', username)
-        result = self.connection.insert_one(db_users, {'Username': username, 'Role': 'Admin', 'Password': generate_password_hash(password)})
+        result = self.connection.insert_one(db_users, {'username': username, 'role': 'Admin', 'password': generate_password_hash(password)})
         return result
 
     def get_user(self, username):
         print('  [ DAO ] get user', username)
-        result = self.connection.find_one(db_users, {"Username": username})
+        result = self.connection.find_one(db_users, {"username": username})
         return result if result and result.get('status') else None
+    
+    def get_menu(self, role):
+        print('  [ DAO ] get menu', role)
+        general_menu = self.connection.find_many(db_urls, {"role": "General"})
+        user_menu = self.connection.find_many(db_urls, {"role": role})
+        if general_menu and general_menu.get('status'):
+            if user_menu and user_menu.get('status'):
+                for x in user_menu['data']:
+                    general_menu['data'].append(x)
+            for x in general_menu['data']:
+                del x['_id'], x['role']
+            return general_menu['data'] if general_menu['data'] else None
+        return None
 
     def verify_user(self, username, password):
         print('  [ DAO ] verify user', username, password)
@@ -22,11 +36,12 @@ class loginDao:
         print('    user', user) 
         if user:
             user_data = user['data']
-            stored_password = user_data.get('Password', '')
+            stored_password = user_data.get('password', '')
             print('    stored_password      :', type(stored_password), stored_password)
             print('    password param       :', type(password), password)
             print('    check_password_hash  :', check_password_hash(stored_password, password))
             if check_password_hash(stored_password, password):
-                del user_data['Password']
+                del user_data['password']
+                session['user'] = user['data']
                 return {'status': True, 'data': user_data, 'message': 'Login berhasil'}
         return {'status': False, 'message': 'Username atau password salah'}
