@@ -49,37 +49,37 @@
   // });
   // testing_tab.clear().rows.add(asd).draw()
 
-  let testing_tab = $("#testing").DataTable({
-    scrollX: true,
-    scrollY: "50vh",
-    scrollCollapse: true,
-    paging: false,
-    responsive: true,
-    info: false,
-    ajax: {
-      type: "POST",
-      url: "/user",
-      cache: false,
-      data: {},
-      beforeSend: () => {
-        console.log("beforesend datatable");
-      },
-      complete: () => {},
-      // success: function (res) {
-      //   console.log("dtble", res);
-      // },
-    },
-    columns: [
-      {
-        data: "id",
-      },
-      {
-        data: "name",
-      },
-      {
-        data: "email",
-      },
-    ],
-  });
+  // let testing_tab = $("#testing").DataTable({
+  //   scrollX: true,
+  //   scrollY: "50vh",
+  //   scrollCollapse: true,
+  //   paging: false,
+  //   responsive: true,
+  //   info: false,
+  //   // ajax: {
+  //   //   type: "POST",
+  //   //   url: "/user",
+  //   //   cache: false,
+  //   //   data: {},
+  //   //   beforeSend: () => {
+  //   //     console.log("beforesend datatable");
+  //   //   },
+  //   //   complete: () => {},
+  //   //   // success: function (res) {
+  //   //   //   console.log("dtble", res);
+  //   //   // },
+  //   // },
+  //   columns: [
+  //     {
+  //       data: "id",
+  //     },
+  //     {
+  //       data: "name",
+  //     },
+  //     {
+  //       data: "email",
+  //     },
+  //   ],
+  // });
 </script>
 {% endblock %}

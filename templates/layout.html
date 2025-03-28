@@ -15,6 +15,10 @@
       rel="stylesheet"
       href="/static/plugins/datatables/css/datatables.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="/static/plugins/sweetAlert/css/sweetalert2.min.css"
+    />
 
     <!-- <link
       rel="stylesheet"
@@ -219,9 +223,6 @@
       <a href="#"><i class="fas fa-home fa-fw"></i> <span>Dashboard</span></a>
       <a href="#"><i class="fas fa-user fa-fw"></i> <span>Profile</span></a>
       <a href="#"><i class="fas fa-cog fa-fw"></i> <span>Settings</span></a>
-      <a href="#"
-        ><i class="fas fa-sign-out-alt fa-fw"></i> <span>Logout</span></a
-      >
     </div>
 
     <!-- Header -->
@@ -235,7 +236,7 @@
         <div class="dropdown-menu">
           <a href="#">Profile</a>
           <a href="#">Settings</a>
-          <a href="#">Logout</a>
+          <a href="/logout">Logout</a>
         </div>
       </div>
     </div>
@@ -262,8 +263,11 @@
 
     <!-- REQUIRED SCRIPTS -->
     <script src="/static/plugins/jquery/jquery-3.7.1.min.js"></script>
+    <script src="/static/plugins/jquery/jquery-3.7.1.js"></script>
     <script src="/static/plugins/datatables/datatables.min.js"></script>
     <script src="/static/plugins/bootstrap/bootstrap.bundle.min.js"></script>
+
+    <script src="/static/plugins/sweetAlert/sweetalert2.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
 
@@ -272,23 +276,21 @@
 
     <script>
       $(document).ready(function () {
-        $(document).ready(function () {
-          $("#toggle-btn").click(function () {
-            $("#sidebar").toggleClass("closed");
-            $("#content").toggleClass("full");
-            $("#header").toggleClass("full");
-          });
+        $("#toggle-btn").click(function () {
+          $("#sidebar").toggleClass("closed");
+          $("#content").toggleClass("full");
+          $("#header").toggleClass("full");
+        });
 
-          // Profile dropdown toggle
-          $("#profile-dropdown").click(function (e) {
-            e.stopPropagation();
-            $(".dropdown-menu").toggle();
-          });
+        // Profile dropdown toggle
+        $("#profile-dropdown").click(function (e) {
+          e.stopPropagation();
+          $(".dropdown-menu").toggle();
+        });
 
-          // Hide dropdown when clicking outside
-          $(document).click(function () {
-            $(".dropdown-menu").hide();
-          });
+        // Hide dropdown when clicking outside
+        $(document).click(function () {
+          $(".dropdown-menu").hide();
         });
       });
     </script>

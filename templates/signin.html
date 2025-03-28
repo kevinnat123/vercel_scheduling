@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In</title>
+    <link
+      rel="stylesheet"
+      href="/static/plugins/sweetAlert/css/sweetalert2.min.css"
+    />
+    <style>
+      /* Reset dan base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Body dan background */
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(135deg, #4a90e2, #50c878);
+        min-height: 100vh; /* Ganti height menjadi min-height */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto; /* Ganti overflow agar tidak menyebabkan masalah */
+      }
+
+      /* Logo latar belakang */
+      .background-logo {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background-image: url("static/img/UKSW-Color_outline.png");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        opacity: 0.5;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+      }
+
+      /* Container signin */
+      .signin-container {
+        position: relative;
+        z-index: 2;
+        width: 90%;
+        max-width: 400px;
+        background-color: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Judul */
+      .signin-container h2 {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      /* Form input */
+      .input-group {
+        position: relative;
+        margin-bottom: 25px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background: rgba(255, 255, 255, 1);
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+      /* Tombol signin */
+      .signin-btn {
+        width: 100%;
+        padding: 10px;
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .signin-btn:hover {
+        background-color: #357abd;
+      }
+
+      /* Responsivitas */
+      @media screen and (max-width: 480px) {
+        .signin-container {
+          width: 95%;
+          padding: 20px;
+        }
+
+        .background-logo {
+          width: 200px;
+          height: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Logo latar belakang -->
+    <div class="background-logo"></div>
+
+    <!-- Container signin -->
+    <div class="signin-container">
+      <h2>Sign In</h2>
+      <form id="signin-form">
+        <!-- Input username -->
+        <div class="input-group">
+          <input
+            type="text"
+            id="username"
+            placeholder="Username"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- Input password -->
+        <div class="input-group">
+          <input type="password" id="password" placeholder="Password" />
+        </div>
+
+        <!-- Tombol signin -->
+        <button type="submit" class="signin-btn" onclick="signin(event)">
+          Sign In
+        </button>
+      </form>
+    </div>
+
+    <script src="/static/plugins/jquery/jquery-3.7.1.min.js"></script>
+    <script src="/static/plugins/jquery/jquery-3.7.1.js"></script>
+
+    <script src="/static/plugins/sweetAlert/sweetalert2.min.js"></script>
+
+    <script>
+      const BASE_URL = "/controller/loginController";
+
+      $(document).ready(function () {});
+
+      function signin(event) {
+        event.preventDefault();
+
+        let username = $("#username").val();
+        let password = $("#password").val();
+
+        // if (!username) {
+        //   return Swal.fire({
+        //     title: "Username Wajib diisi!",
+        //     text: "Silakan masukkan username Anda sebelum Submit",
+        //     icon: "warning",
+        //   });
+        // } else if (!password) {
+        //   return Swal.fire({
+        //     title: "Password Wajib diisi!",
+        //     text: "Silakan masukkan password Anda sebelum Submit",
+        //     icon: "warning",
+        //   });
+        // }
+
+        params = { username: username, password: password };
+        console.log("param");
+
+        $.ajax({
+          type: "POST",
+          url: "/login",
+          cache: false,
+          data: JSON.stringify(params),
+          success: function (res) {
+            window.location.href = res.redirect_url;
+          },
+          error: function (xhr) {
+            let errorMsg = xhr.responseJSON
+              ? xhr.responseJSON.message
+              : "Login gagal!";
+            return Swal.fire({
+              title: "Error!",
+              text: errorMsg,
+              icon: "error",
+              showConfirmButton: false,
+              timer: 1000,
+            }).then(() => {
+              $("#signin-form")[0].reset();
+              setTimeout(() => {
+                $(":input").blur();
+              }, 250);
+            });
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
