@@ -9,12 +9,17 @@ class loginDao:
 
     def signUp(self, username, password):
         print('  [ DAO ] sign up user', username)
-        result = self.connection.insert_one(db_users, {'username': username, 'role': 'Admin', 'password': generate_password_hash(password)})
+        result = self.connection.insert_one(db_users, {'u_id': username, 'role': 'Admin', 'password': generate_password_hash(password)})
         return result
+    
+    def get_user_id(self, u_id):
+        print('  [ DAO ] get user', u_id)
+        result = self.connection.find_one(db_users, {"u_id": u_id})
+        return result['data']['u_id'] if result and result.get('status') else None
 
-    def get_user(self, username):
-        print('  [ DAO ] get user', username)
-        result = self.connection.find_one(db_users, {"username": username})
+    def get_user(self, u_id):
+        print('  [ DAO ] get user', u_id)
+        result = self.connection.find_one(db_users, {"u_id": u_id})
         return result if result and result.get('status') else None
     
     def get_menu(self, role):
@@ -26,13 +31,14 @@ class loginDao:
                 for x in user_menu['data']:
                     general_menu['data'].append(x)
             for x in general_menu['data']:
-                del x['_id'], x['role']
+                print('    general menu', x  )
+                del x['role']
             return general_menu['data'] if general_menu['data'] else None
         return None
 
-    def verify_user(self, username, password):
-        print('  [ DAO ] verify user', username, password)
-        user = self.get_user(username)
+    def verify_user(self, u_id, password):
+        print('  [ DAO ] verify user', u_id, password)
+        user = self.get_user(u_id)
         print('    user', user) 
         if user:
             user_data = user['data']
@@ -44,4 +50,4 @@ class loginDao:
                 del user_data['password']
                 session['user'] = user['data']
                 return {'status': True, 'data': user_data, 'message': 'Login berhasil'}
-        return {'status': False, 'message': 'Username atau password salah'}
+        return {'status': False, 'message': 'NIP atau password salah'}
