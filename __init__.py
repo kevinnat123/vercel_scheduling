@@ -4,7 +4,16 @@ from userModel import User
 from dao.loginDao import loginDao
 
 from controller.loginController import signin
+
+# ADMIN
 from controller.admin.generateJadwalController import generateJadwal
+
+# LABORAN
+from controller.laboran.ruangKelasController import ruangKelas
+
+# KAPRODI
+from controller.kaprodi.dataDosenController import dosen
+from controller.kaprodi.dataMataKuliahController import mataKuliah
 
 login_manager = LoginManager()
 
@@ -24,7 +33,16 @@ def create_app():
     
     # Daftarkan Blueprint
     app.register_blueprint(signin)
+
+    # ADMIN
     app.register_blueprint(generateJadwal)
+
+    # LABORAN
+    app.register_blueprint(ruangKelas)
+
+    # KAPRODI
+    app.register_blueprint(dosen)
+    app.register_blueprint(mataKuliah)
     
     # # Tambahkan konfigurasi tambahan jika diperlukan
     # app.config['SAMPLE_CONFIG'] = 'Sample Value'
