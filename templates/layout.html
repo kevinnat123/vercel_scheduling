@@ -33,6 +33,28 @@
         overflow-x: hidden;
       }
 
+      .row {
+        padding-bottom: 10px;
+      }
+
+      /* Perbaikan untuk outline input yang lebih terlihat */
+      input,
+      select,
+      textarea,
+      .input {
+        border: black 0.1px solid !important;
+        border-radius: 4px;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus,
+      .input:focus {
+        border-color: #0066cc !important;
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25) !important;
+        outline: none;
+      }
+
       /* Sidebar */
       #sidebar {
         width: 250px;
@@ -209,6 +231,76 @@
         min-width: 300px;
       }
 
+      /* Loading - Modern Animation Style */
+      #loadingModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+      }
+
+      .loading-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        max-width: 300px;
+        width: 100%;
+      }
+
+      /* Pulse Dots Animation */
+      .pulse-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin: 15px 0;
+      }
+
+      .pulse-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: #0066cc;
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      .pulse-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .pulse-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(0.8);
+          opacity: 0.5;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 1;
+        }
+      }
+
+      .loading-content p {
+        color: #333;
+        font-size: 16px;
+        font-weight: 500;
+        margin-top: 10px;
+        margin-bottom: 0;
+      }
+
       /* Jika layar kecil, buat 2 kolom */
       @media (max-width: 992px) {
         .card-responsive {
@@ -265,7 +357,7 @@
       <div id="profile-dropdown">
         <!-- <img src="static/img/FTI.png" alt="Profile Picture" /> -->
         <i class="fas fa-circle-user fa-fw"></i>
-        <span>John Doe</span>
+        <span>{{ session['user']['nama'] }}</span>
         <div class="dropdown-menu">
           <a href="#">Profile</a>
           <a href="#">Settings</a>
@@ -294,6 +386,18 @@
       {% endblock %}
     </div>
 
+    <!-- Modern Loading Modal -->
+    <div id="loadingModal">
+      <div class="loading-content">
+        <div class="pulse-container">
+          <div class="pulse-dot"></div>
+          <div class="pulse-dot"></div>
+          <div class="pulse-dot"></div>
+        </div>
+        <p>Mohon tunggu...</p>
+      </div>
+    </div>
+
     <!-- REQUIRED SCRIPTS -->
     <script src="/static/plugins/jquery/jquery-3.7.1.min.js"></script>
     <script src="/static/plugins/jquery/jquery-3.7.1.js"></script>
@@ -304,11 +408,32 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
 
-    <!-- SweetAlert2 -->
-    <!-- <script src="/static/plugins/sweetalert2/sweetalert2.min.js"></script> -->
+    <script src="static/js/global.js"></script>
 
     <script>
+      // // Tampilkan loading saat halaman mulai dimuat
+      // document.addEventListener("DOMContentLoaded", function () {
+      //   showLoading();
+      // });
+
+      // // Sembunyikan loading setelah semua elemen halaman selesai dimuat
+      // window.addEventListener("load", function () {
+      //   hideLoading();
+      // });
+
       $(document).ready(function () {
+        function adjustSidebar() {
+          if (window.matchMedia("(max-width: 1200px)").matches) {
+            $("#sidebar").addClass("closed");
+            $("#content").addClass("full");
+            $("#header").addClass("full");
+          } else {
+            $("#sidebar").removeClass("closed");
+            $("#content").removeClass("full");
+            $("#header").removeClass("full");
+          }
+        }
+
         $("#toggle-btn").click(function () {
           $("#sidebar").toggleClass("closed");
           $("#content").toggleClass("full");
@@ -325,69 +450,12 @@
         $(document).click(function () {
           $(".dropdown-menu").hide();
         });
+
+        $(window).on("resize", adjustSidebar);
+        adjustSidebar(); // Jalankan saat halaman pertama kali dimuat
+
+        hideLoading();
       });
-
-      /**
-       * @param {string} [icon] - The icon type (e.g., "success", "error", "warning", "info"). Leave as `undefined` to skip.
-       * @param {string} [title] - The title text. Leave as `undefined` to skip.
-       * @param {string} [text] - The message text. Leave as `undefined` to skip.
-       * @param {number} [timer] - The duration in milliseconds before closing. Leave as `undefined` for default behavior.
-       */
-      async function popUpTimer(icon, title, text = null, timer = 1000) {
-        await Swal.fire({
-          position: "center",
-          icon: icon ?? "error",
-          title: title ?? "Terjadi kesalahan pada sistem.",
-          text: text ?? null,
-          showConfirmButton: false,
-          timer: timer,
-        });
-      }
-
-      // DATATABLE FUNCTION
-      /**
-       * Creating empty row contains of empty columns data of the specified datatable.
-       */
-      function createEmptyRow(dataTable) {
-        let emptyRow = {};
-        dataTable.columns().every(function (index) {
-          let columnData = this.dataSrc();
-          if (columnData !== null) emptyRow[columnData] = "";
-        });
-        return emptyRow;
-      }
-
-      /**
-       * Adding a new row to the specified datatable.
-       */
-      function addRow(dataTable) {
-        if (dataTable.rows().count() > 0) {
-          // cek apakah datatable punya baris ?
-          let tableId = dataTable.table().node().id; // ambil id table yang digunakan pada datatable
-          let lastRow = $("#" + tableId + " tbody tr:last td:first input")
-            .val()
-            .trim();
-          if (!lastRow) return false;
-        }
-
-        let emptyRow = createEmptyRow(dataTable);
-
-        dataTable.row.add(emptyRow).draw(false);
-
-        return true;
-      }
-
-      function addRowButton(dataTable) {
-        let tableId = dataTable.table().node().id; // ambil id table yang digunakan pada datatable
-
-        addRow(dataTable);
-
-        $("#" + tableId + " tbody tr:last td:first input")
-          .click()
-          .focus();
-
-        return true;
-      }
     </script>
 
     {% block script %} {% endblock %}

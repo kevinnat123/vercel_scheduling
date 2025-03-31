@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - Halaman Tidak Ditemukan</title>
+    <style>
+      /* Reset dan base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Body dan background */
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(135deg, #4a90e2, #50c878);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+      }
+
+      /* Logo latar belakang */
+      .background-logo {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background-image: url("static/img/UKSW-Color_outline.png");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        opacity: 0.3; /* Mengurangi opacity logo */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+      }
+
+      /* Container error */
+      .error-container {
+        position: relative;
+        z-index: 2;
+        width: 90%;
+        max-width: 500px;
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.35
+        ); /* Meningkatkan opacity container */
+        backdrop-filter: blur(15px);
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+
+      /* Judul */
+      .error-container h1 {
+        font-size: 72px;
+        color: #ffffff; /* Warna putih solid */
+        margin-bottom: 10px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Menambahkan bayangan */
+      }
+
+      .error-container h2 {
+        font-size: 28px;
+        color: #ffffff; /* Warna putih solid */
+        margin-bottom: 20px;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* Menambahkan bayangan */
+      }
+
+      /* Teks error */
+      .error-container p {
+        color: #003366; /* Warna biru tua */
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.7
+        ); /* Background semi-transparan */
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-weight: 500; /* Membuat teks sedikit lebih tebal */
+      }
+
+      /* Tombol kembali */
+      .back-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #003366; /* Warna biru tua */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .back-btn:hover {
+        background-color: #004080;
+        transform: translateY(-2px);
+      }
+
+      /* Responsivitas */
+      @media screen and (max-width: 480px) {
+        .error-container {
+          width: 95%;
+          padding: 20px;
+        }
+
+        .error-container h1 {
+          font-size: 60px;
+        }
+
+        .error-container h2 {
+          font-size: 22px;
+        }
+
+        .background-logo {
+          width: 200px;
+          height: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Logo latar belakang -->
+    <div class="background-logo"></div>
+
+    <!-- Container error -->
+    <div class="error-container">
+      <h1>404</h1>
+      <h2>Halaman Tidak Ditemukan</h2>
+      <p>Silakan periksa kembali alamat URL atau kembali ke halaman utama.</p>
+      <a href="/" class="back-btn">Kembali ke Beranda</a>
+    </div>
+  </body>
+</html>
