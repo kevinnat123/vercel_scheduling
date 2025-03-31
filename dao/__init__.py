@@ -20,6 +20,7 @@ class Database:
             result = collection.find_one(filter)
             if result:
                 result['_id'] = str(result['_id']) 
+                del result['_id']
                 return {'status': True, 'data': result, 'message': 'Data ditemukan'}
             return {'status': False, 'data': None, 'message': 'Data tidak ditemukan'}
         except errors.PyMongoError as e:
@@ -33,6 +34,9 @@ class Database:
                 cursor = cursor.sort(sort)
             
             data = [{**doc, '_id': str(doc['_id'])} for doc in cursor]
+            for doc in data:
+                doc.pop('_id', None)  # Hapus _id, jika ada
+
             total_documents = collection.count_documents(filter)
             
             return {'status': True, 'data': data, 'total_documents': total_documents, 'message': 'Data ditemukan'}
@@ -64,6 +68,16 @@ class Database:
             return {'status': False, 'message': 'Data tidak ditemukan atau tidak diperbarui'}
         except errors.PyMongoError as e:
             return {'status': False, 'message': f'Error pymongo: {e}'}
+        
+    def update_many(self, collection_name, filter, update_data):
+        try:
+            collection = self.get_collection(collection_name)
+            update_result = collection.update_many(filter, {'$set': update_data})
+            if update_result.modified_count > 0:
+                return {'status': True, 'modified_count': update_result.modified_count, 'message': 'Data berhasil diperbarui'}
+            return {'status': False, 'modified_count': 0, 'message': 'Tidak ada data yang diperbarui'}
+        except errors.PyMongoError as e:
+            return {'status': False, 'message': f'Error pymongo: {e}'}
     
     def delete_one(self, collection_name, filter):
         try:
@@ -72,6 +86,16 @@ class Database:
             if delete_result.deleted_count > 0:
                 return {'status': True, 'message': 'Data berhasil dihapus'}
             return {'status': False, 'message': 'Data tidak ditemukan'}
+        except errors.PyMongoError as e:
+            return {'status': False, 'message': f'Error pymongo: {e}'}
+        
+    def delete_many(self, collection_name, filter):
+        try:
+            collection = self.get_collection(collection_name)
+            delete_result = collection.delete_many(filter)
+            if delete_result.deleted_count > 0:
+                return {'status': True, 'deleted_count': delete_result.deleted_count, 'message': 'Data berhasil dihapus'}
+            return {'status': False, 'deleted_count': 0, 'message': 'Tidak ada data yang dihapus'}
         except errors.PyMongoError as e:
             return {'status': False, 'message': f'Error pymongo: {e}'}
     
