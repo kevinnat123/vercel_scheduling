@@ -9,22 +9,24 @@ class loginDao:
 
     def signUp(self, username, password):
         print('  [ DAO ] sign up user', username)
-        result = self.connection.insert_one(db_users, {'u_id': username, 'role': 'Admin', 'password': generate_password_hash(password)})
+        result = self.connection.insert_one(db_users, {'u_id': username, 'role': 'ADMIN', 'password': generate_password_hash(password)})
         return result
     
     def get_user_id(self, u_id):
         print('  [ DAO ] get user', u_id)
-        result = self.connection.find_one(db_users, {"u_id": u_id})
+        # print('  [ generate "kaprodi" ]', generate_password_hash('kaprodi'))
+        result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result['data']['u_id'] if result and result.get('status') else None
 
     def get_user(self, u_id):
         print('  [ DAO ] get user', u_id)
-        result = self.connection.find_one(db_users, {"u_id": u_id})
+        # print('  [ generate "kaprodi" ]', generate_password_hash('kaprodi'))
+        result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result if result and result.get('status') else None
     
     def get_menu(self, role):
         print('  [ DAO ] get menu', role)
-        general_menu = self.connection.find_many(db_urls, {"role": "General"})
+        general_menu = self.connection.find_many(db_urls, {"role": "GENERAL"})
         user_menu = self.connection.find_many(db_urls, {"role": role})
         if general_menu and general_menu.get('status'):
             if user_menu and user_menu.get('status'):
