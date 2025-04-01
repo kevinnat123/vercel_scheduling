@@ -1,0 +1,51 @@
+from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for
+from dao.kaprodi.dataDosenDao import dataDosenDao
+from flask_login import login_required
+
+dosen = Blueprint('dosen', __name__)
+dao = dataDosenDao()
+
+@dosen.route("/data_dosen")
+@login_required
+def dosen_index():
+    print('[ CONTROLLER ] render data dosen')
+    if session['user']['role'] != 'KEPALA PROGRAM STUDI':
+        return redirect(url_for('signin.error403'))
+    else:
+        return render_template(
+                '/kaprodi/data_dosen/index.html', 
+                menu = 'Data Dosen', 
+                title = 'Data Dosen', 
+                prodi = session['user']['prodi']
+            )
+    
+@dosen.route("/get_dosen", methods=['GET'])
+@login_required
+def get_dosen():
+    print('[ CONTROLLER ] get_dosen')
+    data = dao.get_dosen()
+    return jsonify({ 'data': data })
+
+@dosen.route("/post_dosen", methods=['POST'])
+@login_required
+def post_dosen():
+    print('[ CONTROLLER ] post_dosen')
+    req = request.get_json('data')
+    data = dao.post_dosen(req)
+    return jsonify( data )
+
+@dosen.route("/put_dosen", methods=['POST'])
+@login_required
+def put_dosen():
+    print('[ CONTROLLER ] put_dosen')
+    req = request.get_json('data')
+    data = dao.put_dosen(req)
+    return jsonify( data )
+
+@dosen.route("/delete_dosen", methods=['POST'])
+@login_required
+def delete_dosen():
+    print('[ CONTROLLER ] delete_dosen')
+    req = request.get_json('data')
+    data = dao.delete_dosen(req)
+    return jsonify( data )

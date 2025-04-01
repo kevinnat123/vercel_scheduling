@@ -1,0 +1,366 @@
+{% extends "layout.html" %} {% block content %}
+<!-- <div class="container-fluid mt-4" id="main-window"> -->
+<div class="card" id="card-form" hidden>
+  <div class="card-body">
+    <form role="form" class="form-horizontal row" id="frm">
+      <div class="row">
+        <h4 id="formTitle"></h4>
+      </div>
+      <div class="form-group row">
+        <label for="input_nip" class="col-2 col-form-label">NIP</label>
+        <div class="col-2">
+          <input
+            type="text"
+            class="form-control"
+            id="input_nip"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_nama" class="col-2 col-form-label">Nama</label>
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input_nama"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_konsentrasi" class="col-2 col-form-label"
+          >Konsentrasi</label
+        >
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input_konsentrasi"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_prodi" class="col-2 col-form-label"
+          >Program Studi</label
+        >
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input_prodi"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="col text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpan">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-update">
+          Simpan
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          id="btn-batal"
+          onclick="form_dosen(false, true)"
+        >
+          Batal
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <button
+      type="button"
+      class="btn btn-primary"
+      id="btn-tambah"
+      onclick="form_dosen(false)"
+    >
+      <i class="fas fa-plus fa-fw"></i><span> Tambah Data</span>
+    </button>
+    <button type="button" class="btn btn-danger" id="btn-hapus">
+      <i class="fas fa-trash fa-fw"></i><span> Hapus Data</span>
+    </button>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-stripped w-100" id="table_dosen">
+        <thead class="text-center">
+          <th><input type="checkbox" name="cbDosenTabAll" /></th>
+          <th>NIP</th>
+          <th>Nama</th>
+          <th>Konsentrasi</th>
+          <th></th>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- </div> -->
+{% endblock %} {% block script %}
+<script>
+  const prodi = "{{ prodi | safe }}";
+  $(document).ready(function () {});
+
+  function form_dosen(update, hidden = false, data = undefined) {
+    $("#frm")[0].reset();
+    if (update === false) {
+      document.getElementById("formTitle").innerText = "Tambah Data";
+      $("#card-form input").prop("disabled", false);
+      $("#btn-simpan").attr("hidden", false);
+      $("#btn-update").attr("hidden", true);
+    } else {
+      document.getElementById("formTitle").innerText = "Update Data";
+      $("#input_nip").prop("disabled", true);
+      $("#btn-simpan").attr("hidden", true);
+      $("#btn-update").attr("hidden", false);
+    }
+    $("#input_prodi").prop("disabled", true);
+    $("#input_prodi").val(prodi);
+    if (data) {
+      $("#input_nip").val(data.nip);
+      $("#input_nama").val(data.nama);
+      $("#input_konsentrasi").val(data.konsentrasi);
+    }
+    $("#card-form").prop("hidden", hidden ? true : false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  $("#btn-simpan").on("click", function () {
+    if (!$("#input_nip").val()) {
+      popUpTimer("error", "NIP belum diisi!");
+      setTimeout(() => {
+        $("#input_nip").focus();
+      }, 1500);
+      return;
+    } else if (
+      dosen_tab
+        .data()
+        .toArray()
+        .some((item) => item.nip === $("#input_nip").val())
+    ) {
+      popUpTimer(
+        "error",
+        "Data dengan NIP " + $("#input_nip").val() + " sudah ada!"
+      );
+      form_dosen(false);
+      return;
+    } else if (!$("#input_nama").val()) {
+      popUpTimer("error", "Nama belum diisi!");
+      setTimeout(() => {
+        $("#input_nama").focus();
+      }, 1500);
+      return;
+    }
+
+    let params = {
+      nip: $("#input_nip").val(),
+      nama: $("#input_nama").val(),
+      konsentrasi: $("#input_konsentrasi").val(),
+      prodi: prodi,
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/post_dosen",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        console.log("[ post_dosen ] ", res);
+        if (res.status === false) {
+          await popUpTimer("error", res.message);
+          if (res.target)
+            setTimeout(() => {
+              $("#" + res.target).focus();
+            }, 1500);
+        } else {
+          $("#btn-batal").click();
+          popUpTimer("success", res.message);
+          dosen_tab.ajax.reload(null, false);
+        }
+      },
+    });
+  });
+
+  $("#btn-update").on("click", function () {
+    if (!$("#input_nama").val())
+      return popUpTimer("error", "Nama belum diisi!");
+
+    let params = {
+      nip: $("#input_nip").val(),
+      nama: $("#input_nama").val(),
+      konsentrasi: $("#input_konsentrasi").val(),
+    };
+    console.log("[ btn-update ] params", params);
+
+    $.ajax({
+      type: "POST",
+      url: "/put_dosen",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        console.log("[ put_dosen ] ", res);
+        if (res.status === false) {
+          await popUpTimer("error", res.message);
+          if (res.target)
+            setTimeout(() => {
+              $("#" + res.target).focus();
+            }, 500);
+        } else {
+          $("#btn-batal").click();
+          popUpTimer("success", res.message);
+          dosen_tab.ajax.reload(null, false);
+        }
+      },
+    });
+  });
+
+  $("#btn-hapus").on("click", async function () {
+    let selectedData = [];
+
+    $("input[name='cbDosenTab']:checked").each(function () {
+      let row = $(this).closest("tr"); // Dapatkan baris terkait
+      let rowData = dosen_tab.row(row).data(); // Ambil data baris dari DataTable
+
+      if (rowData) {
+        selectedData.push(rowData);
+      }
+    });
+
+    if (!selectedData.length)
+      return popUpTimer("error", "Tidak ada data untuk dihapus.");
+
+    let decision = await Swal.fire({
+      title: "Yakin akan hapus data ini?",
+      showCancelButton: true,
+      confirmButtonText: "Yakin",
+      cancelButtonText: "Batalkan",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        return true;
+      } else if (result.isDismissed) {
+        return false;
+      }
+    });
+
+    console.log("decision", decision);
+
+    if (decision === true) {
+      $.ajax({
+        type: "POST",
+        url: "/delete_dosen",
+        cache: false,
+        data: JSON.stringify(selectedData),
+        beforeSend: () => {
+          showLoading();
+        },
+        complete: () => {
+          hideLoading();
+        },
+        success: function (res) {
+          console.log("[ delete_dosen ] ", res);
+          if (res.status === false) {
+            popUpTimer("error", res.message);
+          } else {
+            popUpTimer("success", res.message);
+            $('input[name="cbDosenTabAll"]').prop("checked", false);
+            dosen_tab.ajax.reload(null, false);
+          }
+        },
+      });
+    }
+  });
+
+  function detail_dosen(object) {
+    let data = dosen_tab.row(object.closest("tr")).data();
+    form_dosen(true, false, data);
+  }
+
+  // CHECKBOX
+  // Event ketika cbDosenTabAll di-click
+  $('input[name="cbDosenTabAll"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $('input[name="cbDosenTab"]').prop("checked", isChecked);
+  });
+
+  // Event ketika salah satu cbDosenTab di-click
+  $(document).on("change", 'input[name="cbDosenTab"]', function () {
+    let allChecked =
+      $('input[name="cbDosenTab"]').length ===
+      $('input[name="cbDosenTab"]:checked').length;
+    $('input[name="cbDosenTabAll"]').prop("checked", allChecked);
+  });
+
+  // DATATABLE
+  let dosen_tab = $("#table_dosen").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    info: false,
+    ajax: {
+      type: "GET",
+      url: "/get_dosen",
+      cache: false,
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+    },
+    columns: [
+      {
+        data: null,
+        width: "10px",
+        render: function (data, type, row) {
+          return `
+              <input type="checkbox" name="cbDosenTab"/>
+            `;
+        },
+      },
+      {
+        data: "nip",
+        width: "75px",
+      },
+      {
+        data: "nama",
+        width: "300px",
+      },
+      {
+        data: "konsentrasi",
+        width: "",
+      },
+      {
+        data: null,
+        width: "10px",
+        render: function () {
+          return `<button class="btn btn-primary btn-sm" onclick="detail_dosen($(this))">Det</button>`;
+        },
+        // orderable: false,
+        className: "text-center",
+      },
+    ],
+  });
+</script>
+{% endblock %}
