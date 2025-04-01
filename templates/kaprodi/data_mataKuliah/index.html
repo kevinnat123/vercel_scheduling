@@ -1,0 +1,560 @@
+{% extends "layout.html" %} {% block content %}
+<!-- <div class="container-fluid mt-4" id="main-window"> -->
+<div class="card" id="card-form" hidden>
+  <div class="card-body">
+    <form role="form" class="form-horizontal row" id="frm">
+      <div class="row">
+        <h4 id="formTitle"></h4>
+      </div>
+      <div class="form-group row">
+        <label for="input_kode" class="col-2 col-form-label text-end"
+          >Kode</label
+        >
+        <div class="col-2">
+          <input
+            type="text"
+            class="form-control"
+            id="input_kode"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_nama" class="col-2 col-form-label text-end"
+          >Nama</label
+        >
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input_nama"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_kelompok" class="col-2 col-form-label text-end"
+          >Kelompok</label
+        >
+        <div class="col">
+          <select class="form-control" id="input_kelompok">
+            {% for kelompok in session['user']['kelompok_matkul'] %}
+            <option value="{{ kelompok }}">{{ kelompok }}</option>
+            {% endfor %}
+            <option value="tambah_baru">+ Tambah Kelompok Baru</option>
+          </select>
+
+          <!-- Input untuk kelompok baru (disembunyikan awalnya) -->
+          <div
+            class="input-group mt-2"
+            style="display: none"
+            id="kelompok_baru_group"
+          >
+            <input
+              type="text"
+              id="kelompok_baru"
+              class="form-control"
+              placeholder="Masukkan nama kelompok baru"
+              autocomplete="off"
+            />
+            <button type="button" id="simpan_kelompok" class="btn btn-primary">
+              Simpan
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_prodi" class="col-2 col-form-label text-end"
+          >Program Studi</label
+        >
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input_prodi"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_sksA" class="col-2 col-form-label text-end"
+          >SKS Akademik</label
+        >
+        <div class="col-1">
+          <input
+            type="text"
+            class="form-control"
+            id="input_sksA"
+            autocomplete="off"
+          />
+        </div>
+        <label for="input_sksB" class="col-2 col-form-label text-end"
+          >SKS Bayar</label
+        >
+        <div class="col-1">
+          <input
+            type="text"
+            class="form-control"
+            id="input_sksB"
+            autocomplete="off"
+          />
+        </div>
+        <div class="col"></div>
+        <label for="cbPraktikum" class="col-2 col-form-label text-end"
+          >Praktikum</label
+        >
+        <div class="col-1 d-flex align-items-center">
+          <input type="checkbox" id="cbPraktikum" />
+        </div>
+      </div>
+      <div class="col text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpan">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-update">
+          Simpan
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          id="btn-batal"
+          onclick="form_matkul(false, true)"
+        >
+          Batal
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <button
+      type="button"
+      class="btn btn-primary"
+      id="btn-tambah"
+      onclick="form_matkul(false)"
+    >
+      <i class="fas fa-plus fa-fw"></i><span> Tambah Data</span>
+    </button>
+    <button type="button" class="btn btn-danger" id="btn-hapus">
+      <i class="fas fa-trash fa-fw"></i><span> Hapus Data</span>
+    </button>
+
+    <div class="table-responsive">
+      <table
+        class="table table-bordered table-stripped w-100"
+        id="table_matkul"
+      >
+        <thead class="text-center">
+          <th><input type="checkbox" name="cbMatkulTabAll" /></th>
+          <th>Kode</th>
+          <th>Nama</th>
+          <th>SKS A</th>
+          <th>SKS B</th>
+          <th>Kelompok</th>
+          <th></th>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- </div> -->
+{% endblock %} {% block script %}
+<script>
+  const prodi = "{{ prodi | safe }}";
+  $(document).ready(function () {
+    document
+      .getElementById("input_kelompok")
+      .addEventListener("change", function () {
+        console.log(this.value);
+        let kelompokBaruGroup = document.getElementById("kelompok_baru_group");
+
+        if (this.value === "tambah_baru") {
+          console.log("⚠️ showing kelompok baru");
+          kelompokBaruGroup.style.display = "flex"; // Menampilkan input dan tombol
+          document.getElementById("kelompok_baru").focus();
+        } else {
+          kelompokBaruGroup.style.display = "none";
+        }
+      });
+
+    document
+      .getElementById("kelompok_baru")
+      .addEventListener("input", function () {
+        document.getElementById("simpan_kelompok").disabled =
+          this.value.trim() === "";
+      });
+
+    document
+      .getElementById("simpan_kelompok")
+      .addEventListener("click", function () {
+        let kelompokBaru = document
+          .getElementById("kelompok_baru")
+          .value.trim();
+        if (kelompokBaru === "") return;
+
+        $.ajax({
+          type: "POST",
+          url: "/post_kelompok",
+          cache: false,
+          data: JSON.stringify({ nama: kelompokBaru }),
+          beforeSend: () => {
+            showLoading();
+          },
+          complete: () => {
+            hideLoading();
+          },
+          success: async function (res) {
+            console.log("[ post_kelompok ] ", res);
+            if (res.status === false) {
+              popUpTimer("error", res.message, undefined, 1500);
+              $("#kelompok_baru").val("");
+            } else {
+              let dropdown = document.getElementById("input_kelompok");
+              let option = document.createElement("option");
+              option.value = kelompokBaru;
+              option.textContent = kelompokBaru;
+              dropdown.insertBefore(option, dropdown.lastElementChild);
+              dropdown.value = kelompokBaru;
+
+              // Reset input
+              document.getElementById("kelompok_baru").value = "";
+              // document.getElementById("kelompok_baru").style.display = "none";
+              // document.getElementById("simpan_kelompok").style.display = "none";
+              document.getElementById("kelompok_baru_group").style.display =
+                "none";
+            }
+          },
+        });
+      });
+  });
+
+  function form_matkul(update, hidden = false, data = undefined) {
+    $("#frm")[0].reset();
+    if (update === false) {
+      document.getElementById("formTitle").innerText = "Tambah Data";
+      $("#card-form input").prop("disabled", false);
+      $("#btn-simpan").attr("hidden", false);
+      $("#btn-update").attr("hidden", true);
+    } else {
+      document.getElementById("formTitle").innerText = "Update Data";
+      $("#input_kode").prop("disabled", true);
+      $("#btn-simpan").attr("hidden", true);
+      $("#btn-update").attr("hidden", false);
+    }
+    $("#input_prodi").prop("disabled", true);
+    if (data) {
+      $("#input_kode").val(data.kode);
+      $("#input_nama").val(data.nama);
+      $("#input_kelompok").val(data.kelompok);
+      $("#input_prodi").val(data.program_studi);
+      $("#input_sksA").val(data.sks_akademik);
+      $("#input_sksB").val(data.sks_bayar);
+      $("#cbPraktikum").prop("checked", data.praktikum ?? false);
+    }
+    $("#card-form").prop("hidden", hidden ? true : false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  $("#btn-simpan").on("click", function () {
+    if (!$("#input_kode").val()) {
+      popUpTimer("error", "Kode Matkul belum diisi!");
+      setTimeout(() => {
+        $("#input_kode").focus();
+      }, 1500);
+      return;
+    } else if (
+      matkul_tab
+        .data()
+        .toArray()
+        .some((item) => item.kode === $("#input_kode").val())
+    ) {
+      popUpTimer(
+        "error",
+        "Data dengan Kode Matkul " + $("#input_kode").val() + " sudah ada!"
+      );
+      form_matkul(false);
+      return;
+    } else if (!$("#input_nama").val()) {
+      popUpTimer("error", "Nama Matkul belum diisi!");
+      setTimeout(() => {
+        $("#input_nama").focus();
+      }, 1500);
+      return;
+    } else if (!$("#input_sksA").val() || !$("#input_sksB").val()) {
+      popUpTimer("error", "SKS Akademik / Bayar belum diisi!");
+      setTimeout(() => {
+        !$("#input_sksA").val()
+          ? $("#input_sksA").focus()
+          : $("#input_sksB").focus();
+      }, 1500);
+      return;
+    }
+
+    let params = {
+      kode: $("#input_kode").val(),
+      nama: $("#input_nama").val(),
+      kelompok: $("#input_kelompok").val(),
+      program_studi: prodi,
+      sks_akademik: $("#input_sksA").val(),
+      sks_bayar: $("#input_sksB").val(),
+      praktikum: $("#cbPraktikum").prop("checked"),
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/post_matkul",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        console.log("[ post_matkul ] ", res);
+        if (res.status === false) {
+          await popUpTimer("error", res.message);
+          if (res.target)
+            setTimeout(() => {
+              $("#" + res.target).focus();
+            }, 1500);
+        } else {
+          $("#btn-batal").click();
+          popUpTimer("success", res.message);
+          matkul_tab.ajax.reload(null, false);
+        }
+      },
+    });
+  });
+
+  $("#btn-update").on("click", function () {
+    if ($("#input_prodi").val() === "GENERAL")
+      return popUpTimer(
+        "error",
+        "Matkul ini tidak bisa diedit!",
+        "Silahkan hubungi admin untuk modifikasi matkul ini.",
+        2500
+      );
+    else if (!$("#input_kode").val()) {
+      popUpTimer("error", "Kode Matkul belum diisi!");
+      setTimeout(() => {
+        $("#input_kode").focus();
+      }, 1500);
+      return;
+    } else if (!$("#input_nama").val()) {
+      popUpTimer("error", "Nama Matkul belum diisi!");
+      setTimeout(() => {
+        $("#input_nama").focus();
+      }, 1500);
+      return;
+    } else if (!$("#input_sksA").val() || !$("#input_sksB").val()) {
+      popUpTimer("error", "SKS Akademik / Bayar belum diisi!");
+      setTimeout(() => {
+        !$("#input_sksA").val()
+          ? $("#input_sksA").focus()
+          : $("#input_sksB").focus();
+      }, 1500);
+      return;
+    }
+
+    let params = {
+      kode: $("#input_kode").val(),
+      nama: $("#input_nama").val(),
+      kelompok: $("#input_kelompok").val(),
+      program_studi: prodi,
+      sks_akademik: $("#input_sksA").val(),
+      sks_bayar: $("#input_sksB").val(),
+      praktikum: $("#cbPraktikum").prop("checked"),
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/put_matkul",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        console.log("[ put_matkul ] ", res);
+        if (res.status === false) {
+          await popUpTimer("error", res.message);
+          if (res.target)
+            setTimeout(() => {
+              $("#" + res.target).focus();
+            }, 500);
+        } else {
+          $("#btn-batal").click();
+          popUpTimer("success", res.message);
+          matkul_tab.ajax.reload(null, false);
+        }
+      },
+    });
+  });
+
+  $("#btn-hapus").on("click", async function () {
+    let selectedData = [];
+
+    $("input[name='cbMatkulTab']:checked").each(function () {
+      let row = $(this).closest("tr"); // Dapatkan baris terkait
+      let rowData = matkul_tab.row(row).data(); // Ambil data baris dari DataTable
+
+      if (rowData) {
+        selectedData.push(rowData);
+      }
+    });
+
+    if (!selectedData.length)
+      return popUpTimer("error", "Tidak ada data untuk dihapus.");
+
+    if (selectedData.find((item) => item.program_studi === "GENERAL"))
+      return popUpTimer(
+        "error",
+        "Matkul ini " +
+          selectedData.find((item) => item.program_studi === "GENERAL").kode +
+          " tidak bisa dihapus!",
+        "Silahkan hubungi admin untuk modifikasi matkul ini.",
+        2500
+      );
+
+    let decision = await Swal.fire({
+      title: "Yakin akan hapus data ini?",
+      showCancelButton: true,
+      confirmButtonText: "Yakin",
+      cancelButtonText: "Batalkan",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        return true;
+      } else if (result.isDismissed) {
+        return false;
+      }
+    });
+
+    console.log("decision", decision);
+
+    if (decision === true) {
+      $.ajax({
+        type: "POST",
+        url: "/delete_matkul",
+        cache: false,
+        data: JSON.stringify(selectedData),
+        beforeSend: () => {
+          showLoading();
+        },
+        complete: () => {
+          hideLoading();
+        },
+        success: function (res) {
+          console.log("[ delete_matkul ] ", res);
+          if (res.status === false) {
+            popUpTimer("error", res.message);
+          } else {
+            popUpTimer("success", res.message);
+            $('input[name="cbMatkulTabAll"]').prop("checked", false);
+            matkul_tab.ajax.reload(null, false);
+          }
+        },
+      });
+    }
+  });
+
+  function detail_matkul(object) {
+    let data = matkul_tab.row(object.closest("tr")).data();
+    if (data.program_studi !== "GENERAL") form_matkul(true, false, data);
+    else
+      return popUpTimer(
+        "error",
+        "Matkul ini tidak bisa diedit!",
+        "Silahkan hubungi admin untuk modifikasi matkul ini.",
+        2500
+      );
+  }
+
+  // CHECKBOX
+  // Event ketika cbMatkulTabAll di-click
+  $('input[name="cbMatkulTabAll"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $('input[name="cbMatkulTab"]').prop("checked", isChecked);
+  });
+
+  // Event ketika salah satu cbMatkulTab di-click
+  $(document).on("change", 'input[name="cbMatkulTab"]', function () {
+    let allChecked =
+      $('input[name="cbMatkulTab"]').length ===
+      $('input[name="cbMatkulTab"]:checked').length;
+    $('input[name="cbMatkulTabAll"]').prop("checked", allChecked);
+  });
+
+  // DATATABLE
+  let matkul_tab = $("#table_matkul").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    info: false,
+    ajax: {
+      type: "GET",
+      url: "/get_matkul",
+      cache: false,
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+    },
+    columns: [
+      {
+        data: null,
+        width: "10px",
+        className: "text-center",
+        render: function (data, type, row) {
+          return `
+              <input type="checkbox" name="cbMatkulTab"/>
+            `;
+        },
+      },
+      {
+        data: "kode",
+        width: "75px",
+      },
+      {
+        data: "nama",
+        width: "300px",
+      },
+      {
+        data: "sks_akademik",
+        width: "20px",
+        className: "text-end",
+      },
+      {
+        data: "sks_bayar",
+        width: "20px",
+        className: "text-end",
+      },
+      {
+        data: "kelompok",
+        width: "",
+      },
+      {
+        data: null,
+        width: "10px",
+        render: function () {
+          return `<button class="btn btn-primary btn-sm" onclick="detail_matkul($(this))">Det</button>`;
+        },
+        // orderable: false,
+        className: "text-center",
+      },
+    ],
+  });
+</script>
+{% endblock %}
