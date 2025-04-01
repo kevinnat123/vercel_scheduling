@@ -357,7 +357,7 @@
       <div id="profile-dropdown">
         <!-- <img src="static/img/FTI.png" alt="Profile Picture" /> -->
         <i class="fas fa-circle-user fa-fw"></i>
-        <span>{{ session['user']['nama'] }}</span>
+        <span>{{ session['user']['nama'].title() }}</span>
         <div class="dropdown-menu">
           <a href="#">Profile</a>
           <a href="#">Settings</a>
@@ -455,6 +455,10 @@
         adjustSidebar(); // Jalankan saat halaman pertama kali dimuat
 
         hideLoading();
+      });
+
+      $("input").on("input", function () {
+        $(this).val($(this).val().toUpperCase());
       });
     </script>
 
