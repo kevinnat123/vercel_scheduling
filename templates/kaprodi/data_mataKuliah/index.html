@@ -245,11 +245,11 @@
       $("#btn-update").attr("hidden", false);
     }
     $("#input_prodi").prop("disabled", true);
+    $("#input_prodi").val(prodi);
     if (data) {
       $("#input_kode").val(data.kode);
       $("#input_nama").val(data.nama);
       $("#input_kelompok").val(data.kelompok);
-      $("#input_prodi").val(data.program_studi);
       $("#input_sksA").val(data.sks_akademik);
       $("#input_sksB").val(data.sks_bayar);
       $("#cbPraktikum").prop("checked", data.praktikum ?? false);
