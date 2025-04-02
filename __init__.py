@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_login import LoginManager
 from userModel import User
 from dao.loginDao import loginDao
@@ -46,6 +46,14 @@ def create_app():
     
     # # Tambahkan konfigurasi tambahan jika diperlukan
     # app.config['SAMPLE_CONFIG'] = 'Sample Value'
+
+    @app.errorhandler(401)
+    def page_not_found(e):
+        return redirect(url_for('signin.login'))
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return redirect(url_for('signin.error404'))
 
     # Cache control
     @app.after_request
