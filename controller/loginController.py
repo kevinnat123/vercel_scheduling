@@ -32,7 +32,6 @@ def check_session():
                 return redirect(url_for('signin.logout'))
     session.pop('redirect_count', None)  # Reset counter jika sukses login
 
-
 @signin.route("/")
 def home():
     print('[ CONTROLLER ] render website')
