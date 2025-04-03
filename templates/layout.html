@@ -136,6 +136,23 @@
         width: 100%;
       }
 
+      /* Footer styles */
+      #footer {
+        background-color: #343a40;
+        color: white;
+        text-align: center;
+        padding: 15px 0;
+        margin-top: auto;
+        margin-left: 250px;
+        width: calc(100% - 250px);
+        transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+      }
+
+      #footer.full {
+        margin-left: 0;
+        width: 100%;
+      }
+
       /* Header */
       #header {
         display: flex;
@@ -376,14 +393,23 @@
       </div> -->
 
       <div class="card" style="border: 0px; margin: 0 !important">
-        <div class="card-body">
-          <h1 class="m-0 text-dark">{{ title|safe }}</h1>
+        <div class="card-body row">
+          <h1 class="col m-0 text-dark">{{ title|safe }}</h1>
         </div>
       </div>
 
       {% block content %}
       <!-- Konten utama -->
       {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <div id="footer">
+      <div class="container">
+        <span id="current-date"></span> | Semester {{
+        session['academic_details']['semester_saat_ini'] | safe or '-' }} Tahun
+        Ajaran {{ session['academic_details']['tahun_ajaran'] | safe or '-' }}
+      </div>
     </div>
 
     <!-- Modern Loading Modal -->
@@ -421,25 +447,41 @@
       //   hideLoading();
       // });
 
+      const today = new Date();
+      // Format current date for footer
+      const footerDate = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+
       $(document).ready(function () {
+        document.getElementById("current-date").textContent =
+          today.toLocaleDateString("id-ID", footerDate);
+
+        // auto-closed sidebar when page shrinked
         function adjustSidebar() {
           if (window.matchMedia("(max-width: 1200px)").matches) {
             $("#sidebar").addClass("closed");
             $("#content").addClass("full");
             $("#header").addClass("full");
+            $("#footer").addClass("full");
           } else {
             $("#sidebar").removeClass("closed");
             $("#content").removeClass("full");
             $("#header").removeClass("full");
+            $("#footer").removeClass("full");
           }
         }
 
+        // toggle sidebar
         $("#toggle-btn").click(function () {
           $("#sidebar").toggleClass("closed");
           $("#content").toggleClass("full");
           $("#header").toggleClass("full");
+          $("#footer").toggleClass("full");
         });
-
         // Profile dropdown toggle
         $("#profile-dropdown").click(function (e) {
           e.stopPropagation();
@@ -457,8 +499,41 @@
         hideLoading();
       });
 
+      // auto uppercase input
       $("input").on("input", function () {
         $(this).val($(this).val().toUpperCase());
+      });
+
+      // NumberOnly & CurrencyFormat
+      document.addEventListener("input", function (event) {
+        let value = event.target.value;
+
+        if (event.target.classList.contains("numberOnly")) {
+          // Hanya angka tanpa tanda minus (-)
+          let sanitizedValue = value.replace(/[^0-9]/g, "");
+          event.target.value = sanitizedValue;
+        }
+
+        if (event.target.classList.contains("negativeNumber")) {
+          // Hanya angka dan bisa memiliki satu '-' di depan
+          let sanitizedValue = value
+            .replace(/[^0-9-]/g, "")
+            .replace(/(?!^)-/g, "");
+          event.target.value = sanitizedValue;
+        }
+
+        if (event.target.classList.contains("yearInput")) {
+          event.target.value = yearInput(event.target.value);
+        }
+
+        if (event.target.classList.contains("currencyFormat")) {
+          // Format mata uang, boleh negatif
+          let sanitizedValue = value
+            .replace(/[^0-9-]/g, "")
+            .replace(/(?!^)-/g, "");
+          event.target.value =
+            sanitizedValue === "" ? "" : formatCurrency(sanitizedValue);
+        }
       });
     </script>
 
