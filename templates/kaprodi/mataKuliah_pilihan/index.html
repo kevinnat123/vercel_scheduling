@@ -20,14 +20,14 @@
           >Angkatan</label
         >
         <div class="col-2">
-          <input
-            type="text"
-            class="form-control"
-            id="input_angkatan"
-            value="All"
-            autocomplete="off"
-          />
+          <select class="form-control" id="input_angkatan">
+            <option value="ALL">All</option>
+            {% for tahun in session['academic_details']['list_angkatan'] %}
+            <option value="{{ tahun }}">{{ tahun }}</option>
+            {% endfor %}
+          </select>
         </div>
+
         <div class="col"></div>
         <label
           for="input_jumlah_mahasiswa"
@@ -148,12 +148,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">List Mata Kuliah</h4>
-        <button
-          type="button"
-          class="close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        >
+        <button type="button" class="close" data-bs-dismiss="modal">
           <span>&times;</span>
         </button>
       </div>
@@ -164,8 +159,8 @@
           id="table-lov-matkul"
         >
           <thead class="text-center">
-            <th>Plu</th>
-            <th>Descp</th>
+            <th>Kode</th>
+            <th>Nama</th>
           </thead>
         </table>
       </div>
@@ -183,7 +178,44 @@
   </div>
   <!-- /.modal-dialog -->
 </div>
-<!-- modal plu end -->
+<!-- modal matkul end -->
+
+<div class="modal fade" id="modal-copy">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">List Angkatan</h4>
+        <button type="button" class="close" data-bs-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table
+          class="table table-hover table-bordered w-100"
+          style="overflow: auto"
+          id="table-lov-matkul"
+        >
+          <thead class="text-center">
+            <th>Kode</th>
+            <th>Nama</th>
+          </thead>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-default pull-left"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- modal matkul end -->
 {% endblock %} {% block script %}
 <script>
   const prodi = "{{ prodi | safe }}";
@@ -215,7 +247,7 @@
 
     document
       .getElementById("input_angkatan")
-      .addEventListener("input", function () {
+      .addEventListener("change", function () {
         let angkatan = yearInput(this.value.trim()); // Ambil nilai input & hilangkan spasi berlebih
         let label = document.getElementById("label_jumlah_mahasiswa");
         this.value = angkatan;
@@ -256,6 +288,7 @@
   }
 
   function form_matkul(update = undefined, hidden = false, data = undefined) {
+    console.log("form_matkul", data);
     $("#frm")[0].reset();
     matkul_tab.clear().draw();
     document.getElementById("btn-hapusMatkul").style.display = "none";
@@ -263,7 +296,13 @@
       document.getElementById("formTitle").innerText = "Tambah Data";
       $("#btn-simpan").attr("hidden", false);
       $("#btn-update").attr("hidden", true);
-      $("#card-form input").prop("disabled", false);
+      $("#input_angkatan").prop("disabled", false);
+
+      $(".data_angkatan").removeClass("active-card"); // Hapus highlight dari card lain
+      if (isNoActiveCard()) {
+        document.getElementById("btn-editData").style.display = "none";
+        document.getElementById("btn-hapusData").style.display = "none";
+      }
     } else {
       document.getElementById("formTitle").innerText = "Update Data";
       $("#btn-simpan").attr("hidden", true);
@@ -279,16 +318,25 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function generateDataContainers(data) {
-    let sorted_data = data.sort(function (a, b) {
-      return a.angkatan - b.angkatan;
+  async function generateDataContainers(data) {
+    let sorted_data = data.sort((a, b) => {
+      if (a.angkatan === "ALL") return -1;
+      if (b.angkatan === "ALL") return 1;
+
+      // Pastikan 'angkatan' adalah string sebelum dibandingkan
+      return String(a.angkatan).localeCompare(String(b.angkatan));
     }); // sorting berdasarkan angkatan
 
     $(".data_angkatan").remove(); // hapus card dengan class 'data_angkatan' agar tidak terjadi double data
 
-    sorted_data.forEach((element) => {
+    await sorted_data.forEach((element) => {
       generateNewDataContainer(element); // buat card baru
     });
+
+    if (isNoActiveCard()) {
+      document.getElementById("btn-editData").style.display = "none";
+      document.getElementById("btn-hapusData").style.display = "none";
+    }
   }
 
   function generateNewDataContainer(data) {
@@ -364,7 +412,7 @@
     $("#tableContainer").append(tableHtml);
 
     // Inisialisasi DataTable
-    new $("#" + tableId).DataTable({
+    $("#" + tableId).DataTable({
       scrollX: true,
       scrollY: "25vh",
       scrollCollapse: true,
@@ -389,7 +437,7 @@
     if (event.key === "F9") {
       event.preventDefault();
       $("#modal-matkul").modal("show");
-      $("#table-lov-matkul_filter input").focus(); // focus ke field search saat modal plu dibuka
+      $("#table-lov-matkul_filter input").focus(); // focus ke field search saat modal matkul dibuka
     }
     if (event.key === "Enter") {
       event.preventDefault();
@@ -418,7 +466,10 @@
         $("#input_angkatan").focus();
       }, 1100);
       return;
-    } else if (!$("#input_jumlah_mahasiswa").val()) {
+    } else if (
+      !$("#input_jumlah_mahasiswa").val() &&
+      $("#input_angkatan").val() !== "All"
+    ) {
       await popUpTimer("error", "Jumlah Mahasiswa Aktif belum diisi!");
       setTimeout(() => {
         $("#input_jumlah_mahasiswa").focus();
@@ -436,7 +487,7 @@
     }
 
     params = {
-      angkatan: Number($("#input_angkatan").val()),
+      angkatan: $("#input_angkatan").val(),
       jumlah_mahasiswa: Number($("#input_jumlah_mahasiswa").val()),
       list_matkul: matkul_tab.data().toArray(),
     };
@@ -465,6 +516,81 @@
           popUpTimer("success", res.message);
           Object.assign(params, { u_id: res["data"] });
           data_angkatan.push(params); // update data_angkatan
+          generateDataContainers(data_angkatan);
+        }
+      },
+    });
+  });
+
+  $("#btn-update").on("click", async function () {
+    if (!$("#input_angkatan").val()) {
+      await popUpTimer("error", "Input Angkatan belum diisi!");
+      setTimeout(() => {
+        $("#input_angkatan").focus();
+      }, 1100);
+      return;
+    } else if (
+      !$("#input_jumlah_mahasiswa").val() &&
+      $("#input_angkatan").val() !== "All"
+    ) {
+      await popUpTimer("error", "Jumlah Mahasiswa Aktif belum diisi!");
+      setTimeout(() => {
+        $("#input_jumlah_mahasiswa").focus();
+      }, 1100);
+      return;
+    } else if (matkul_tab.data().toArray().length === 0) {
+      await popUpTimer(
+        "error",
+        "Belum ada matkul yang dibuka untuk semester ini!"
+      );
+      setTimeout(() => {
+        $("#input_matkul").focus();
+      }, 1100);
+      return;
+    }
+
+    params = {
+      angkatan: $("#input_angkatan").val(),
+      jumlah_mahasiswa: Number($("#input_jumlah_mahasiswa").val()),
+      list_matkul: matkul_tab.data().toArray(),
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/mata_kuliah_pilihan/put_matkul",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        console.log("[ put_matkul ] ", res);
+        if (res.status === false) {
+          await popUpTimer("error", res.message);
+          if (res.target)
+            setTimeout(() => {
+              $("#" + res.target).focus();
+            }, 1500);
+        } else {
+          $("#btn-batal").click();
+          popUpTimer("success", res.message);
+          Object.assign(params, { u_id: res["data"] });
+
+          // Mencari indeks elemen dengan angkatan '2021'
+          let index = data_angkatan.findIndex(
+            (item) => item.angkatan === params["angkatan"]
+          );
+
+          // Jika ditemukan, ganti elemen tersebut, jika tidak, tambahkan data baru
+          if (index !== -1) {
+            data_angkatan[index] = params;
+          } else {
+            data_angkatan.push(params);
+          }
+
           generateDataContainers(data_angkatan);
         }
       },
@@ -503,7 +629,7 @@
   $("#btn-editData").on("click", async function () {
     let cardId = $(".active-card").attr("id");
     if (cardId) {
-      console.log("[ cardId ]", cardId, cardId.slice(-4));
+      console.log("[ cardId ]", cardId);
       let cardElement = $("#" + cardId);
       let tableId = cardId.substring(5) + "_tab";
       let inputs = cardElement.find("input, select, textarea"); // Ambil semua input
@@ -520,9 +646,12 @@
         .toArray();
 
       console.log("[ data ]", data);
+      if (cardId.slice(-3) === "ALL") slicedKey = cardId.slice(-3);
+      else slicedKey = cardId.slice(-4);
+
       let cleanedData = Object.keys(data).reduce((acc, key) => {
-        const newKey = key.endsWith(cardId.slice(-4))
-          ? key.replace(new RegExp(cardId.slice(-4) + "$"), "")
+        const newKey = key.endsWith(slicedKey)
+          ? key.replace(new RegExp(slicedKey + "$"), "")
           : key;
         acc[newKey] = data[key];
         return acc;

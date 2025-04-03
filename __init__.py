@@ -14,6 +14,7 @@ from controller.laboran.ruangKelasController import ruangKelas
 # KAPRODI
 from controller.kaprodi.dataDosenController import dosen
 from controller.kaprodi.dataMataKuliahController import mataKuliah
+from controller.kaprodi.mataKuliahPilihanController import mataKuliahPilihan
 
 login_manager = LoginManager()
 
@@ -43,12 +44,13 @@ def create_app():
     # KAPRODI
     app.register_blueprint(dosen)
     app.register_blueprint(mataKuliah)
+    app.register_blueprint(mataKuliahPilihan)
     
     # # Tambahkan konfigurasi tambahan jika diperlukan
     # app.config['SAMPLE_CONFIG'] = 'Sample Value'
 
     @app.errorhandler(401)
-    def page_not_found(e):
+    def unathorized(e):
         return redirect(url_for('signin.login'))
 
     @app.errorhandler(404)
