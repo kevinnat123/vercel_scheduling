@@ -35,7 +35,8 @@ class dataMataKuliahDao:
     
     def get_matkul(self):
         print('  [ DAO ] get matkul', session['user']['prodi'])
-        result = self.connection.find_many(db_courses, {'prodi': { '$in' : ['GENERAL', session['user']['prodi']] }}, sort=[("kode", 1)])
+        result = self.connection.find_many(db_courses, {'prodi': { '$in' : [session['user']['prodi']] }}, sort=[("kode", 1)])
+        # { '$in' : ['GENERAL', session['user']['prodi']] }
         return result['data'] if result and result.get('status') else None
     
     def post_matkul(self, params: dict):

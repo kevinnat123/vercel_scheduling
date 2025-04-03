@@ -37,7 +37,12 @@
           >Kelompok</label
         >
         <div class="col">
-          <select class="form-control" id="input_kelompok">
+          <select
+            class="form-select"
+            aria-label="Default select example"
+            id="input_kelompok"
+          >
+            <option value="">-- Pilih Kategori Mata Kuliah --</option>
             {% for kelompok in session['user']['kelompok_matkul'] %}
             <option value="{{ kelompok }}">{{ kelompok }}</option>
             {% endfor %}
