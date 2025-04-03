@@ -74,36 +74,36 @@ class Database:
         except errors.PyMongoError as e:
             return {'status': False, 'data': None, 'message': f'Error pymongo: {e}'}
     
-    def insert_one(self, collection_name, data):
+    def insert_one(self, collection_name, data, sensitive = False):
         try:
             collection = self.get_collection(collection_name)
-            insert_result = collection.insert_one(self.to_uppercase(data))
+            insert_result = collection.insert_one(data if sensitive else self.to_uppercase(data))
             return {'status': True, 'data': {'inserted_id': str(insert_result.inserted_id)}, 'message': 'Data berhasil ditambahkan'}
         except errors.PyMongoError as e:
             return {'status': False, 'data': None, 'message': f'Error pymongo: {e}'}
     
-    def insert_many(self, collection_name, data):
+    def insert_many(self, collection_name, data, sensitive = False):
         try:
             collection = self.get_collection(collection_name)
-            insert_result = collection.insert_many(self.to_uppercase(data))
+            insert_result = collection.insert_many(data if sensitive else self.to_uppercase(data))
             return {'status': True, 'data': {'inserted_ids': [str(id) for id in insert_result.inserted_ids]}, 'message': 'Data berhasil ditambahkan'}
         except errors.PyMongoError as e:
             return {'status': False, 'data': None, 'message': f'Error pymongo: {e}'}
     
-    def update_one(self, collection_name, filter, update_data):
+    def update_one(self, collection_name, filter, update_data, sensitive = False):
         try:
             collection = self.get_collection(collection_name)
-            update_result = collection.update_one(self.to_uppercase(filter), {'$set': self.to_uppercase(update_data)})
+            update_result = collection.update_one(self.to_uppercase(filter), {'$set': update_data if sensitive else self.to_uppercase(update_data)})
             if update_result.modified_count > 0:
                 return {'status': True, 'message': 'Data berhasil diperbarui'}
             return {'status': False, 'message': 'Data tidak ditemukan atau tidak diperbarui'}
         except errors.PyMongoError as e:
             return {'status': False, 'message': f'Error pymongo: {e}'}
         
-    def update_many(self, collection_name, filter, update_data):
+    def update_many(self, collection_name, filter, update_data, sensitive = False):
         try:
             collection = self.get_collection(collection_name)
-            update_result = collection.update_many(self.to_uppercase(filter), {'$set': self.to_uppercase(update_data)})
+            update_result = collection.update_many(self.to_uppercase(filter), {'$set': update_data if sensitive else self.to_uppercase(update_data)})
             if update_result.modified_count > 0:
                 return {'status': True, 'modified_count': update_result.modified_count, 'message': 'Data berhasil diperbarui'}
             return {'status': False, 'modified_count': 0, 'message': 'Tidak ada data yang diperbarui'}
