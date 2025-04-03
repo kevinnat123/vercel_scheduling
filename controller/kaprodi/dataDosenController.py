@@ -19,14 +19,14 @@ def dosen_index():
                 prodi = session['user']['prodi']
             )
     
-@dosen.route("/get_dosen", methods=['GET'])
+@dosen.route("/data_dosen/get_dosen", methods=['GET'])
 @login_required
 def get_dosen():
     print('[ CONTROLLER ] get_dosen')
     data = dao.get_dosen()
     return jsonify({ 'data': data })
 
-@dosen.route("/post_dosen", methods=['POST'])
+@dosen.route("/data_dosen/post_dosen", methods=['POST'])
 @login_required
 def post_dosen():
     print('[ CONTROLLER ] post_dosen')
@@ -34,7 +34,7 @@ def post_dosen():
     data = dao.post_dosen(req)
     return jsonify( data )
 
-@dosen.route("/put_dosen", methods=['POST'])
+@dosen.route("/data_dosen/put_dosen", methods=['POST'])
 @login_required
 def put_dosen():
     print('[ CONTROLLER ] put_dosen')
@@ -42,7 +42,7 @@ def put_dosen():
     data = dao.put_dosen(req)
     return jsonify( data )
 
-@dosen.route("/delete_dosen", methods=['POST'])
+@dosen.route("/data_dosen/delete_dosen", methods=['POST'])
 @login_required
 def delete_dosen():
     print('[ CONTROLLER ] delete_dosen')

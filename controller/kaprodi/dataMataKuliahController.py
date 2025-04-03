@@ -8,7 +8,7 @@ dao = dataMataKuliahDao()
 @mataKuliah.route("/data_mata_kuliah")
 @login_required
 def mataKuliah_index():
-    print('[ CONTROLLER ] render ruang kelas')
+    print('[ CONTROLLER ] render data mata kuliah')
     if session['user']['role'] != 'KEPALA PROGRAM STUDI':
         return redirect(url_for('signin.error403'))
     else:
@@ -19,7 +19,7 @@ def mataKuliah_index():
                 prodi = session['user']['prodi']
             )
     
-@mataKuliah.route("/post_kelompok", methods=["POST"])
+@mataKuliah.route("/data_mata_kuliah/post_kelompok", methods=["POST"])
 @login_required
 def tambah_kelompok():
     data = request.get_json('data')
@@ -31,14 +31,14 @@ def tambah_kelompok():
 
     return jsonify({"status": False}), 400
 
-@mataKuliah.route("/get_matkul", methods=['GET'])
+@mataKuliah.route("/data_mata_kuliah/get_matkul", methods=['GET'])
 @login_required
 def get_matkul():
     print('[ CONTROLLER ] get_matkul')
     data = dao.get_matkul()
     return jsonify({ 'data': data })
 
-@mataKuliah.route("/post_matkul", methods=['POST'])
+@mataKuliah.route("/data_mata_kuliah/post_matkul", methods=['POST'])
 @login_required
 def post_matkul():
     print('[ CONTROLLER ] post_matkul')
@@ -46,7 +46,7 @@ def post_matkul():
     data = dao.post_matkul(req)
     return jsonify( data )
 
-@mataKuliah.route("/put_matkul", methods=['POST'])
+@mataKuliah.route("/data_mata_kuliah/put_matkul", methods=['POST'])
 @login_required
 def put_matkul():
     print('[ CONTROLLER ] put_matkul')
@@ -54,7 +54,7 @@ def put_matkul():
     data = dao.put_matkul(req)
     return jsonify( data )
 
-@mataKuliah.route("/delete_matkul", methods=['POST'])
+@mataKuliah.route("/data_mata_kuliah/delete_matkul", methods=['POST'])
 @login_required
 def delete_matkul():
     print('[ CONTROLLER ] delete_matkul')
