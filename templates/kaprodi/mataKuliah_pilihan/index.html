@@ -1,0 +1,737 @@
+{% extends "layout.html" %} {% block content %}
+<style>
+  .active-card {
+    border: 2px solid #007bff !important; /* Warna border biru */
+    box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.5); /* Glow efek */
+    /* transition: 0.3s ease-in-out; */
+  }
+</style>
+<!-- MATKUL_TAB = TABLE MATKUL DI FORM TAMBAH -->
+
+<div class="card" id="card-form" hidden>
+  <!-- hidden -->
+  <div class="card-body">
+    <form role="form" class="form-horizontal row" id="frm">
+      <div class="row">
+        <h4 id="formTitle"></h4>
+      </div>
+      <div class="form-group row">
+        <label for="input_angkatan" class="col-2 col-form-label text-end"
+          >Angkatan</label
+        >
+        <div class="col-2">
+          <input
+            type="text"
+            class="form-control"
+            id="input_angkatan"
+            value="All"
+            autocomplete="off"
+          />
+        </div>
+        <div class="col"></div>
+        <label
+          for="input_jumlah_mahasiswa"
+          class="col-5 col-form-label text-end"
+          id="label_jumlah_mahasiswa"
+          >Jumlah Mahasiswa Aktif Angkatan -</label
+        >
+        <div class="col-2">
+          <input
+            type="text"
+            class="form-control numberOnly text-end"
+            id="input_jumlah_mahasiswa"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_listMatkul" class="col-2 col-form-label text-end"
+          >List Matkul</label
+        >
+        <div class="col">
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              id="input_matkul"
+              placeholder="Masukkan Kode Mata Kuliah yang dicari"
+              autocomplete="off"
+            /><button type="button" id="copy_data" class="btn btn-primary">
+              Copy Data Lain
+            </button>
+          </div>
+          <small class="text-danger" id="info_matkul" style="display: none"
+            >- Tekan 'F9' untuk melihat list matkul.<br />- Tekan 'Enter' untuk
+            memasukkan data.</small
+          >
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="table-responsive">
+          <table
+            class="table table-bordered table-stripped table-hover w-100"
+            id="table_matkul"
+          >
+            <thead class="text-center">
+              <th><input type="checkbox" name="cbMatkulTabAll" /></th>
+              <th>Kode</th>
+              <th>Nama</th>
+              <th>SKS A</th>
+              <th>SKS B</th>
+              <th>Kelompok</th>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpan">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-update">
+          Simpan
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          id="btn-hapusMatkul"
+          style="display: none"
+        >
+          Hapus Matkul
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          id="btn-batal"
+          onclick="form_matkul(undefined, true)"
+        >
+          Batal
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <button
+      type="button"
+      class="btn btn-primary"
+      id="btn-tambah"
+      onclick="form_matkul(false)"
+    >
+      <i class="fas fa-plus fa-fw"></i><span> Tambah Data</span>
+    </button>
+    <button
+      type="button"
+      class="btn btn-success"
+      id="btn-editData"
+      style="display: none"
+    >
+      <i class="fas fa-pen-to-square fa-fw"></i><span> Edit Data Pilihan</span>
+    </button>
+    <button
+      type="button"
+      class="btn btn-danger"
+      id="btn-hapusData"
+      style="display: none"
+    >
+      <i class="fas fa-trash fa-fw"></i><span> Hapus Data Pilihan</span>
+    </button>
+  </div>
+</div>
+
+<div id="tableContainer"></div>
+
+<div class="modal fade" id="modal-matkul">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">List Mata Kuliah</h4>
+        <button
+          type="button"
+          class="close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table
+          class="table table-hover table-bordered w-100"
+          style="overflow: auto"
+          id="table-lov-matkul"
+        >
+          <thead class="text-center">
+            <th>Plu</th>
+            <th>Descp</th>
+          </thead>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-default pull-left"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- modal plu end -->
+{% endblock %} {% block script %}
+<script>
+  const prodi = "{{ prodi | safe }}";
+  const maks_sks = Number("{{ maks_sks | safe }}");
+  const data_sebelum = JSON.parse(`{{ data_sebelum | tojson | safe }}`);
+  let data_angkatan = JSON.parse(JSON.stringify(data_sebelum)); // deepCopy data_sebelum
+
+  $(document).ready(async function () {
+    $("#modal-matkul").on("shown.bs.modal", function (e) {
+      $.fn.dataTable
+        .tables({
+          visible: true,
+          api: true,
+        })
+        .columns.adjust();
+    });
+
+    document
+      .getElementById("input_matkul")
+      .addEventListener("focus", function () {
+        document.getElementById("info_matkul").style.display = "inline";
+      });
+
+    document
+      .getElementById("input_matkul")
+      .addEventListener("blur", function () {
+        document.getElementById("info_matkul").style.display = "none";
+      });
+
+    document
+      .getElementById("input_angkatan")
+      .addEventListener("input", function () {
+        let angkatan = yearInput(this.value.trim()); // Ambil nilai input & hilangkan spasi berlebih
+        let label = document.getElementById("label_jumlah_mahasiswa");
+        this.value = angkatan;
+
+        // Jika ada angka, update label; jika kosong, tampilkan default "-"
+        label.textContent =
+          "Jumlah Mahasiswa Aktif Angkatan " + (angkatan ? angkatan : "-");
+      });
+
+    $(document).on("click", ".data_angkatan", function () {
+      $(".data_angkatan").removeClass("active-card"); // Hapus highlight dari card lain
+      $(this).addClass("active-card"); // Tambahkan highlight ke card yang diklik
+      document.getElementById("btn-editData").style.display = "inline";
+      document.getElementById("btn-hapusData").style.display = "inline";
+    });
+
+    if (data_sebelum) generateDataContainers(data_sebelum);
+
+    $("#modal-matkul tbody").on("click", "tr", async function () {
+      let row = matkul_lov.row(this).data();
+      $("#modal-matkul").modal("hide");
+      await setMatkul(row);
+    });
+  });
+
+  function isNoActiveCard() {
+    // Ambil semua elemen dengan class 'data_angkatan'
+    const elements = document.querySelectorAll(".data_angkatan");
+
+    // Periksa apakah ada elemen yang juga memiliki class 'active-card'
+    for (let element of elements) {
+      if (element.classList.contains("active-card")) {
+        return false; // Ditemukan elemen yang memiliki kedua class
+      }
+    }
+
+    return true; // Tidak ada elemen yang memiliki kedua class
+  }
+
+  function form_matkul(update = undefined, hidden = false, data = undefined) {
+    $("#frm")[0].reset();
+    matkul_tab.clear().draw();
+    document.getElementById("btn-hapusMatkul").style.display = "none";
+    if (update === false) {
+      document.getElementById("formTitle").innerText = "Tambah Data";
+      $("#btn-simpan").attr("hidden", false);
+      $("#btn-update").attr("hidden", true);
+      $("#card-form input").prop("disabled", false);
+    } else {
+      document.getElementById("formTitle").innerText = "Update Data";
+      $("#btn-simpan").attr("hidden", true);
+      $("#btn-update").attr("hidden", false);
+      $("#input_angkatan").prop("disabled", true);
+    }
+    if (data) {
+      $("#input_angkatan").val(data.angkatan);
+      $("#input_jumlah_mahasiswa").val(data.jumlah_mahasiswa);
+      matkul_tab.clear().rows.add(data.list_matkul).draw();
+    }
+    $("#card-form").prop("hidden", hidden ? true : false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function generateDataContainers(data) {
+    let sorted_data = data.sort(function (a, b) {
+      return a.angkatan - b.angkatan;
+    }); // sorting berdasarkan angkatan
+
+    $(".data_angkatan").remove(); // hapus card dengan class 'data_angkatan' agar tidak terjadi double data
+
+    sorted_data.forEach((element) => {
+      generateNewDataContainer(element); // buat card baru
+    });
+  }
+
+  function generateNewDataContainer(data) {
+    let tableId = data.u_id + "_tab";
+    console.log("[ tableId ]", tableId);
+
+    // Struktur tabel baru
+    let tableHtml = `
+          <div class="card data_angkatan" id="${"card_" + data.u_id}">
+              <div class="card-body">
+              <div class="form-group row align-items-center">
+                  <div class="mt-2 d-flex justify-content-end align-items-center" style="padding-bottom: 10px">
+                      <button type="button" id="${
+                        "simpan_group" + data.angkatan
+                      }" class="btn btn-primary me-2" style="display: none;">
+                          <i class="fas fa-plus fa-fw"></i><span> Simpan Perubahan</span>
+                      </button>
+                      <button type="button" id="${
+                        "hapus_group" + data.angkatan
+                      }" class="btn btn-primary" style="display: none;">
+                          <i class="fas fa-plus fa-fw"></i><span> Hapus Matkul</span>
+                      </button>
+                  </div>
+
+                  <label for="${
+                    "angkatan" + data.angkatan
+                  }" class="col-2 col-form-label text-end fw-bold">
+                      Angkatan
+                  </label>
+                  <div class="col-2">
+                      <input type="text" class="form-control text-center" id="${
+                        "angkatan" + data.angkatan
+                      }"
+                          value="${
+                            data.angkatan
+                          }" autocomplete="off" disabled />
+                  </div>
+
+                  <div class="col"></div>
+
+                  <label for="${
+                    "jumlah_mahasiswa" + data.angkatan
+                  }" class="col-3 col-form-label text-end">
+                      Jumlah Mahasiswa Aktif
+                  </label>
+                  <div class="col-2">
+                      <input type="text" class="form-control numberOnly" id="${
+                        "jumlah_mahasiswa" + data.angkatan
+                      }"
+                          value="${
+                            data.jumlah_mahasiswa
+                          }" autocomplete="off" disabled />
+                  </div>
+              </div>
+              <div class="table-responsive">
+                  <table class="table table-bordered table-striped w-100" id="${tableId}">
+                  <thead class="text-center">
+                      <th>Kode</th>
+                      <th>Nama</th>
+                      <th>SKS A</th>
+                      <th>SKS B</th>
+                      <th>Kelompok</th>
+                      <!-- <th>Praktikum</th> -->
+                  </thead>
+                  <tbody></tbody>
+                  </table>
+              </div>
+              </div>
+          </div>
+      `;
+
+    // Tambahkan tabel baru ke dalam container
+    $("#tableContainer").append(tableHtml);
+
+    // Inisialisasi DataTable
+    new $("#" + tableId).DataTable({
+      scrollX: true,
+      scrollY: "25vh",
+      scrollCollapse: true,
+      paging: false,
+      responsive: true,
+      ordering: false,
+      searching: false,
+      info: false,
+      data: data.list_matkul, // Pastikan data dikirim ke DataTable
+      columns: [
+        { data: "kode", width: "75px" },
+        { data: "nama", width: "300px" },
+        { data: "sks_akademik", width: "50px", className: "text-end" },
+        { data: "sks_bayar", width: "50px", className: "text-end" },
+        { data: "kelompok", width: "" },
+        // { data: "praktikum", width: "50px", className: "text-center" },
+      ],
+    });
+  }
+
+  $("#input_matkul").on("keydown", async function (event) {
+    if (event.key === "F9") {
+      event.preventDefault();
+      $("#modal-matkul").modal("show");
+      $("#table-lov-matkul_filter input").focus(); // focus ke field search saat modal plu dibuka
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      let resultKode = matkul_lov
+        .data()
+        .toArray()
+        .find((matkul) => matkul.kode === this.value);
+
+      if (resultKode) await setMatkul(resultKode);
+      else
+        await popUpTimer(
+          "error",
+          "Data tidak ditemukan!",
+          "Jika bersikeras, harap tambahkan data terlebih dahulu.",
+          2000
+        );
+
+      this.value = "";
+    }
+  });
+
+  $("#btn-simpan").on("click", async function () {
+    if (!$("#input_angkatan").val()) {
+      await popUpTimer("error", "Input Angkatan belum diisi!");
+      setTimeout(() => {
+        $("#input_angkatan").focus();
+      }, 1100);
+      return;
+    } else if (!$("#input_jumlah_mahasiswa").val()) {
+      await popUpTimer("error", "Jumlah Mahasiswa Aktif belum diisi!");
+      setTimeout(() => {
+        $("#input_jumlah_mahasiswa").focus();
+      }, 1100);
+      return;
+    } else if (matkul_tab.data().toArray().length === 0) {
+      await popUpTimer(
+        "error",
+        "Belum ada matkul yang dibuka untuk semester ini!"
+      );
+      setTimeout(() => {
+        $("#input_matkul").focus();
+      }, 1100);
+      return;
+    }
+
+    params = {
+      angkatan: Number($("#input_angkatan").val()),
+      jumlah_mahasiswa: Number($("#input_jumlah_mahasiswa").val()),
+      list_matkul: matkul_tab.data().toArray(),
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/mata_kuliah_pilihan/post_matkul",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        console.log("[ post_matkul ] ", res);
+        if (res.status === false) {
+          await popUpTimer("error", res.message);
+          if (res.target)
+            setTimeout(() => {
+              $("#" + res.target).focus();
+            }, 1500);
+        } else {
+          $("#btn-batal").click();
+          popUpTimer("success", res.message);
+          Object.assign(params, { u_id: res["data"] });
+          data_angkatan.push(params); // update data_angkatan
+          generateDataContainers(data_angkatan);
+        }
+      },
+    });
+  });
+
+  $("#btn-hapusMatkul").on("click", async function () {
+    let selectedData = [];
+    let selectedRow = [];
+
+    $("input[name='cbMatkulTab']:checked").each(function () {
+      let row = $(this).closest("tr"); // Dapatkan baris terkait
+      let rowData = matkul_tab.row(row).data(); // Ambil data baris dari DataTable
+
+      if (rowData) {
+        selectedRow.push(row[0]._DT_RowIndex);
+        selectedData.push(rowData);
+      }
+    });
+
+    let decision = await Swal.fire({
+      title: "Yakin akan hapus matkul ini?",
+      text: "[ " + selectedData.map((x) => x.kode) + " ]",
+      showCancelButton: true,
+      confirmButtonText: "Yakin",
+      cancelButtonText: "Batalkan",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        return matkul_tab.rows(selectedRow).remove().draw(false);
+      } else if (result.isDismissed) {
+        return false;
+      }
+    });
+  });
+
+  $("#btn-editData").on("click", async function () {
+    let cardId = $(".active-card").attr("id");
+    if (cardId) {
+      console.log("[ cardId ]", cardId, cardId.slice(-4));
+      let cardElement = $("#" + cardId);
+      let tableId = cardId.substring(5) + "_tab";
+      let inputs = cardElement.find("input, select, textarea"); // Ambil semua input
+
+      let data = {};
+      inputs.each(function () {
+        let name = $(this).attr("id"); // Gunakan name atau id sebagai key
+        let value = $(this).val();
+        data[name] = value;
+      });
+      data["list_matkul"] = $("#" + tableId)
+        .DataTable()
+        .data()
+        .toArray();
+
+      console.log("[ data ]", data);
+      let cleanedData = Object.keys(data).reduce((acc, key) => {
+        const newKey = key.endsWith(cardId.slice(-4))
+          ? key.replace(new RegExp(cardId.slice(-4) + "$"), "")
+          : key;
+        acc[newKey] = data[key];
+        return acc;
+      }, {});
+      console.log("[ cleanedData ]", cleanedData);
+
+      form_matkul(true, false, cleanedData);
+    }
+  });
+
+  $("#btn-hapusData").on("click", async function () {
+    let cardId = $(".active-card").attr("id");
+    if (cardId) {
+      let cardElement = $("#" + cardId);
+      let decision = await Swal.fire({
+        title: "Yakin akan hapus data ini?",
+        showCancelButton: true,
+        confirmButtonText: "Yakin",
+        cancelButtonText: "Batalkan",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          return true;
+        } else if (result.isDismissed) {
+          return false;
+        }
+      });
+
+      console.log("decision", decision);
+
+      if (decision === true) {
+        $.ajax({
+          type: "POST",
+          url: "/mata_kuliah_pilihan/delete_data",
+          cache: false,
+          data: JSON.stringify(cardId),
+          beforeSend: () => {
+            showLoading();
+          },
+          complete: () => {
+            hideLoading();
+          },
+          success: async function (res) {
+            console.log("[ post_kelompok ] ", res);
+            if (res.status === false) {
+              popUpTimer("error", res.message);
+            } else {
+              popUpTimer("success", res.message);
+              data_angkatan = data_angkatan.filter(
+                (item) => item.u_id !== cardId.slice(5)
+              ); // update data_angkatan
+              cardElement.remove(); // hapus card
+
+              if (isNoActiveCard()) {
+                document.getElementById("btn-editData").style.display = "none";
+                document.getElementById("btn-hapusData").style.display = "none";
+              }
+            }
+          },
+        });
+      }
+    }
+  });
+
+  async function setMatkul(data) {
+    let greenFlag = true;
+    let jmlSks = await countSksinDatatable();
+
+    if (
+      matkul_tab
+        .data()
+        .toArray()
+        .find((matkul) => matkul.kode === data.kode)
+    )
+      return popUpTimer("error", "Mata Kuliah ini sudah ditambahkan!");
+
+    let final_sks = await (jmlSks + data.sks_akademik);
+
+    if (final_sks > maks_sks) {
+      await Swal.fire({
+        title: "Jumlah SKS sudah mencapai batas maksimum: " + jmlSks + " sks!",
+        text: "Apakah anda yakin ingin tetap menambahkan mata kuliah ini?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Tambahkan",
+        cancelButtonText: "Batalkan",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          greenFlag = true;
+        } else if (result.isDismissed) {
+          greenFlag = false;
+        }
+      });
+    }
+
+    if (greenFlag) matkul_tab.row.add(data).draw(false);
+    return greenFlag ?? false;
+  }
+
+  async function countSksinDatatable() {
+    let jmlSks = 0;
+    let dataBfr = matkul_tab.data().toArray();
+
+    await dataBfr.forEach((element) => {
+      jmlSks += element.sks_akademik;
+    });
+
+    return jmlSks;
+  }
+
+  // CHECKBOX
+  // Event ketika cbMatkulTabAll di-click
+
+  $('input[name="cbMatkulTabAll"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $('input[name="cbMatkulTab"]').prop("checked", isChecked);
+
+    document.getElementById("btn-hapusMatkul").style.display = isChecked
+      ? "inline-block"
+      : "none";
+  });
+
+  // Event ketika salah satu cbMatkulTab di-click
+  $(document).on("change", 'input[name="cbMatkulTab"]', function () {
+    let allChecked =
+      $('input[name="cbMatkulTab"]').length ===
+      $('input[name="cbMatkulTab"]:checked').length;
+    $('input[name="cbMatkulTabAll"]').prop("checked", allChecked);
+
+    let anyChecked = $('input[name="cbMatkulTab"]:checked').length > 0;
+    document.getElementById("btn-hapusMatkul").style.display = anyChecked
+      ? "inline-block"
+      : "none";
+  });
+
+  // DATATABLEs
+  let matkul_tab = $("#table_matkul").DataTable({
+    scrollX: true,
+    scrollY: "25vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    searching: false,
+    info: false,
+    columns: [
+      {
+        data: null,
+        width: "10px",
+        className: "text-center",
+        render: function (data, type, row) {
+          return `
+                <input type="checkbox" name="cbMatkulTab"/>
+              `;
+        },
+      },
+      {
+        data: "kode",
+        width: "75px",
+      },
+      {
+        data: "nama",
+        width: "300px",
+      },
+      {
+        data: "sks_akademik",
+        width: "50px",
+        className: "text-end",
+      },
+      {
+        data: "sks_bayar",
+        width: "50px",
+        className: "text-end",
+      },
+      {
+        data: "kelompok",
+        width: "",
+      },
+    ],
+  });
+
+  let matkul_lov = $("#table-lov-matkul").DataTable({
+    scrollX: true,
+    scrollY: "40vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    info: false,
+    ajax: {
+      type: "GET",
+      url: "/mata_kuliah_pilihan/get_lovMatkul",
+      cache: false,
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+    },
+    columns: [
+      {
+        data: "kode",
+        width: "75px",
+      },
+      {
+        data: "nama",
+        width: "300px",
+      },
+    ],
+  });
+</script>
+{% endblock %}
