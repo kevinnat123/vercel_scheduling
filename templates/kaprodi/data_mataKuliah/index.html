@@ -118,7 +118,7 @@
           type="button"
           class="btn btn-secondary"
           id="btn-batal"
-          onclick="form_matkul(false, true)"
+          onclick="form_matkul(undefined, true)"
         >
           Batal
         </button>
@@ -143,7 +143,7 @@
 
     <div class="table-responsive">
       <table
-        class="table table-bordered table-stripped w-100"
+        class="table table-bordered table-stripped table-hover w-100"
         id="table_matkul"
       >
         <thead class="text-center">
@@ -172,7 +172,7 @@
         let kelompokBaruGroup = document.getElementById("kelompok_baru_group");
 
         if (this.value === "tambah_baru") {
-          console.log("⚠️ showing kelompok baru");
+          console.log(" showing kelompok baru");
           kelompokBaruGroup.style.display = "flex"; // Menampilkan input dan tombol
           document.getElementById("kelompok_baru").focus();
         } else {
@@ -197,7 +197,7 @@
 
         $.ajax({
           type: "POST",
-          url: "/post_kelompok",
+          url: "/data_mata_kuliah/post_kelompok",
           cache: false,
           data: JSON.stringify({ nama: kelompokBaru }),
           beforeSend: () => {
@@ -231,7 +231,7 @@
       });
   });
 
-  function form_matkul(update, hidden = false, data = undefined) {
+  function form_matkul(update = undefined, hidden = false, data = undefined) {
     $("#frm")[0].reset();
     if (update === false) {
       document.getElementById("formTitle").innerText = "Tambah Data";
@@ -297,7 +297,7 @@
       kode: $("#input_kode").val(),
       nama: $("#input_nama").val(),
       kelompok: $("#input_kelompok").val(),
-      program_studi: prodi,
+      prodi: prodi,
       sks_akademik: $("#input_sksA").val(),
       sks_bayar: $("#input_sksB").val(),
       praktikum: $("#cbPraktikum").prop("checked"),
@@ -305,7 +305,7 @@
 
     $.ajax({
       type: "POST",
-      url: "/post_matkul",
+      url: "/data_mata_kuliah/post_matkul",
       cache: false,
       data: JSON.stringify(params),
       beforeSend: () => {
@@ -365,7 +365,7 @@
       kode: $("#input_kode").val(),
       nama: $("#input_nama").val(),
       kelompok: $("#input_kelompok").val(),
-      program_studi: prodi,
+      prodi: prodi,
       sks_akademik: $("#input_sksA").val(),
       sks_bayar: $("#input_sksB").val(),
       praktikum: $("#cbPraktikum").prop("checked"),
@@ -373,7 +373,7 @@
 
     $.ajax({
       type: "POST",
-      url: "/put_matkul",
+      url: "/data_mata_kuliah/put_matkul",
       cache: false,
       data: JSON.stringify(params),
       beforeSend: () => {
@@ -414,11 +414,11 @@
     if (!selectedData.length)
       return popUpTimer("error", "Tidak ada data untuk dihapus.");
 
-    if (selectedData.find((item) => item.program_studi === "GENERAL"))
+    if (selectedData.find((item) => item.prodi === "GENERAL"))
       return popUpTimer(
         "error",
         "Matkul ini " +
-          selectedData.find((item) => item.program_studi === "GENERAL").kode +
+          selectedData.find((item) => item.prodi === "GENERAL").kode +
           " tidak bisa dihapus!",
         "Silahkan hubungi admin untuk modifikasi matkul ini.",
         2500
@@ -442,7 +442,7 @@
     if (decision === true) {
       $.ajax({
         type: "POST",
-        url: "/delete_matkul",
+        url: "/data_mata_kuliah/delete_matkul",
         cache: false,
         data: JSON.stringify(selectedData),
         beforeSend: () => {
@@ -467,7 +467,7 @@
 
   function detail_matkul(object) {
     let data = matkul_tab.row(object.closest("tr")).data();
-    if (data.program_studi !== "GENERAL") form_matkul(true, false, data);
+    if (data.prodi !== "GENERAL") form_matkul(true, false, data);
     else
       return popUpTimer(
         "error",
@@ -503,7 +503,7 @@
     info: false,
     ajax: {
       type: "GET",
-      url: "/get_matkul",
+      url: "/data_mata_kuliah/get_matkul",
       cache: false,
       beforeSend: () => {
         showLoading();

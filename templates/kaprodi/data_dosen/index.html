@@ -65,7 +65,7 @@
           type="button"
           class="btn btn-secondary"
           id="btn-batal"
-          onclick="form_dosen(false, true)"
+          onclick="form_dosen(undefined, true)"
         >
           Batal
         </button>
@@ -89,7 +89,10 @@
     </button>
 
     <div class="table-responsive">
-      <table class="table table-bordered table-stripped w-100" id="table_dosen">
+      <table
+        class="table table-bordered table-stripped table-hover w-100"
+        id="table_dosen"
+      >
         <thead class="text-center">
           <th><input type="checkbox" name="cbDosenTabAll" /></th>
           <th>NIP</th>
@@ -108,7 +111,7 @@
   const prodi = "{{ prodi | safe }}";
   $(document).ready(function () {});
 
-  function form_dosen(update, hidden = false, data = undefined) {
+  function form_dosen(update = undefined, hidden = false, data = undefined) {
     $("#frm")[0].reset();
     if (update === false) {
       document.getElementById("formTitle").innerText = "Tambah Data";
@@ -168,7 +171,7 @@
 
     $.ajax({
       type: "POST",
-      url: "/post_dosen",
+      url: "/data_dosen/post_dosen",
       cache: false,
       data: JSON.stringify(params),
       beforeSend: () => {
@@ -207,7 +210,7 @@
 
     $.ajax({
       type: "POST",
-      url: "/put_dosen",
+      url: "/data_dosen/put_dosen",
       cache: false,
       data: JSON.stringify(params),
       beforeSend: () => {
@@ -266,7 +269,7 @@
     if (decision === true) {
       $.ajax({
         type: "POST",
-        url: "/delete_dosen",
+        url: "/data_dosen/delete_dosen",
         cache: false,
         data: JSON.stringify(selectedData),
         beforeSend: () => {
@@ -320,7 +323,7 @@
     info: false,
     ajax: {
       type: "GET",
-      url: "/get_dosen",
+      url: "/data_dosen/get_dosen",
       cache: false,
       beforeSend: () => {
         showLoading();
