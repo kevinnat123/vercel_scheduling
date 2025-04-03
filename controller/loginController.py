@@ -8,6 +8,15 @@ from datetime import datetime
 signin = Blueprint('signin', __name__)
 loginDao = loginDao()
 
+# def to_uppercase(value):
+#     if isinstance(value, str):
+#         return value.upper()
+#     elif isinstance(value, list):
+#         return [to_uppercase(item) for item in value]
+#     elif isinstance(value, dict):
+#         return {key: to_uppercase(val) for key, val in value.items()}
+#     return value
+
 @signin.before_request
 def check_session():
     """ Periksa apakah session user masih valid, jika tidak logout otomatis """
