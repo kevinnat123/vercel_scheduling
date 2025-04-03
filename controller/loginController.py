@@ -3,6 +3,7 @@ from dao.loginDao import loginDao
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from userModel import User
+from datetime import datetime
 
 signin = Blueprint('signin', __name__)
 loginDao = loginDao()
@@ -62,10 +63,11 @@ def login():
 
             menu = loginDao.get_menu(session['user']['role'])
             session['menu'] = menu if menu else []
+            session['academic_details'] = get_academic_details()
 
-            print('  session        :', session)
-            print('  session user   :', session['user'])
-            print('  session menu   :', session['menu'])
+            print('  session academic_details   :', session['academic_details'])
+            print('  session user               :', session['user'])
+            print('  session menu               :', session['menu'])
             return jsonify({'status': True, 'redirect_url': url_for('signin.dashboard')}), 200
 
         return jsonify({'status': False, 'message': user['message']}), 401
@@ -83,16 +85,49 @@ def dashboard():
 
     return render_template('index.html', menu='Dashboard', title='Dashboard')
 
-@signin.route("/404")
+def get_academic_details():
+    today = datetime.today()
+    current_year = today.year
+    max_year = current_year if today.month >= 7 else current_year - 1
+    min_year = max_year - 7
+
+    # Menentukan semester saat ini
+    if today.month <= 3:
+        semester_saat_ini = "Antara"
+        semester_depan = "Genap"
+    elif today.month <= 8:
+        semester_saat_ini = "Genap"
+        semester_depan = "Gasal"
+    else:
+        semester_saat_ini = "Gasal"
+        semester_depan = "Antara"
+
+    # Menentukan tahun ajaran
+    tahun_ajaran_1 = (current_year - 1) if today.month <= 8 else current_year
+    tahun_ajaran = f"{current_year - 1}/{current_year}" if today.month <= 8 else f"{current_year}/{current_year + 1}"
+
+    list_angkatan = list(range(min_year, max_year + 1))
+
+    return {
+        "min_year": min_year,
+        "max_year": max_year,
+        "semester_saat_ini": semester_saat_ini,
+        "semester_depan": semester_depan,
+        "tahun_ajaran_1": tahun_ajaran_1,
+        "tahun_ajaran": tahun_ajaran,
+        "list_angkatan": list_angkatan
+    }
+
+@signin.route("/404NotFound")
 @login_required
 def error404():
     print('[ CONTROLLER ] error404')
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
-    return render_template('404.html')
+    return render_template('404.html', menu = "404 Not Found")
 
-@signin.route("/403")
+@signin.route("/403Forbidden")
 def error403():
     print('[ CONTROLLER ] error403')
     if not session.get('user') or 'u_id' not in session['user']:
