@@ -35,7 +35,7 @@ class dataMataKuliahDao:
     
     def get_matkul(self):
         print('  [ DAO ] get matkul', session['user']['prodi'])
-        result = self.connection.find_many(db_courses, {'program_studi': { '$in' : ['GENERAL', session['user']['prodi']] }})
+        result = self.connection.find_many(db_courses, {'prodi': { '$in' : ['GENERAL', session['user']['prodi']] }}, sort=[("kode", 1)])
         return result['data'] if result and result.get('status') else None
     
     def post_matkul(self, params: dict):
@@ -86,7 +86,7 @@ class dataMataKuliahDao:
         try:
             print('    params', params)
 
-            if params.get('program_studi') != 'GENERAL':
+            if params.get('prodi') != 'GENERAL':
                 if params.get('kode'):
                     res = self.connection.find_one(db_courses, {'kode': params['kode']})
                     if (res['status'] == False and res['data'] == None):
@@ -120,29 +120,14 @@ class dataMataKuliahDao:
         print('    result', result)
         return result
     
-    def func(self):
-        result = { 'status': False }
-        print('  [ DAO ] func')
-        
-        try:
-            result.update({ 'status': True })
-        except CustomError as e:
-            result.update({ 'message': f'{e.error_dict.get('message')}' })
-            if e.error_dict.get('target'):
-                result.update({ 'target': e.error_dict.get('target') })
-        except Exception as e:
-            result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
-
-        return result
-    
     def delete_matkul(self, params: dict):
         result = { 'status': False }
         print('  [ DAO ] delete matkul')
 
         try:
-            program_studi = list({item["program_studi"] for item in params})
-            if 'GENERAL' in program_studi:
-                raise CustomError({ 'message': 'Matkul ' + [item.get('kode') for item in params if item["program_studi"] == "GENERAL"] + ' tidak bisa dihapus!' })
+            prodi = list({item["prodi"] for item in params})
+            if 'GENERAL' in prodi:
+                raise CustomError({ 'message': 'Matkul ' + [item.get('kode') for item in params if item["prodi"] == "GENERAL"] + ' tidak bisa dihapus!' })
                 
             list_kode = [item["kode"] for item in params]
             print('  list_kode', list_kode, params)
@@ -150,7 +135,7 @@ class dataMataKuliahDao:
                 db_courses, 
                 { 
                     'kode' : { '$in': list_kode }, 
-                    'program_studi': session['user']['prodi'] 
+                    'prodi': session['user']['prodi'] 
                 }
             )
             if res['status'] == False:

@@ -13,7 +13,7 @@ class dataDosenDao:
 
     def get_dosen(self):
         print('  [ DAO ] get dosen', session['user']['prodi'])
-        result = self.connection.find_many(db_dosen, {'prodi': session['user']['prodi']})
+        result = self.connection.find_many(db_dosen, {'prodi': session['user']['prodi']}, sort=[("nip", 1)])
         if result.get('status'):
             for y in result['data']:
                 if not y.get('konsentrasi'):
