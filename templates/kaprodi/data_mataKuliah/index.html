@@ -1,5 +1,6 @@
 {% extends "layout.html" %} {% block content %}
 <!-- <div class="container-fluid mt-4" id="main-window"> -->
+
 <div class="card" id="card-form" hidden>
   <div class="card-body">
     <form role="form" class="form-horizontal row" id="frm">
@@ -215,7 +216,7 @@
             console.log("[ post_kelompok ] ", res);
             if (res.status === false) {
               popUpTimer("error", res.message, undefined, 1500);
-              $("#kelompok_baru").val("");
+              document.getElementById("kelompok_baru").value = "";
             } else {
               let dropdown = document.getElementById("input_kelompok");
               let option = document.createElement("option");

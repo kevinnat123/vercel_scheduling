@@ -22,7 +22,7 @@ class dataMataKuliahDao:
             result = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'kelompok_matkul': session['user']['kelompok_matkul']})
             if result and result.get('status') == False:
                 session['user']['kelompok_matkul'].remove(nama_baru.upper())
-                raise Exception
+                raise CustomError({ 'message': result.get('message') })
 
             result.update({ 'status': True, 'message': result.get('message') })
         except CustomError as e:

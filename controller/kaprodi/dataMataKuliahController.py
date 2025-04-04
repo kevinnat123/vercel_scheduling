@@ -8,7 +8,7 @@ dao = dataMataKuliahDao()
 @mataKuliah.route("/data_mata_kuliah")
 @login_required
 def mataKuliah_index():
-    print('[ CONTROLLER ] render data mata kuliah')
+    print('========== ========== ========== ========== RENDER DATA MATA KULIAH  ========== ========== ========== ==========')
     if session['user']['role'] != 'KEPALA PROGRAM STUDI':
         return redirect(url_for('signin.error403'))
     else:

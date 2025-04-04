@@ -8,7 +8,7 @@ dao = dataDosenDao()
 @dosen.route("/data_dosen")
 @login_required
 def dosen_index():
-    print('[ CONTROLLER ] render data dosen')
+    print('========== ========== ========== ========== RENDER DATA DOSEN  ========== ========== ========== ==========')
     if session['user']['role'] != 'KEPALA PROGRAM STUDI':
         return redirect(url_for('signin.error403'))
     else:
