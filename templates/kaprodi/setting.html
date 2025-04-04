@@ -1,0 +1,310 @@
+{% extends "layout.html" %} {% block content %}
+<style>
+  .password-container {
+    position: relative;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .password-input {
+    padding-right: 35px; /* Memberikan ruang untuk ikon mata */
+  }
+
+  .eye-open,
+  .eye-closed {
+    transition: all 0.2s ease;
+  }
+
+  .eye-closed {
+    display: none;
+  }
+</style>
+
+<div class="card-wrapper">
+  <div class="card-responsive">
+    <form role="form" class="form-horizontal row" id="frmGeneral">
+      <div class="row">
+        <h4 id="formTitle">General Setting</h4>
+      </div>
+      <div class="form-group row">
+        <label for="input-maks_sks" class="col-5 col-form-label"
+          >Maks. SKS</label
+        >
+        <div class="col">
+          <input
+            type="text"
+            class="form-control text-end"
+            id="input-maks_sks"
+            value="{{ session['user'].get('maks_sks_prodi') }}"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="col text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpanGeneral">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-secondary btn-batal">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card-responsive">
+    <form role="form" class="form-horizontal row" id="frmPassword">
+      <div class="row">
+        <h4 id="formTitle">Ganti Password</h4>
+      </div>
+
+      <div class="form-group row mb-3">
+        <label for="input-oldPassword" class="col-5 col-form-label"
+          >Old Password</label
+        >
+        <div class="col password-container">
+          <input
+            type="password"
+            class="form-control password-input sensitive-case"
+            id="input-oldPassword"
+            autocomplete="off"
+          />
+          <div class="password-toggle" data-target="input-oldPassword">
+            <i class="fas fa-eye fa-fw eye-open"></i>
+            <i class="fas fa-eye-slash fa-fw eye-closed"></i>
+
+            <!-- <span class="eye-open">👁️</span>
+            <span class="eye-closed">👁️‍🗨️</span> -->
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row mb-3">
+        <label for="input-newPassword" class="col-5 col-form-label"
+          >New Password</label
+        >
+        <div class="col password-container">
+          <input
+            type="password"
+            class="form-control password-input sensitive-case"
+            id="input-newPassword"
+            autocomplete="off"
+          />
+          <div class="password-toggle" data-target="input-newPassword">
+            <i class="fas fa-eye fa-fw eye-open"></i>
+            <i class="fas fa-eye-slash fa-fw eye-closed"></i>
+
+            <!-- <span class="eye-open">👁️</span>
+            <span class="eye-closed">👁️‍🗨️</span> -->
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row mb-3">
+        <label for="input-verifyNewPassword" class="col-5 col-form-label"
+          >Verify New Password</label
+        >
+        <div class="col password-container">
+          <input
+            type="password"
+            class="form-control password-input sensitive-case"
+            id="input-verifyNewPassword"
+            autocomplete="off"
+          />
+          <div class="password-toggle" data-target="input-verifyNewPassword">
+            <i class="fas fa-eye fa-fw eye-open"></i>
+            <i class="fas fa-eye-slash fa-fw eye-closed"></i>
+
+            <!-- <span class="eye-open">👁️</span>
+            <span class="eye-closed">👁️‍🗨️</span> -->
+          </div>
+        </div>
+      </div>
+
+      <div class="col text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpanPassword">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-secondary btn-batal">Clear</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form role="form" class="form-horizontal row" id="frmDetail">
+      <div class="row">
+        <h4 id="formTitle">Ganti Password</h4>
+      </div>
+      <div class="form-group row">
+        <label for="input-1" class="col-5 col-form-label">Old Password</label>
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input-1"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input-2" class="col-5 col-form-label">New Password</label>
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input-2"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input-3" class="col-5 col-form-label"
+          >Verify New Password</label
+        >
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input-3"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="col text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpan">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-secondary btn-batal">Clear</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %} {% block script %}
+<script>
+  const prodi = "{{ prodi | safe }}";
+  $(document).ready(function () {
+    $(".btn-batal").on("click", function () {
+      let closestForm = $(this).closest("form");
+      closestForm[0].reset();
+    });
+
+    $("#btn-simpanGeneral").on("click", function () {
+      if (!$("#input-maks_sks").val())
+        popUpTimer("error", "Tidak ada yang perlu disimpan");
+
+      params = { maks_sks: Number($("#input-maks_sks").val()) };
+
+      $.ajax({
+        // REMINDER: LANJUTKAN
+        type: "POST",
+        url: "/update_general",
+        cache: false,
+        data: JSON.stringify(params),
+        beforeSend: () => {
+          showLoading();
+        },
+        complete: () => {
+          hideLoading();
+        },
+        success: async function (res) {
+          if (res.status == false) popUpTimer("error", res.message);
+          else {
+            $("#frmPassword")[0].reset();
+            await popUpTimer("success", res.message);
+          }
+        },
+      });
+    });
+
+    $("#btn-simpanPassword").on("click", function () {
+      if (!$("#input-oldPassword").val()) {
+        popUpTimer("error", "Silahkan isi password lama anda!");
+        setTimeout(() => {
+          $("#input-oldPassword").focus();
+        }, 1500);
+      } else if (!$("#input-newPassword").val()) {
+        popUpTimer("error", "Silahkan isi password baru yang diinginkan!");
+        setTimeout(() => {
+          $("#input-newPassword").focus();
+        }, 1500);
+      } else if (!$("#input-verifyNewPassword").val()) {
+        popUpTimer("error", "Silahkan verifikasi password baru anda!");
+        setTimeout(() => {
+          $("#input-verifyNewPassword").focus();
+        }, 1500);
+      } else if (
+        $("#input-newPassword").val() === $("#input-oldPassword").val()
+      )
+        popUpTimer("error", "Silahkan masukkan password yang berbeda!");
+      else if (
+        $("#input-newPassword").val() !== $("#input-verifyNewPassword").val()
+      )
+        popUpTimer("error", "Input password baru tidak cocok!");
+
+      params = {
+        oldPassword: $("#input-oldPassword").val(),
+        newPassword: $("#input-newPassword").val(),
+        verifyNewPassword: $("#input-verifyNewPassword").val(),
+      };
+
+      $.ajax({
+        type: "POST",
+        url: "/password_verification",
+        cache: false,
+        data: JSON.stringify(params),
+        beforeSend: () => {
+          showLoading();
+        },
+        complete: () => {
+          hideLoading();
+        },
+        success: async function (res) {
+          if (res.status == false) popUpTimer("error", res.message);
+          else {
+            $("#frmPassword")[0].reset();
+            await popUpTimer("success", res.message);
+            // window.location.href = res.redirect_url; // REMINDER: bebas pakai
+          }
+        },
+      });
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // Toggle password visibility
+    const toggles = document.querySelectorAll(".password-toggle");
+
+    toggles.forEach((toggle) => {
+      toggle.addEventListener("click", function () {
+        const targetId = this.getAttribute("data-target");
+        const inputField = document.getElementById(targetId);
+        const eyeOpen = this.querySelector(".eye-open");
+        const eyeClosed = this.querySelector(".eye-closed");
+
+        if (inputField.type === "password") {
+          inputField.type = "text";
+          eyeOpen.style.display = "none";
+          eyeClosed.style.display = "inline";
+        } else {
+          inputField.type = "password";
+          eyeOpen.style.display = "inline";
+          eyeClosed.style.display = "none";
+        }
+      });
+    });
+
+    // Clear button functionality
+    document.querySelector(".btn-batal").addEventListener("click", function () {
+      document.getElementById("input-oldPassword").value = "";
+      document.getElementById("input-newPassword").value = "";
+      document.getElementById("input-verifyNewPassword").value = "";
+    });
+  });
+</script>
+{% endblock %}
