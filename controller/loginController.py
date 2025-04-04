@@ -8,40 +8,43 @@ from datetime import datetime
 signin = Blueprint('signin', __name__)
 loginDao = loginDao()
 
-# def to_uppercase(value):
-#     if isinstance(value, str):
-#         return value.upper()
-#     elif isinstance(value, list):
-#         return [to_uppercase(item) for item in value]
-#     elif isinstance(value, dict):
-#         return {key: to_uppercase(val) for key, val in value.items()}
-#     return value
-
 @signin.before_request
 def check_session():
-    """ Periksa apakah session user masih valid, jika tidak logout otomatis """
-    if request.endpoint not in ['signin.login', 'signin.logout']:  # Hindari loop logout
+    safe_endpoints = ['signin.login', 'signin.logout', 'static', 'signin.ping']
+    current_endpoint = request.endpoint
+
+    print(f"🔍 Before request: {current_endpoint}")
+
+    if current_endpoint not in safe_endpoints:
+        # Cek apakah session masih ada
         if not session.get('user') or 'u_id' not in session['user']:
-            # Tambahkan counter untuk mendeteksi redirect loop
-            session['redirect_count'] = session.get('redirect_count', 0) + 1
-            if session['redirect_count'] > 3:  # Misal redirect lebih dari 3 kali
-                print("⚠️ Terlalu banyak redirect! Logout otomatis...")
-                session.clear()
-                return redirect(url_for('signin.login'))
+            print("⚠️ Session kosong atau tidak valid")
             return redirect(url_for('signin.logout'))
-        
-        # 🛑 **Tambahan: Cek apakah session yang ada berbeda dengan data user yang diharapkan**
-        if request.endpoint in ['signin.dashboard']:  # Pastikan hanya mengecek di halaman tertentu
+
+        # Jangan reset lifetime kalau hanya /ping
+        if not request.path.startswith('/ping'):
+            print('🔄 Perpanjang lifetime session')
+            session.permanent = True
+            session.modified = True
+
+        # Opsional: validasi extra user (misal di dashboard)
+        if current_endpoint in ['signin.dashboard']:
             user_id_in_session = session['user'].get('u_id')
-            user_id_in_db = loginDao.get_user_id(user_id_in_session)  # Fungsi ambil user dari DB
-            print('user_id_in_session', user_id_in_session, 'user_id_in_db', user_id_in_db)
+            user_id_in_db = loginDao.get_user_id(user_id_in_session)
 
             if not user_id_in_db or user_id_in_db != user_id_in_session:
-                print("⚠️ Session tidak valid! Logout otomatis...")
+                print("🚫 User tidak valid di database")
                 session.clear()
                 return redirect(url_for('signin.logout'))
-    session.pop('redirect_count', None)  # Reset counter jika sukses login
 
+@signin.route("/ping")
+def ping():
+    print('❤❤❤❤❤ ❤❤❤❤❤ ❤❤❤❤❤ ❤❤❤❤❤ HEARTBEAT ❤❤❤❤❤ ❤❤❤❤❤ ❤❤❤❤❤ ❤❤❤❤❤')
+    print('session', True if session.get('user') else False)
+    if not session.get('user'):
+        return jsonify({'status': False, 'expired': True}), 401
+    return jsonify({'status': True, 'expired': False}), 200
+            
 @signin.route("/")
 def home():
     print('[ CONTROLLER ] render website')
@@ -73,6 +76,8 @@ def login():
             menu = loginDao.get_menu(session['user']['role'])
             session['menu'] = menu if menu else []
             session['academic_details'] = get_academic_details()
+
+            session.permanent = True  # Aktifkan waktu hidup session
 
             print('  session academic_details   :', session['academic_details'])
             print('  session user               :', session['user'])
@@ -137,12 +142,62 @@ def error404():
     return render_template('404.html', menu = "404 Not Found")
 
 @signin.route("/403Forbidden")
+@login_required
 def error403():
     print('[ CONTROLLER ] error403')
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
     return render_template('403.html')
+
+@signin.route("/setting")
+@login_required
+def setting():
+    print('[ CONTROLLER ] setting')
+    if session['user']['role'] == 'KEPALA PROGRAM STUDI':
+        return render_template(
+                '/kaprodi/setting.html', 
+                menu = 'Setting', 
+                title = 'Setting', 
+                prodi = session['user']['prodi']
+            )
+    else:
+        return redirect(url_for('signin.error403'))
+    
+@signin.route("/password_verification", methods=['GET', 'POST'])
+@login_required
+def password_verification():
+    print('[ CONTROLLER ] password_verification', request.method, session.get('user'))
+    if not session.get('user') or 'u_id' not in session['user']:
+        return redirect(url_for('signin.login'))
+    
+    if request.method == 'POST':
+        req = request.get_json('data')
+        oldPassword = req.get('oldPassword')
+        newPassword = req.get('newPassword')
+        verifyNewPassword = req.get('verifyNewPassword')
+
+        manage_new_password = loginDao.register_new_password(oldPassword, newPassword, verifyNewPassword)
+        # manage_new_password.update({ 'redirect_url': url_for('signin.logout') })
+            
+    return jsonify( manage_new_password )
+
+@signin.route("/update_general", methods=['POST'])
+@login_required
+def update_general():
+    print('[ CONTROLLER ] update_general', request.method, session.get('user'))
+    if not session.get('user') or 'u_id' not in session['user']:
+        return redirect(url_for('signin.login'))
+    
+    req = request.get_json('data')
+
+    result = loginDao.update_general(req)
+
+    print('  result BE', result)
+    if (result.get('status') == False and result.get('message') == 'User Not Found'):
+        return redirect(url_for('signin.logout'))
+            
+    return jsonify( result )
 
 @signin.route("/logout")
 def logout():

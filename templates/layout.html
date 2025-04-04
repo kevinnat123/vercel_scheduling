@@ -376,8 +376,7 @@
         <i class="fas fa-circle-user fa-fw"></i>
         <span>{{ session['user']['nama'].title() }}</span>
         <div class="dropdown-menu">
-          <a href="#">Profile</a>
-          <a href="#">Settings</a>
+          <a href="/setting">Settings</a>
           <a href="/logout">Logout</a>
         </div>
       </div>
@@ -457,6 +456,54 @@
       };
 
       $(document).ready(function () {
+        // // * Logout Timer BEGIN * //
+        // // Waktu timeout dalam milidetik (60 menit = ... ms)
+        // const timeout = 60 * 60 * 1000;
+
+        // let logoutTimer;
+
+        // function resetLogoutTimer() {
+        //   clearTimeout(logoutTimer);
+        //   logoutTimer = setTimeout(() => {
+        //     alert("Sesi Anda telah habis. Anda akan logout.");
+        //     window.location.href = "/logout";
+        //   }, timeout);
+        // }
+
+        // // Deteksi aktivitas user
+        // [
+        //   "mousemove",
+        //   "keydown",
+        //   "click",
+        //   "scroll",
+        //   "touchstart",
+        //   "touchmove",
+        // ].forEach((evt) => {
+        //   document.addEventListener(evt, resetLogoutTimer);
+        // });
+
+        // // Mulai timer saat halaman dimuat
+        // resetLogoutTimer();
+        // // * Logout Timer END * //
+
+        // * Heartbeat BEGIN * //
+        setInterval(() => {
+          $.ajax({
+            url: "/ping",
+            cache: false,
+            error: async function (xhr, status, error) {
+              await Swal.fire({
+                title: "Session Timeout!",
+                icon: "info",
+                showCloseButton: true,
+                showConfirmButton: false,
+              });
+              if (xhr.status === 401) window.location.href = "/logout";
+            },
+          });
+        }, 61 * 60 * 1000); // setiap 61 menit ( (m) * (s) )
+        // * Heartbeat END * //
+
         document.getElementById("current-date").textContent =
           today.toLocaleDateString("id-ID", footerDate);
 
@@ -501,7 +548,9 @@
 
       // auto uppercase input
       $("input").on("input", function () {
-        $(this).val($(this).val().toUpperCase());
+        if (!$(this).hasClass("sensitive-case")) {
+          $(this).val($(this).val().toUpperCase());
+        }
       });
 
       // NumberOnly & CurrencyFormat
