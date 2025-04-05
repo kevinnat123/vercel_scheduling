@@ -143,5 +143,14 @@
       <p>Silakan periksa kembali alamat URL atau kembali ke halaman utama.</p>
       <a href="/" class="back-btn">Kembali ke Beranda</a>
     </div>
+
+    <script src="/static/plugins/jquery/jquery-3.7.1.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        setTimeout(() => {
+          window.location.href = "{{ redirect_url | safe }}";
+        }, 15 * 1000); // setiap 30 seconds
+      });
+    </script>
   </body>
 </html>
