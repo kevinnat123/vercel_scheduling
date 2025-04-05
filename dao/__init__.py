@@ -96,7 +96,7 @@ class Database:
             update_result = collection.update_one(self.to_uppercase(filter), {'$set': update_data if sensitive else self.to_uppercase(update_data)})
             if update_result.modified_count > 0:
                 return {'status': True, 'message': 'Data berhasil diperbarui'}
-            return {'status': False, 'message': 'Data tidak ditemukan atau tidak diperbarui'}
+            return {'status': False, 'message': 'Tidak ada data yang diperbarui'}
         except errors.PyMongoError as e:
             return {'status': False, 'message': f'Error pymongo: {e}'}
         

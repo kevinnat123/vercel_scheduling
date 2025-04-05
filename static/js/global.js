@@ -24,6 +24,48 @@ window.hideLoading = function () {
   document.getElementById("loadingModal").style.display = "none";
 };
 
+$(document).on("keydown", "form", function (e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    return false;
+  }
+});
+
+// auto uppercase input
+$("input").on("input", function () {
+  if (!$(this).hasClass("sensitive-case")) {
+    $(this).val($(this).val().toUpperCase());
+  }
+});
+
+// NumberOnly & CurrencyFormat
+document.addEventListener("input", function (event) {
+  let value = event.target.value;
+
+  if (event.target.classList.contains("numberOnly")) {
+    // Hanya angka tanpa tanda minus (-)
+    let sanitizedValue = value.replace(/[^0-9]/g, "");
+    event.target.value = sanitizedValue;
+  }
+
+  if (event.target.classList.contains("negativeNumber")) {
+    // Hanya angka dan bisa memiliki satu '-' di depan
+    let sanitizedValue = value.replace(/[^0-9-]/g, "").replace(/(?!^)-/g, "");
+    event.target.value = sanitizedValue;
+  }
+
+  if (event.target.classList.contains("yearInput")) {
+    event.target.value = yearInput(event.target.value);
+  }
+
+  if (event.target.classList.contains("currencyFormat")) {
+    // Format mata uang, boleh negatif
+    let sanitizedValue = value.replace(/[^0-9-]/g, "").replace(/(?!^)-/g, "");
+    event.target.value =
+      sanitizedValue === "" ? "" : formatCurrency(sanitizedValue);
+  }
+});
+
 /**
  * @param {string} [icon] - The icon type (e.g., "success", "error", "warning", "info"). Leave as `undefined` to skip.
  * @param {string} [title] - The title text. Leave as `undefined` to skip.

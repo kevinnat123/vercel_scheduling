@@ -248,6 +248,13 @@
         min-width: 300px;
       }
 
+      .card-content {
+        transition: all 0.3s ease;
+      }
+      .card.collapsed .card-content {
+        display: none;
+      }
+
       /* Loading - Modern Animation Style */
       #loadingModal {
         position: fixed;
@@ -384,13 +391,6 @@
 
     <!-- Main Content -->
     <div id="content">
-      <!-- PENGGUNAAN CARD RESPONSIVE -->
-      <!-- <div class="card-wrapper">
-        <div class="card-responsive"></div>
-        <div class="card-responsive"></div>
-        <div class="card-responsive"></div>
-      </div> -->
-
       <div class="card" style="border: 0px; margin: 0 !important">
         <div class="card-body row">
           <h1 class="col m-0 text-dark">{{ title|safe }}</h1>
@@ -529,6 +529,25 @@
           $("#header").toggleClass("full");
           $("#footer").toggleClass("full");
         });
+
+        $(document).on("click", ".btn-toggle-card", function (e) {
+          const $card = $(this).closest(".card");
+          $card.toggleClass("collapsed");
+
+          // Ganti icon agar intuitif
+          const icon = $(this).find(".toggle-icon")[0];
+          icon.classList.toggle("fa-folder-closed");
+          icon.classList.toggle("fa-folder-open");
+
+          // disable button
+          $card
+            .find("input, select, textarea, button")
+            .not(this) // Hindari tombol yang diklik
+            .prop("disabled", function (i, v) {
+              return !v;
+            });
+        });
+
         // Profile dropdown toggle
         $("#profile-dropdown").click(function (e) {
           e.stopPropagation();
@@ -544,45 +563,6 @@
         adjustSidebar(); // Jalankan saat halaman pertama kali dimuat
 
         hideLoading();
-      });
-
-      // auto uppercase input
-      $("input").on("input", function () {
-        if (!$(this).hasClass("sensitive-case")) {
-          $(this).val($(this).val().toUpperCase());
-        }
-      });
-
-      // NumberOnly & CurrencyFormat
-      document.addEventListener("input", function (event) {
-        let value = event.target.value;
-
-        if (event.target.classList.contains("numberOnly")) {
-          // Hanya angka tanpa tanda minus (-)
-          let sanitizedValue = value.replace(/[^0-9]/g, "");
-          event.target.value = sanitizedValue;
-        }
-
-        if (event.target.classList.contains("negativeNumber")) {
-          // Hanya angka dan bisa memiliki satu '-' di depan
-          let sanitizedValue = value
-            .replace(/[^0-9-]/g, "")
-            .replace(/(?!^)-/g, "");
-          event.target.value = sanitizedValue;
-        }
-
-        if (event.target.classList.contains("yearInput")) {
-          event.target.value = yearInput(event.target.value);
-        }
-
-        if (event.target.classList.contains("currencyFormat")) {
-          // Format mata uang, boleh negatif
-          let sanitizedValue = value
-            .replace(/[^0-9-]/g, "")
-            .replace(/(?!^)-/g, "");
-          event.target.value =
-            sanitizedValue === "" ? "" : formatCurrency(sanitizedValue);
-        }
       });
     </script>
 

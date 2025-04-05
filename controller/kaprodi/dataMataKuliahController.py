@@ -21,7 +21,7 @@ def mataKuliah_index():
     
 @mataKuliah.route("/data_mata_kuliah/post_kelompok", methods=["POST"])
 @login_required
-def tambah_kelompok():
+def mataKuliah_tambah_kelompok():
     data = request.get_json('data')
     nama_baru = data.get("nama")
     
@@ -33,14 +33,14 @@ def tambah_kelompok():
 
 @mataKuliah.route("/data_mata_kuliah/get_matkul", methods=['GET'])
 @login_required
-def get_matkul():
+def mataKuliah_get_matkul():
     print('[ CONTROLLER ] get_matkul')
     data = dao.get_matkul()
     return jsonify({ 'data': data })
 
 @mataKuliah.route("/data_mata_kuliah/post_matkul", methods=['POST'])
 @login_required
-def post_matkul():
+def mataKuliah_post_matkul():
     print('[ CONTROLLER ] post_matkul')
     req = request.get_json('data')
     data = dao.post_matkul(req)
@@ -48,7 +48,7 @@ def post_matkul():
 
 @mataKuliah.route("/data_mata_kuliah/put_matkul", methods=['POST'])
 @login_required
-def put_matkul():
+def mataKuliah_put_matkul():
     print('[ CONTROLLER ] put_matkul')
     req = request.get_json('data')
     data = dao.put_matkul(req)
@@ -56,7 +56,7 @@ def put_matkul():
 
 @mataKuliah.route("/data_mata_kuliah/delete_matkul", methods=['POST'])
 @login_required
-def delete_matkul():
+def mataKuliah_delete_matkul():
     print('[ CONTROLLER ] delete_matkul')
     req = request.get_json('data')
     print('  req', req)

@@ -90,7 +90,7 @@ def login():
 @signin.route("/dashboard")
 @login_required
 def dashboard():
-    print('[ CONTROLLER ] dashboard')
+    print('========== ========== ========== ========== RENDER DASHBOARD  ========== ========== ========== ==========')
 
     # Pastikan session masih valid
     if not session.get('user') or 'u_id' not in session['user']:
@@ -139,7 +139,7 @@ def error404():
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
-    return render_template('404.html', menu = "404 Not Found")
+    return render_template('404.html', menu = "404 Not Found", redirect_url = url_for('signin.dashboard'))
 
 @signin.route("/403Forbidden")
 @login_required
@@ -148,56 +148,7 @@ def error403():
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
-    return render_template('403.html')
-
-@signin.route("/setting")
-@login_required
-def setting():
-    print('[ CONTROLLER ] setting')
-    if session['user']['role'] == 'KEPALA PROGRAM STUDI':
-        return render_template(
-                '/kaprodi/setting.html', 
-                menu = 'Setting', 
-                title = 'Setting', 
-                prodi = session['user']['prodi']
-            )
-    else:
-        return redirect(url_for('signin.error403'))
-    
-@signin.route("/password_verification", methods=['GET', 'POST'])
-@login_required
-def password_verification():
-    print('[ CONTROLLER ] password_verification', request.method, session.get('user'))
-    if not session.get('user') or 'u_id' not in session['user']:
-        return redirect(url_for('signin.login'))
-    
-    if request.method == 'POST':
-        req = request.get_json('data')
-        oldPassword = req.get('oldPassword')
-        newPassword = req.get('newPassword')
-        verifyNewPassword = req.get('verifyNewPassword')
-
-        manage_new_password = loginDao.register_new_password(oldPassword, newPassword, verifyNewPassword)
-        # manage_new_password.update({ 'redirect_url': url_for('signin.logout') })
-            
-    return jsonify( manage_new_password )
-
-@signin.route("/update_general", methods=['POST'])
-@login_required
-def update_general():
-    print('[ CONTROLLER ] update_general', request.method, session.get('user'))
-    if not session.get('user') or 'u_id' not in session['user']:
-        return redirect(url_for('signin.login'))
-    
-    req = request.get_json('data')
-
-    result = loginDao.update_general(req)
-
-    print('  result BE', result)
-    if (result.get('status') == False and result.get('message') == 'User Not Found'):
-        return redirect(url_for('signin.logout'))
-            
-    return jsonify( result )
+    return render_template('403.html', menu = "403 Forbidden", redirect_url = url_for('signin.dashboard'))
 
 @signin.route("/logout")
 def logout():

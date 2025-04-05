@@ -1,5 +1,53 @@
 {% extends "layout.html" %} {% block content %}
 <!--  -->
+<!-- PENGGUNAAN CARD RESPONSIVE -->
+<!-- <div class="card-wrapper">
+  <div class="card-responsive"></div>
+  <div class="card-responsive"></div>
+  <div class="card-responsive"></div>
+</div> -->
+
+<!-- PENGGUNAAN CARD CLOSE-ABLE -->
+<!-- <div class="card close-able">
+  <div class="card-body">
+    <div class="row align-items-center justify-content-between mb-3">
+      <h4 id="formTitle" class="col btn-toggle-card">
+        <i class="fas fa-folder-open fa-fw toggle-icon me-2"></i
+        ><span>Setting Kelompok Mata Kuliah</span>
+      </h4>
+      <div class="col-auto text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpan">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-secondary btn-batal">Clear</button>
+      </div>
+    </div>
+
+    <div class="card-content">
+      <form role="form" class="form-horizontal row" id="frmDetail">
+        <div class="form-group row">
+          <label for="input-1" class="col-5 col-form-label">Label</label>
+          <div class="col">
+            <input
+              type="text"
+              class="form-control"
+              id="input-1"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div class="col text-end mt-3">
+          <button type="button" class="btn btn-primary" id="btn-simpan">
+            Simpan
+          </button>
+          <button type="button" class="btn btn-secondary btn-batal">
+            Clear
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> -->
 {% endblock %} {% block script %}
 <script>
   const prodi = "{{ prodi | safe }}";
