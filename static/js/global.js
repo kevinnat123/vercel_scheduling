@@ -33,9 +33,9 @@ $(document).on("keydown", "form", function (e) {
 
 // auto uppercase input
 $("input").on("input", function () {
-  if (!$(this).hasClass("sensitive-case")) {
-    $(this).val($(this).val().toUpperCase());
-  }
+  if (!$(this).hasClass("sensitive-case"))
+    $(this).val($(this).val().trim().toUpperCase());
+  else $(this).val($(this).val().trim());
 });
 
 // NumberOnly & CurrencyFormat
