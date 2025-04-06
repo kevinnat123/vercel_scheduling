@@ -37,38 +37,3 @@ class settingDao:
                 else:
                     return {'status': False, 'message': 'Input password baru tidak cocok!'}
         return {'status': False, 'message': 'NIP atau password salah'}
-    
-    def update_general(self, params):
-        print('  [ DAO ] update general', params)
-        if params:
-            user = self.get_user(session['user']['u_id'])
-            if user:
-                if params.get('maks_sks'):
-                    if params['maks_sks'] > 50:
-                        return {'status': False, 'message': 'Beban SKS terlalu banyak!'}
-                    update_data = {'maks_sks_prodi': params['maks_sks']}
-
-                result = self.connection.update_one(db_users, { 'u_id': session['user']['u_id'] }, update_data)
-                if result and result.get('status') == True:
-                    session['user']['maks_sks_prodi'] = params['maks_sks']
-                    session.modified = True  # Pastikan perubahan tersimpan
-                return {'status': result.get('status'), 'message': result.get('message')}
-                
-            return {'status': False, 'message': 'User Not Found'}
-        return {'status': False, 'message': 'Tidak ada yang perlu disimpan'}
-    
-    def update_kelompokMatkul(self, data):
-        print('  [ DAO ] update kelompok matkul', data)
-
-        if data:
-            newGroup = [item["kelompok_matkul"] for item in data]
-            print(newGroup)
-            updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'kelompok_matkul': newGroup})
-            
-            if updateData and updateData['status']:
-                session['user']['kelompok_matkul'] = newGroup
-                session.modified = True
-
-            return {'status': updateData.get('status'), 'message': updateData.get('message')}
-        
-        return {'status': False, 'message': 'Data tidak valid'}
