@@ -5,6 +5,7 @@ from dao.loginDao import loginDao
 from datetime import timedelta
 
 from controller.loginController import signin
+from controller.dashboardController import dashboard
 from controller.settingController import setting
 
 # ADMIN
@@ -38,6 +39,7 @@ def create_app():
     
     # Daftarkan Blueprint
     app.register_blueprint(signin)
+    app.register_blueprint(dashboard)
     app.register_blueprint(setting)
 
     # ADMIN
