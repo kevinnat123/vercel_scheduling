@@ -1,60 +1,443 @@
 {% extends "layout.html" %} {% block content %}
-<div class="container-fluid mt-4" id="main-window">
-  <div class="card">
-    <div class="card-body"></div>
+<style>
+  .input-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  .form-control.has-unit {
+    padding-right: 35px; /* Memberi ruang untuk unit GB */
+  }
+
+  .input-unit {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* Agar tidak menghalangi klik pada input */
+  }
+</style>
+
+<div class="card" id="card-form" hidden>
+  <!-- hidden -->
+  <div class="card-body">
+    <form role="form" class="form-horizontal row" id="frm">
+      <div class="row">
+        <h4 id="formTitle"></h4>
+      </div>
+      <div class="form-group row">
+        <label for="input_kode" class="col-2 col-form-label">Kode</label>
+        <div class="col-2">
+          <input
+            type="text"
+            class="form-control"
+            id="input_kode"
+            placeholder="Kode Ruangan"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="col"></div>
+
+        <label for="cb_praktikum" class="col-auto col-form-label">Lab</label>
+        <div class="col-1 d-flex justify-content-center align-items-center">
+          <input type="checkbox" id="cb_praktikum" />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_kapasitas" class="col-2 col-form-label"
+          >Kapasitas</label
+        >
+        <div class="col-2">
+          <input
+            type="text"
+            class="form-control numberOnly"
+            id="input_kapasitas"
+            placeholder="Kapasitas Ruangan"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="input_prodi" class="col-2 col-form-label"
+          >Program Studi</label
+        >
+        <div class="col">
+          <select class="form-select" id="input_prodi">
+            <option value="">-- Pilih Program Studi --</option>
+            {% for prodi in session['user']['list_prodi'] %}
+            <option value="{{ prodi }}">{{ prodi }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="card mt-3" id="card-spesifikasi" hidden>
+        <div class="card-body">
+          <div class="row">
+            <h3>Spesifikasi Lab</h3>
+          </div>
+          <div class="form-group row">
+            <label for="input_os" class="col-2 col-form-label"
+              >Operating System</label
+            >
+            <div class="col">
+              <select class="form-select" id="input_os">
+                <option value="">-- Pilih Operating System --</option>
+                {% for os in session['user']['list_os'] %}
+                <option value="{{ os }}">{{ os }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="input_processor" class="col-2 col-form-label"
+              >Processor</label
+            >
+            <div class="col">
+              <select class="form-select" id="input_processor">
+                <option value="">-- Pilih Processor --</option>
+                {% for processor in session['user']['list_processor'] %}
+                <option value="{{ processor }}">{{ processor }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="input_ram" class="col-2 col-form-label">RAM</label>
+            <div class="col-3">
+              <select class="form-select" id="input_ram">
+                <option value="">-- Pilih Ukuran RAM --</option>
+                <option value="1">1 GB</option>
+                <option value="2">2 GB</option>
+                <option value="4">4 GB</option>
+                <option value="8">8 GB</option>
+                <option value="16">16 GB</option>
+                <option value="32">32 GB</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="input_storage" class="col-2 col-form-label"
+              >Storage</label
+            >
+            <div class="col-3 input-container">
+              <input
+                type="text"
+                class="form-control numberOnly has-unit pr-3 text-end"
+                id="input_storage"
+                placeholder="Ukuran Storage"
+                autocomplete="off"
+              />
+              <span class="input-unit">GB</span>
+            </div>
+            <div
+              class="col-1 form-check d-flex justify-content-center align-items-center"
+            >
+              <input
+                class="form-check-input"
+                type="radio"
+                name="jenis_storage"
+                id="HDD"
+                value="HDD"
+              />
+              <label class="form-check-label ms-2" for="HDD"> HDD </label>
+            </div>
+            <div
+              class="col-1 form-check d-flex justify-content-center align-items-center"
+            >
+              <input
+                class="form-check-input"
+                type="radio"
+                name="jenis_storage"
+                id="SSD"
+                value="SSD"
+              />
+              <label class="form-check-label ms-2" for="SSD"> SSD </label>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="input_rekomendasiAplikasi" class="col-2 col-form-label"
+              >Rekomendasi Aplikasi</label
+            >
+            <div class="col-3">
+              <select class="form-select" id="input_rekomendasiAplikasi">
+                <option value="">-- Pilih RAM --</option>
+              </select>
+              <!-- BIKIN DATATABLe AJA KAYAnYA -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpan">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-update">
+          Simpan
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          id="btn-batal"
+          onclick="form_ruang(undefined, true)"
+        >
+          Batal
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <button
+      type="button"
+      class="btn btn-primary"
+      id="btn-tambah"
+      onclick="form_ruang(false)"
+    >
+      <i class="fas fa-plus fa-fw"></i><span> Tambah Data</span>
+    </button>
+    <button type="button" class="btn btn-danger" id="btn-hapus">
+      <i class="fas fa-trash fa-fw"></i><span> Hapus Data</span>
+    </button>
+
+    <div class="table-responsive">
+      <table
+        class="table table-bordered table-stripped table-hover w-100"
+        id="table_kelas"
+      >
+        <thead>
+          <tr>
+            <th rowspan="2"><input type="checkbox" name="cbKelasTabAll" /></th>
+            <th rowspan="2">Kode</th>
+            <th rowspan="2">Kapasitas</th>
+            <th rowspan="2">Prodi</th>
+            <th rowspan="2">Lab</th>
+            <th rowspan="2">OS</th>
+            <th rowspan="2">Processor</th>
+            <th rowspan="2">RAM</th>
+            <th rowspan="2">Storage</th>
+            <th colspan="3">Rekomendasi Aplikasi</th>
+            <th rowspan="2"></th>
+          </tr>
+          <tr>
+            <th>Gasal</th>
+            <th>Antara</th>
+            <th>Genap</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 </div>
 {% endblock %} {% block script %}
 <script>
-  $(document).ready(function () {});
+  $(document).ready(function () {
+    $("#cb_praktikum").on("change", function () {
+      isChecked = $(this).prop("checked");
+      $("#card-spesifikasi").attr("hidden", !isChecked);
+    });
+  });
 
-  // $.ajax({
-  //   type: "POST",
-  //   url: "/user",
-  //   cache: false,
-  //   data: JSON.stringify({}),
-  //   beforeSend: () => {
-  //     console.log("beforesend ajax");
-  //   },
-  //   complete: () => {},
-  //   success: async function (res) {
-  //     console.log("res ajax", res);
-  //     asd = res;
-  //   },
-  // });
-  // testing_tab.clear().rows.add(asd).draw()
+  function form_ruang(update = undefined, hidden = false, data = undefined) {
+    $("#frm")[0].reset();
+    $("#card-spesifikasi").attr("hidden", true);
+    if (update === false) {
+      document.getElementById("formTitle").innerText = "Tambah Data";
+      $("#card-form input").prop("disabled", false);
+      $("#btn-simpan").attr("hidden", false);
+      $("#btn-update").attr("hidden", true);
+    } else {
+      document.getElementById("formTitle").innerText = "Update Data";
+      $("#input_kode").prop("disabled", true);
+      $("#btn-simpan").attr("hidden", true);
+      $("#btn-update").attr("hidden", false);
+    }
+    if (data) {
+    }
+    $("#card-form").prop("hidden", hidden ? true : false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-  // let testing_tab = $("#testing").DataTable({
-  //   scrollX: true,
-  //   scrollY: "50vh",
-  //   scrollCollapse: true,
-  //   paging: false,
-  //   responsive: true,
-  //   info: false,
-  //   // ajax: {
-  //   //   type: "POST",
-  //   //   url: "/user",
-  //   //   cache: false,
-  //   //   data: {},
-  //   //   beforeSend: () => {
-  //   //     console.log("beforesend datatable");
-  //   //   },
-  //   //   complete: () => {},
-  //   //   // success: function (res) {
-  //   //   //   console.log("dtble", res);
-  //   //   // },
-  //   // },
-  //   columns: [
-  //     {
-  //       data: "id",
-  //     },
-  //     {
-  //       data: "name",
-  //     },
-  //     {
-  //       data: "email",
-  //     },
-  //   ],
-  // });
+  $("#btn-simpan").on("click", function () {
+    if (!$("#input_kode").val()) {
+      popUpTimer("error", "Kode Ruangan belum diisi!");
+      setTimeout(() => {
+        $("#input_kode").focus();
+      }, 1500);
+      return;
+    } else if (!$("#input_kapasitas").val()) {
+      popUpTimer("error", "Kapasitas Ruangan belum diisi!");
+      setTimeout(() => {
+        $("#input_kapasitas").focus();
+      }, 1500);
+      return;
+    } else if ($("#cb_praktikum").prop("checked")) {
+      if (!$("#input_os").val()) {
+        popUpTimer("error", "Detail OS belum diisi!");
+        setTimeout(() => {
+          $("#input_os").focus();
+        }, 1500);
+        return;
+      } else if (!$("#input_processor").val()) {
+        popUpTimer("error", "Detail Processor belum diisi!");
+        setTimeout(() => {
+          $("#input_processor").focus();
+        }, 1500);
+        return;
+      } else if (!$("#input_ram").val()) {
+        popUpTimer("error", "Ukuran RAM belum diisi!");
+        setTimeout(() => {
+          $("#input_ram").focus();
+        }, 1500);
+        return;
+      } else if (
+        !$("#input_storage").val() ||
+        !$("input[type='radio'][name='jenis_storage']:checked").val()
+      ) {
+        popUpTimer("error", "Detail Storage belum diisi!");
+        setTimeout(() => {
+          !$("#input_storage").val()
+            ? $("#input_storage").focus()
+            : $("input[type='radio'][name='jenis_storage']").focus();
+        }, 1500);
+        return;
+      }
+      // REMINDER (OPSIONAL): TAMBAH ALERT KALO REKOMENDASI APLIKASI BLM DIISI
+    }
+
+    params = {
+      kode: $("#input_kode").val(),
+      kapasitas: $("#input_kapasitas").val(),
+      prodi: $("#input_prodi").val(),
+      lab: $("#cb_praktikum").prop("checked") ? "T" : "F",
+      os: $("#input_os").val(),
+      processor: $("#input_processor").val(),
+      ram: $("#input_ram").val(),
+      storage:
+        $("#input_storage").val() +
+        $("input[type='radio'][name='jenis_storage']:checked").val(),
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/ruang_kelas/post_kelas",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: function (res) {
+        console.log("[ tambah kelas ] ", res);
+        if (res.status === false) {
+          popUpTimer("error", res.message);
+        } else {
+          popUpTimer("success", res.message);
+          kelas_tab.ajax.reload(null, false);
+        }
+      },
+    });
+  });
+
+  $("#btn-update").on("click", function () {});
+
+  function detail_ruang(object) {
+    let data = kelas_tab.row(object.closest("tr")).data();
+    form_ruang(true, false, data);
+  }
+
+  let kelas_tab = $("#table_kelas").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    info: false,
+    // ajax: {
+    //   type: "POST",
+    //   url: "/user",
+    //   cache: false,
+    //   data: {},
+    //   beforeSend: () => {
+    //     console.log("beforesend datatable");
+    //   },
+    //   complete: () => {},
+    //   // success: function (res) {
+    //   //   console.log("dtble", res);
+    //   // },
+    // },
+    columns: [
+      {
+        data: null,
+        width: "10px",
+        className: "text-center",
+        render: function (data, type, row) {
+          return `
+              <input type="checkbox" name="cbKelasTab"/>
+            `;
+        },
+      },
+      {
+        data: "kode",
+        width: "75px",
+      },
+      {
+        data: "kapasitas",
+        width: "75px",
+      },
+      {
+        data: "prodi",
+        width: "300px",
+      },
+      {
+        data: "lab",
+        width: "10px",
+      },
+      {
+        data: "os",
+        width: "300px",
+      },
+      {
+        data: "processor",
+        width: "300px",
+      },
+      {
+        data: "ram",
+        width: "75px",
+      },
+      {
+        data: "storage",
+        width: "75px",
+      },
+      {
+        data: "gasal",
+        width: "300px",
+      },
+      {
+        data: "antara",
+        width: "300px",
+      },
+      {
+        data: "genap",
+        width: "300px",
+      },
+      {
+        data: null,
+        width: "10px",
+        render: function () {
+          return `<button class="btn btn-primary btn-sm" onclick="detail_ruang($(this))">Det</button>`;
+        },
+        // orderable: false,
+        className: "text-center",
+      },
+    ],
+  });
 </script>
 {% endblock %}

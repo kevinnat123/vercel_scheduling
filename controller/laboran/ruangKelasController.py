@@ -8,7 +8,7 @@ dao = ruangKelasDao()
 @ruangKelas.route("/ruang_kelas")
 @login_required
 def ruangKelas_index():
-    print('[ CONTROLLER ] render ruang kelas')
+    print('========== ========== ========== ========== RENDER RUANG KELAS  ========== ========== ========== ==========')
     if session['user']['role'] != 'LABORAN':
         return redirect(url_for('signin.error403'))
     else:
@@ -17,3 +17,11 @@ def ruangKelas_index():
             menu = 'Ruang Kelas', 
             title = 'Ruang Kelas', 
         )
+    
+@ruangKelas.route("/ruang_kelas/post_kelas", methods=['POST'])
+@login_required
+def mataKuliah_post_kelas():
+    print('[ CONTROLLER ] post_kelas')
+    req = request.get_json('data')
+    data = dao.post_kelas(req)
+    return jsonify( data )
