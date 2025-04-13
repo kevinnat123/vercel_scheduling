@@ -40,7 +40,6 @@ class dashboardDao:
         else:
             return {'status': False, 'message': 'Data tidak valid'}
 
-        print(newGroup)
         updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'kelompok_matkul': newGroup})
         
         if updateData and updateData['status']:
@@ -53,15 +52,13 @@ class dashboardDao:
     
     def update_os(self, data):
         print('  [ DAO ] update os', data)
-
+        
         if data:
             newGroup = [item["os"] for item in data]
         elif data == []:
             newGroup = data
         else:
             return {'status': False, 'message': 'Data tidak valid'}
-
-        print(newGroup)
 
         updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'list_os': newGroup})
         
@@ -80,8 +77,6 @@ class dashboardDao:
             newGroup = data
         else:
             return {'status': False, 'message': 'Data tidak valid'}
-
-        print(newGroup)
 
         updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'list_processor': newGroup})
         

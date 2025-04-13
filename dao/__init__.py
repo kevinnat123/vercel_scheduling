@@ -1,5 +1,6 @@
 from pymongo import MongoClient, errors
 import config
+import sys
 
 class Database:
     def __init__(self, dbname):
@@ -137,5 +138,13 @@ class Database:
         except errors.PyMongoError as e:
             return {'status': False, 'count': 0, 'message': f'Error pymongo: {e}'}
     
+    # def __del__(self):
+    #     self.connection.close()
+
     def __del__(self):
-        self.connection.close()
+        if hasattr(self, 'client') and self.client:
+            if sys.meta_path is not None:  # Cek kalau Python belum shutdown
+                try:
+                    self.connection.close()
+                except Exception as e:
+                    print("[WARNING] Error closing MongoDB connection:", e)

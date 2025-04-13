@@ -155,7 +155,8 @@
 
   $("#input-kelompok_baru").on("keydown", function (event) {
     if (event.key === "Enter") {
-      tambahKelompok($(this).val());
+      tambahKelompok($(this).val().trim());
+      $("#input-kelompok_baru").val("");
     }
   });
 
@@ -164,11 +165,11 @@
     let isExist = json_matkul.findIndex(
       (kelompok) => kelompok.kelompok_matkul === newData
     );
-    if (isExist !== -1) return;
+    if (isExist !== -1)
+      returnpopUpTimer("error", "Data Kelompok Matkul ini sudah ada!");
 
     json_matkul.push({ kelompok_matkul: newData });
     kelompok_tab.clear().rows.add(json_matkul).draw(false);
-    $("#input-kelompok_baru").val("");
   }
 
   $("#btn-simpanKelompok").on("click", function () {

@@ -1,5 +1,69 @@
 {% extends "layout.html" %} {% block content %}
-<div class="card close-able" id="card-kelompok_mata_kuliah">
+<div class="card close-able" id="card-list_os">
+  <div class="card-body">
+    <div class="row align-items-center justify-content-between mb-3">
+      <h4 id="formTitle" class="col btn-toggle-card">
+        <i class="fas fa-folder-open fa-fw toggle-icon me-2"></i
+        ><span>Setting List Operating System</span>
+      </h4>
+      <div class="col-auto text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpanOs">
+          Simpan
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          id="btn-hapusOs"
+          style="display: none"
+        >
+          Hapus
+        </button>
+        <button type="button" class="btn btn-secondary btn-batal">Clear</button>
+      </div>
+    </div>
+
+    <div class="card-content">
+      <form role="form" class="form-horizontal" id="frmDetail">
+        <div class="form-group row">
+          <label for="input-os_baru" class="col-3 col-form-label"
+            >OS Baru</label
+          >
+          <div class="input-group col">
+            <input
+              type="text"
+              id="input-os_baru"
+              class="form-control"
+              placeholder="Masukkan nama operating system baru"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              id="tambah_os"
+              class="btn btn-primary"
+              onclick="tambahOs($('#input-os_baru').val())"
+            >
+              Tambah
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table
+              class="table table-bordered table-stripped table-hover w-100"
+              id="table_os"
+            >
+              <thead>
+                <th><input type="checkbox" name="cbOsAll" /></th>
+                <th>Operating System</th>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="card close-able" id="card-list_processor">
   <div class="card-body">
     <div class="row align-items-center justify-content-between mb-3">
       <h4 id="formTitle" class="col btn-toggle-card">
@@ -52,7 +116,7 @@
             >
               <thead>
                 <th><input type="checkbox" name="cbProcessorAll" /></th>
-                <th>Processor Mata Kuliah</th>
+                <th>Processor</th>
               </thead>
               <tbody></tbody>
             </table>
@@ -64,9 +128,14 @@
 </div>
 {% endblock %} {% block script %}
 <script>
+  const list_os = JSON.parse(`{{ list_os | tojson | safe }}`);
+  var json_os = list_os.map((os) => ({
+    os: os,
+  }));
+
   const list_processor = JSON.parse(`{{ list_processor | tojson | safe }}`);
-  var json_processor = list_processor.map((kelompok) => ({
-    processor: kelompok,
+  var json_processor = list_processor.map((processor) => ({
+    processor: processor,
   }));
 
   $(document).ready(function () {
@@ -83,28 +152,102 @@
     });
   });
 
-  $("#input-kelompok_baru").on("keydown", function (event) {
+  $("#input-os_baru").on("keydown", function (event) {
     if (event.key === "Enter") {
-      tambahKelompok($(this).val());
+      tambahOs($(this).val().trim());
+      $("#input-os_baru").val("");
     }
   });
 
-  function tambahKelompok(data) {
+  function tambahOs(data) {
+    let newData = String(data).toUpperCase();
+    let isExist = json_os.findIndex((os) => os.os === newData);
+    if (isExist !== -1)
+      return popUpTimer("error", "Data Operating System ini sudah ada!");
+
+    json_os.push({ os: newData });
+    os_tab.clear().rows.add(json_os).draw(false);
+  }
+
+  $("#btn-simpanOs").on("click", function () {
+    $.ajax({
+      type: "POST",
+      url: "/update_os",
+      cache: false,
+      data: JSON.stringify(json_os),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        if (res.status == false) popUpTimer("error", res.message);
+        else {
+          await popUpTimer("success", res.message);
+        }
+      },
+    });
+  });
+
+  $("#btn-hapusOs").on("click", function () {
+    let selectedData = [];
+    $("input[name='cbOs']:checked").each(function () {
+      let row = $(this).closest("tr"); // Dapatkan baris terkait
+      let rowData = os_tab.row(row).data(); // Ambil data baris dari DataTable
+
+      if (rowData) {
+        selectedData.push(rowData.os);
+      }
+    });
+
+    let filtered_data = json_os.filter((os) => !selectedData.includes(os.os));
+
+    $.ajax({
+      type: "POST",
+      url: "/delete_os",
+      cache: false,
+      data: JSON.stringify(filtered_data),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        if (res.status == false) popUpTimer("error", res.message);
+        else {
+          json_os = JSON.parse(JSON.stringify(filtered_data));
+          os_tab.clear().rows.add(json_os).draw(false);
+          await popUpTimer("success", res.message);
+        }
+      },
+    });
+  });
+
+  $("#input-processor_baru").on("keydown", function (event) {
+    if (event.key === "Enter") {
+      tambahProcessor($(this).val().trim());
+      $("#input-processor_baru").val("");
+    }
+  });
+
+  function tambahProcessor(data) {
     let newData = String(data).toUpperCase();
     let isExist = json_processor.findIndex(
-      (kelompok) => kelompok.kelompok_matkul === newData
+      (processor) => processor.processor === newData
     );
-    if (isExist !== -1) return;
+    if (isExist !== -1)
+      return popUpTimer("error", "Data Processor ini sudah ada!");
 
-    json_processor.push({ kelompok_matkul: newData });
+    json_processor.push({ processor: newData });
     processor_tab.clear().rows.add(json_processor).draw(false);
-    $("#input-kelompok_baru").val("");
   }
 
   $("#btn-simpanProcessor").on("click", function () {
     $.ajax({
       type: "POST",
-      url: "/update_kelompok_matkul",
+      url: "/update_processor",
       cache: false,
       data: JSON.stringify(json_processor),
       beforeSend: () => {
@@ -129,12 +272,12 @@
       let rowData = processor_tab.row(row).data(); // Ambil data baris dari DataTable
 
       if (rowData) {
-        selectedData.push(rowData.kelompok_matkul);
+        selectedData.push(rowData.processor);
       }
     });
 
     let filtered_data = json_processor.filter(
-      (kelompok) => !selectedData.includes(kelompok.kelompok_matkul)
+      (processor) => !selectedData.includes(processor.processor)
     );
 
     $.ajax({
@@ -159,6 +302,28 @@
     });
   });
 
+  // Event ketika cbOsAll di-click
+  $('input[name="cbOsAll"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $('input[name="cbOs"]').prop("checked", isChecked);
+
+    document.getElementById("btn-hapusOs").style.display = isChecked
+      ? "inline-block"
+      : "none";
+  });
+
+  // Event ketika salah satu cbOs di-click
+  $(document).on("change", 'input[name="cbOs"]', function () {
+    let allChecked =
+      $('input[name="cbOs"]').length === $('input[name="cbOs"]:checked').length;
+    $('input[name="cbOsAll"]').prop("checked", allChecked);
+
+    let anyChecked = $('input[name="cbOs"]:checked').length > 0;
+    document.getElementById("btn-hapusOs").style.display = anyChecked
+      ? "inline-block"
+      : "none";
+  });
+
   // Event ketika cbProcessorAll di-click
   $('input[name="cbProcessorAll"]').on("change", function () {
     let isChecked = $(this).prop("checked");
@@ -180,6 +345,34 @@
     document.getElementById("btn-hapusProcessor").style.display = anyChecked
       ? "inline-block"
       : "none";
+  });
+
+  let os_tab = $("#table_os").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    searching: false,
+    info: false,
+    data: json_os,
+    columns: [
+      {
+        data: null,
+        width: "10%",
+        className: "text-center",
+        render: function (data, type, row) {
+          return `
+              <input type="checkbox" name="cbOs"/>
+            `;
+        },
+      },
+      {
+        data: "os",
+        width: "",
+      },
+    ],
   });
 
   let processor_tab = $("#table_processor").DataTable({
