@@ -38,11 +38,7 @@
           >Kelompok</label
         >
         <div class="col">
-          <select
-            class="form-select"
-            aria-label="Default select example"
-            id="input_kelompok"
-          >
+          <select class="form-select" id="input_kelompok">
             <option value="">-- Pilih Kategori Mata Kuliah --</option>
             {% for kelompok in session['user']['kelompok_matkul'] %}
             <option value="{{ kelompok }}">{{ kelompok }}</option>
@@ -152,7 +148,7 @@
         class="table table-bordered table-stripped table-hover w-100"
         id="table_matkul"
       >
-        <thead class="text-center">
+        <thead>
           <th><input type="checkbox" name="cbMatkulTabAll" /></th>
           <th>Kode</th>
           <th>Nama</th>
@@ -166,7 +162,6 @@
     </div>
   </div>
 </div>
-<!-- </div> -->
 {% endblock %} {% block script %}
 <script>
   const prodi = "{{ prodi | safe }}";

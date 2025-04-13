@@ -31,7 +31,7 @@
   <div class="card-body">
     <div class="row align-items-center justify-content-between mb-3">
       <h4 id="formTitle" class="col btn-toggle-card">
-        <i class="fas fa-folder-closed fa-fw toggle-icon me-2"></i
+        <i class="fas fa-folder-open fa-fw toggle-icon me-2"></i
         ><span>Ganti Password</span>
       </h4>
       <div class="col-auto text-end">
@@ -123,9 +123,9 @@
     });
 
     // Toggle password visibility
-    const toggles = document.querySelectorAll(".password-toggle");
+    const password_toggles = document.querySelectorAll(".password-toggle");
 
-    toggles.forEach((toggle) => {
+    password_toggles.forEach((toggle) => {
       toggle.addEventListener("click", function () {
         const targetId = this.getAttribute("data-target");
         const inputField = document.getElementById(targetId);

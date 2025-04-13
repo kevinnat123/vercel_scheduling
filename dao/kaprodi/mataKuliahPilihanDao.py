@@ -131,24 +131,3 @@ class mataKuliahPilihanDao:
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
-
-    def func(self):
-        result = { 'status': False }
-        print('  [ DAO ] func')
-        
-        try:
-            res = self.connection.find_one(db_open_courses, {})
-            if res['status'] == False:
-                raise CustomError({ 'message': res['message'] })
-            else:
-                result.update({ 'message': res['message'] })
-
-            result.update({ 'status': True })
-        except CustomError as e:
-            result.update({ 'message': f'{e.error_dict.get('message')}' })
-            if e.error_dict.get('target'):
-                result.update({ 'target': e.error_dict.get('target') })
-        except Exception as e:
-            result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
-
-        return result
