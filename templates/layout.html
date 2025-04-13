@@ -356,6 +356,10 @@
 
       <!-- Menu dinamis dengan jarak setelah dashboard -->
       <div class="sidebar-menu">
+        <a href="/dashboard">
+          <i class="fas fa-home fa-fw"></i>
+          <span>Dashboard</span>
+        </a>
         {% if session['menu'] != None %} {% for x in session['menu'] %}
         <a href="{{ x['url'] }}">
           <i class="fas fa-circle-dot fa-fw"></i>
@@ -436,15 +440,15 @@
     <script src="static/js/global.js"></script>
 
     <script>
-      // // Tampilkan loading saat halaman mulai dimuat
-      // document.addEventListener("DOMContentLoaded", function () {
-      //   showLoading();
-      // });
+      // Tampilkan loading saat halaman mulai dimuat
+      document.addEventListener("DOMContentLoaded", function () {
+        showLoading();
+      });
 
-      // // Sembunyikan loading setelah semua elemen halaman selesai dimuat
-      // window.addEventListener("load", function () {
-      //   hideLoading();
-      // });
+      // Sembunyikan loading setelah semua elemen halaman selesai dimuat
+      window.addEventListener("load", function () {
+        hideLoading();
+      });
 
       const today = new Date();
       // Format current date for footer
@@ -534,10 +538,20 @@
           const $card = $(this).closest(".card");
           $card.toggleClass("collapsed");
 
-          // Ganti icon agar intuitif
-          const icon = $(this).find(".toggle-icon")[0];
-          icon.classList.toggle("fa-folder-closed");
-          icon.classList.toggle("fa-folder-open");
+          const iconClosed = $(this).find(".toggle-icon-closed")[0];
+          const iconOpen = $(this).find(".toggle-icon-open")[0];
+
+          // Tukar display
+          if (
+            iconClosed.style.display === "inline" &&
+            iconOpen.style.display === "none"
+          ) {
+            iconClosed.style.display = "inline";
+            iconOpen.style.display = "none";
+          } else {
+            iconClosed.style.display = "none";
+            iconOpen.style.display = "inline";
+          }
 
           // disable button
           $card
