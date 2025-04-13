@@ -82,7 +82,8 @@ def login():
             print('  session academic_details   :', session['academic_details'])
             print('  session user               :', session['user'])
             print('  session menu               :', session['menu'])
-            return jsonify({'status': True, 'redirect_url': url_for('signin.dashboard')}), 200
+            return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
+            # return jsonify({'status': True, 'redirect_url': url_for('signin.dashboard')}), 200
 
         return jsonify({'status': False, 'message': user['message']}), 401
     return render_template('signin.html')
@@ -96,8 +97,29 @@ def dashboard():
     if not session.get('user') or 'u_id' not in session['user']:
         print("⚠️ Session tidak valid, redirect ke login")
         return redirect(url_for('signin.login'))
-
-    return render_template('index.html', menu='Dashboard', title='Dashboard')
+    
+    if session['user']['role'] == 'KEPALA PROGRAM STUDI':
+        return render_template(
+                '/kaprodi/dashboard.html', 
+                menu = 'Dashboard', 
+                title = 'Dashboard', 
+                prodi = session['user']['prodi'],
+                kelompok_matkul = session['user']['kelompok_matkul']
+            )
+    elif session['user']['role'] == 'LABORAN':
+        return render_template(
+                '/laboran/dashboard.html', 
+                menu = 'Dashboard', 
+                title = 'Dashboard', 
+                list_os = session['user']['list_os'],
+                list_processor = session['user']['list_processor']
+            )
+    elif session['user']['role'] == 'ADMIN':
+        return render_template(
+                '/admin/dashboard.html', 
+                menu = 'Dashboard', 
+                title = 'Dashboard', 
+            )
 
 def get_academic_details():
     today = datetime.today()
