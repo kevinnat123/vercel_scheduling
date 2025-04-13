@@ -1,0 +1,283 @@
+{% extends "layout.html" %} {% block content %}
+<div class="card close-able" id="card-general">
+  <div class="card-body">
+    <div class="row align-items-center justify-content-between mb-3">
+      <h4 id="formTitle" class="col btn-toggle-card">
+        <i class="fas fa-folder-open fa-fw toggle-icon me-2"></i
+        ><span>General Setting</span>
+      </h4>
+      <div class="col-auto text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpanGeneral">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-secondary btn-batal">Clear</button>
+      </div>
+      <!-- <small class="text-danger ms-5">* maks sks</small> -->
+    </div>
+
+    <div class="card-content">
+      <form role="form" class="form-horizontal" id="frmGeneral">
+        <div class="form-group row">
+          <label for="input-maks_sks" class="col-3 col-form-label"
+            >Maks. SKS</label
+          >
+          <div class="col">
+            <input
+              type="text"
+              class="form-control text-end numberOnly"
+              id="input-maks_sks"
+              value="{{ session['user'].get('maks_sks_prodi') }}"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="card close-able" id="card-kelompok_mata_kuliah">
+  <div class="card-body">
+    <div class="row align-items-center justify-content-between mb-3">
+      <h4 id="formTitle" class="col btn-toggle-card">
+        <i class="fas fa-folder-open fa-fw toggle-icon me-2"></i
+        ><span>Setting Kelompok Mata Kuliah</span>
+      </h4>
+      <div class="col-auto text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpanKelompok">
+          Simpan
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          id="btn-hapusKelompok"
+          style="display: none"
+        >
+          Hapus
+        </button>
+        <button type="button" class="btn btn-secondary btn-batal">Clear</button>
+      </div>
+    </div>
+
+    <div class="card-content">
+      <form role="form" class="form-horizontal" id="frmDetail">
+        <div class="form-group row">
+          <label for="input-kelompok_baru" class="col-3 col-form-label"
+            >Kelompok Baru</label
+          >
+          <div class="input-group col">
+            <input
+              type="text"
+              id="input-kelompok_baru"
+              class="form-control"
+              placeholder="Masukkan nama kelompok baru"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              id="tambah_kelompok"
+              class="btn btn-primary"
+              onclick="tambahKelompok($('#input-kelompok_baru').val())"
+            >
+              Tambah
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table
+              class="table table-bordered table-stripped table-hover w-100"
+              id="table_kelompok"
+            >
+              <thead>
+                <th><input type="checkbox" name="cbKelompokAll" /></th>
+                <th>Kelompok Mata Kuliah</th>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block script %}
+<script>
+  const list_matkul = JSON.parse(`{{ kelompok_matkul | tojson | safe }}`);
+  var json_matkul = list_matkul.map((kelompok) => ({
+    kelompok_matkul: kelompok,
+  }));
+
+  $(document).ready(function () {
+    const toggle_close_card = document.querySelectorAll(".btn-toggle-card");
+    toggle_close_card.forEach((toggle) => {
+      toggle.click();
+    });
+
+    $(document).on("click", ".btn-batal", function () {
+      let form = $(this).closest(".card").find("form");
+      form.find("input").each(function () {
+        $(this).val("");
+      });
+    });
+  });
+
+  $("#btn-simpanGeneral").on("click", function () {
+    if (!$("#input-maks_sks").val()) {
+      popUpTimer("error", "Tidak ada yang perlu disimpan");
+      return;
+    } else if ($("#input-maks_sks").val() > 50) {
+      popUpTimer("error", "Beban SKS terlalu banyak!");
+      return;
+    }
+
+    params = { maks_sks: Number($("#input-maks_sks").val()) };
+
+    $.ajax({
+      type: "POST",
+      url: "/update_general",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        if (res.status == false) popUpTimer("error", res.message);
+        else {
+          $("#frmPassword")[0].reset();
+          $("#input-maks_sks").val(params["maks_sks"]);
+          await popUpTimer("success", res.message);
+        }
+      },
+    });
+  });
+
+  $("#input-kelompok_baru").on("keydown", function (event) {
+    if (event.key === "Enter") {
+      tambahKelompok($(this).val());
+    }
+  });
+
+  function tambahKelompok(data) {
+    let newData = String(data).toUpperCase();
+    let isExist = json_matkul.findIndex(
+      (kelompok) => kelompok.kelompok_matkul === newData
+    );
+    if (isExist !== -1) return;
+
+    json_matkul.push({ kelompok_matkul: newData });
+    kelompok_tab.clear().rows.add(json_matkul).draw(false);
+    $("#input-kelompok_baru").val("");
+  }
+
+  $("#btn-simpanKelompok").on("click", function () {
+    $.ajax({
+      type: "POST",
+      url: "/update_kelompok_matkul",
+      cache: false,
+      data: JSON.stringify(json_matkul),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        if (res.status == false) popUpTimer("error", res.message);
+        else {
+          await popUpTimer("success", res.message);
+        }
+      },
+    });
+  });
+
+  $("#btn-hapusKelompok").on("click", function () {
+    let selectedData = [];
+    $("input[name='cbKelompok']:checked").each(function () {
+      let row = $(this).closest("tr"); // Dapatkan baris terkait
+      let rowData = kelompok_tab.row(row).data(); // Ambil data baris dari DataTable
+
+      if (rowData) {
+        selectedData.push(rowData.kelompok_matkul);
+      }
+    });
+
+    let filtered_data = json_matkul.filter(
+      (kelompok) => !selectedData.includes(kelompok.kelompok_matkul)
+    );
+
+    $.ajax({
+      type: "POST",
+      url: "/update_kelompok_matkul",
+      cache: false,
+      data: JSON.stringify(filtered_data),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        if (res.status == false) popUpTimer("error", res.message);
+        else {
+          json_matkul = JSON.parse(JSON.stringify(filtered_data));
+          kelompok_tab.clear().rows.add(json_matkul).draw(false);
+          await popUpTimer("success", res.message);
+        }
+      },
+    });
+  });
+
+  // Event ketika cbKelompokAll di-click
+  $('input[name="cbKelompokAll"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $('input[name="cbKelompok"]').prop("checked", isChecked);
+
+    document.getElementById("btn-hapusKelompok").style.display = isChecked
+      ? "inline-block"
+      : "none";
+  });
+
+  // Event ketika salah satu cbKelompok di-click
+  $(document).on("change", 'input[name="cbKelompok"]', function () {
+    let allChecked =
+      $('input[name="cbKelompok"]').length ===
+      $('input[name="cbKelompok"]:checked').length;
+    $('input[name="cbKelompokAll"]').prop("checked", allChecked);
+
+    let anyChecked = $('input[name="cbKelompok"]:checked').length > 0;
+    document.getElementById("btn-hapusKelompok").style.display = anyChecked
+      ? "inline-block"
+      : "none";
+  });
+
+  let kelompok_tab = $("#table_kelompok").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    searching: false,
+    info: false,
+    data: json_matkul,
+    columns: [
+      {
+        data: null,
+        width: "10%",
+        className: "text-center",
+        render: function (data, type, row) {
+          return `
+              <input type="checkbox" name="cbKelompok"/>
+            `;
+        },
+      },
+      {
+        data: "kelompok_matkul",
+        width: "",
+      },
+    ],
+  });
+</script>
+{% endblock %}

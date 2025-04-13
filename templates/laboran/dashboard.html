@@ -1,0 +1,213 @@
+{% extends "layout.html" %} {% block content %}
+<div class="card close-able" id="card-kelompok_mata_kuliah">
+  <div class="card-body">
+    <div class="row align-items-center justify-content-between mb-3">
+      <h4 id="formTitle" class="col btn-toggle-card">
+        <i class="fas fa-folder-open fa-fw toggle-icon me-2"></i
+        ><span>Setting List Processor</span>
+      </h4>
+      <div class="col-auto text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpanProcessor">
+          Simpan
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          id="btn-hapusProcessor"
+          style="display: none"
+        >
+          Hapus
+        </button>
+        <button type="button" class="btn btn-secondary btn-batal">Clear</button>
+      </div>
+    </div>
+
+    <div class="card-content">
+      <form role="form" class="form-horizontal" id="frmDetail">
+        <div class="form-group row">
+          <label for="input-processor_baru" class="col-3 col-form-label"
+            >Processor Baru</label
+          >
+          <div class="input-group col">
+            <input
+              type="text"
+              id="input-processor_baru"
+              class="form-control"
+              placeholder="Masukkan nama processor baru"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              id="tambah_processor"
+              class="btn btn-primary"
+              onclick="tambahProcessor($('#input-processor_baru').val())"
+            >
+              Tambah
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table
+              class="table table-bordered table-stripped table-hover w-100"
+              id="table_processor"
+            >
+              <thead>
+                <th><input type="checkbox" name="cbProcessorAll" /></th>
+                <th>Processor Mata Kuliah</th>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block script %}
+<script>
+  const list_processor = JSON.parse(`{{ list_processor | tojson | safe }}`);
+  var json_processor = list_processor.map((kelompok) => ({
+    processor: kelompok,
+  }));
+
+  $(document).ready(function () {
+    const toggle_close_card = document.querySelectorAll(".btn-toggle-card");
+    toggle_close_card.forEach((toggle) => {
+      toggle.click();
+    });
+
+    $(document).on("click", ".btn-batal", function () {
+      let form = $(this).closest(".card").find("form");
+      form.find("input").each(function () {
+        $(this).val("");
+      });
+    });
+  });
+
+  $("#input-kelompok_baru").on("keydown", function (event) {
+    if (event.key === "Enter") {
+      tambahKelompok($(this).val());
+    }
+  });
+
+  function tambahKelompok(data) {
+    let newData = String(data).toUpperCase();
+    let isExist = json_processor.findIndex(
+      (kelompok) => kelompok.kelompok_matkul === newData
+    );
+    if (isExist !== -1) return;
+
+    json_processor.push({ kelompok_matkul: newData });
+    processor_tab.clear().rows.add(json_processor).draw(false);
+    $("#input-kelompok_baru").val("");
+  }
+
+  $("#btn-simpanProcessor").on("click", function () {
+    $.ajax({
+      type: "POST",
+      url: "/update_kelompok_matkul",
+      cache: false,
+      data: JSON.stringify(json_processor),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        if (res.status == false) popUpTimer("error", res.message);
+        else {
+          await popUpTimer("success", res.message);
+        }
+      },
+    });
+  });
+
+  $("#btn-hapusProcessor").on("click", function () {
+    let selectedData = [];
+    $("input[name='cbProcessor']:checked").each(function () {
+      let row = $(this).closest("tr"); // Dapatkan baris terkait
+      let rowData = processor_tab.row(row).data(); // Ambil data baris dari DataTable
+
+      if (rowData) {
+        selectedData.push(rowData.kelompok_matkul);
+      }
+    });
+
+    let filtered_data = json_processor.filter(
+      (kelompok) => !selectedData.includes(kelompok.kelompok_matkul)
+    );
+
+    $.ajax({
+      type: "POST",
+      url: "/update_processor",
+      cache: false,
+      data: JSON.stringify(filtered_data),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        if (res.status == false) popUpTimer("error", res.message);
+        else {
+          json_processor = JSON.parse(JSON.stringify(filtered_data));
+          processor_tab.clear().rows.add(json_processor).draw(false);
+          await popUpTimer("success", res.message);
+        }
+      },
+    });
+  });
+
+  // Event ketika cbProcessorAll di-click
+  $('input[name="cbProcessorAll"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $('input[name="cbProcessor"]').prop("checked", isChecked);
+
+    document.getElementById("btn-hapusProcessor").style.display = isChecked
+      ? "inline-block"
+      : "none";
+  });
+
+  // Event ketika salah satu cbProcessor di-click
+  $(document).on("change", 'input[name="cbProcessor"]', function () {
+    let allChecked =
+      $('input[name="cbProcessor"]').length ===
+      $('input[name="cbProcessor"]:checked').length;
+    $('input[name="cbProcessorAll"]').prop("checked", allChecked);
+
+    let anyChecked = $('input[name="cbProcessor"]:checked').length > 0;
+    document.getElementById("btn-hapusProcessor").style.display = anyChecked
+      ? "inline-block"
+      : "none";
+  });
+
+  let processor_tab = $("#table_processor").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    searching: false,
+    info: false,
+    data: json_processor,
+    columns: [
+      {
+        data: null,
+        width: "10%",
+        className: "text-center",
+        render: function (data, type, row) {
+          return `
+              <input type="checkbox" name="cbProcessor"/>
+            `;
+        },
+      },
+      {
+        data: "processor",
+        width: "",
+      },
+    ],
+  });
+</script>
+{% endblock %}
