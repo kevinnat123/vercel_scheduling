@@ -60,7 +60,7 @@ class mataKuliahPilihanDao:
 
             result.update({ 'status': True })
         except CustomError as e:
-            result.update({ 'message': f'{e.error_dict.get('message')}' })
+            result.update({ "message": f"{e.error_dict.get('message')}" })
             if e.error_dict.get('target'):
                 result.update({ 'target': e.error_dict.get('target') })
         except Exception as e:
@@ -102,7 +102,7 @@ class mataKuliahPilihanDao:
 
             result.update({ 'status': True })
         except CustomError as e:
-            result.update({ 'message': f'{e.error_dict.get('message')}' })
+            result.update({ "message": f"{e.error_dict.get('message')}" })
             if e.error_dict.get('target'):
                 result.update({ 'target': e.error_dict.get('target') })
         except Exception as e:
@@ -124,7 +124,7 @@ class mataKuliahPilihanDao:
 
             result.update({ 'status': True })
         except CustomError as e:
-            result.update({ 'message': f'{e.error_dict.get('message')}' })
+            result.update({ "message": f"{e.error_dict.get('message')}" })
             if e.error_dict.get('target'):
                 result.update({ 'target': e.error_dict.get('target') })
         except Exception as e:
