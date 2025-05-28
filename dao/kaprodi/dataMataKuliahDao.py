@@ -12,8 +12,8 @@ class dataMataKuliahDao:
         self.connection = Database(MONGO_DB)
 
     def put_kelompok(self, nama_baru):
+        print(f"{'':<5}{'[ DAO ]':<10} Put Kelompok (Data Baru: {nama_baru})")
         result = { 'status': False }
-        print('  [ DAO ] put kelompok')
         try:
             if nama_baru.upper() in session['user']['kelompok_matkul']:
                 raise CustomError({ 'message': 'Kelompok dengan nama ' + nama_baru.upper() + ' sudah ada!' })
@@ -28,13 +28,14 @@ class dataMataKuliahDao:
         except CustomError as e:
             result.update({ "message": f"{e.error_dict.get('message')}" })
         except Exception as e:
+            print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         session.modified = True  # Pastikan perubahan tersimpan
         return result
     
     def get_matkul(self):
-        print('  [ DAO ] get matkul', session['user']['prodi'])
+        print(f"{'':<5}{'[ DAO ]':<10} Get Matkul (Prodi: {session['user']['prodi']})")
         result = self.connection.find_many(
             db_courses, 
             {'prodi': { '$in' : [session['user']['prodi']] }}, 
@@ -44,13 +45,12 @@ class dataMataKuliahDao:
         return result['data'] if result and result.get('status') else None
     
     def post_matkul(self, params: dict):
+        print(f"{'':<5}{'[ DAO ]':<10} Post Matkul (Parameter: {params})")
         result = { 'status': False }
-        print('  [ DAO ] post matkul', params)
 
         try:
             # Hapus key yang memiliki value kosong
             params = {k: v for k, v in params.items() if v}
-            print('    params', params)
 
             if params.get('kode'):
                 # Check exist
@@ -79,18 +79,17 @@ class dataMataKuliahDao:
             if e.error_dict.get('target'):
                 result.update({ 'target': e.error_dict.get('target') })
         except Exception as e:
+            print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
-        print('    result', result)
+        print(f"{'':<15} Result: {result}")
         return result
     
     def put_matkul(self, params: dict):
+        print(f"{'':<5}{'[ DAO ]':<10} Put Matkul (Parameter: {params})")
         result = { 'status': False }
-        print('  [ DAO ] put matkul')
 
         try:
-            print('    params', params)
-
             if params.get('prodi') != 'GENERAL':
                 if params.get('kode'):
                     res = self.connection.find_one(db_courses, {'kode': params['kode']})
@@ -120,14 +119,15 @@ class dataMataKuliahDao:
             if e.error_dict.get('target'):
                 result.update({ 'target': e.error_dict.get('target') })
         except Exception as e:
+            print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
-        print('    result', result)
+        print(f"{'':<15} Result: {result}")
         return result
     
     def delete_matkul(self, params: dict):
+        print(f"{'':<5}{'[ DAO ]':<10} Delete Matkul (Parameter: {params})")
         result = { 'status': False }
-        print('  [ DAO ] delete matkul')
 
         try:
             prodi = list({item["prodi"] for item in params})
@@ -135,7 +135,7 @@ class dataMataKuliahDao:
                 raise CustomError({ 'message': 'Matkul ' + [item.get('kode') for item in params if item["prodi"] == "GENERAL"] + ' tidak bisa dihapus!' })
                 
             list_kode = [item["kode"] for item in params]
-            print('  list_kode', list_kode, params)
+            print(f"{'':<15} List Kode: {list_kode}")
             res = self.connection.delete_many(
                 db_courses, 
                 { 
@@ -150,7 +150,7 @@ class dataMataKuliahDao:
         except CustomError as e:
             result.update({ "message": f"{e.error_dict.get('message')}" })
         except Exception as e:
-            print(f'[ ERROR ] delete matkul: {e}')
+            print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result

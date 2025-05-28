@@ -8,7 +8,7 @@ settingDao = settingDao()
 @setting.route("/setting")
 @login_required
 def setting_index():
-    print('========== ========== ========== ========== RENDER SETTING KAPRODI  ========== ========== ========== ==========')
+    print(f"{'[ RENDER ]':<15} Setting (Role: {session['user']['role']})")
     return render_template(
             '/setting.html', 
             menu = 'Setting', 
@@ -18,7 +18,7 @@ def setting_index():
 @setting.route("/password_verification", methods=['GET', 'POST'])
 @login_required
 def setting_passwordVerification():
-    print('[ CONTROLLER ] password_verification', request.method, session.get('user'))
+    print(f"{'[ CONTROLLER ]':<15} Password Verification (Method: {request.method})")
     if request.method == 'POST':
         req = request.get_json('data')
         oldPassword = req.get('oldPassword')

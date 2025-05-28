@@ -8,7 +8,7 @@ dao = generateJadwalDao()
 @generateJadwal.route("/generate_jadwal")
 @login_required
 def generateJadwal_index():
-    print('[ CONTROLLER ] render generate jadwal')
+    print(f"{'[ RENDER ]':<15} Generate Jadwal (Role: {session['user']['role']})")
     if session['user']['role'] != 'ADMIN':
         return redirect(url_for('signin.error403'))
     else:

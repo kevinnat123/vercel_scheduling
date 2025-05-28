@@ -8,7 +8,7 @@ dao = mataKuliahPilihanDao()
 @mataKuliahPilihan.route("/mata_kuliah_pilihan")
 @login_required
 def mataKuliahPilihan_index():
-    print('========== ========== ========== ========== RENDER MATA KULIAH PILIHAN  ========== ========== ========== ==========')
+    print(f"{'[ RENDER ]':<15} Mata Kuliah Pilihan (Role: {session['user']['role']})")
     if session['user']['role'] != 'KEPALA PROGRAM STUDI':
         return redirect(url_for('signin.error403'))
     else:
@@ -24,14 +24,14 @@ def mataKuliahPilihan_index():
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/get_lovMatkul", methods=['GET'])
 @login_required
 def mataKuliahPilihan_get_lovMatkul():
-    print('[ CONTROLLER ] get_lovMatkul')
+    print(f"{'[ CONTROLLER ]':<15} Get LOV Matkul")
     data = dao.get_lovMatkul()
     return jsonify({ 'data': data })
 
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/post_matkul", methods=['POST'])
 @login_required
 def mataKuliahPilihan_post_matkul():
-    print('[ CONTROLLER ] post_matkul')
+    print(f"{'[ CONTROLLER ]':<15} Post Matkul Pilihan")
     req = request.get_json('data')
     data = dao.post_matkul(req)
     return jsonify( data )
@@ -39,7 +39,7 @@ def mataKuliahPilihan_post_matkul():
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/put_matkul", methods=['POST'])
 @login_required
 def mataKuliahPilihan_put_matkul():
-    print('[ CONTROLLER ] put_matkul')
+    print(f"{'[ CONTROLLER ]':<15} Put Matkul Pilihan")
     req = request.get_json('data')
     data = dao.put_matkul(req)
     return jsonify( data )
@@ -47,7 +47,7 @@ def mataKuliahPilihan_put_matkul():
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/delete_data", methods=['POST'])
 @login_required
 def mataKuliahPilihan_delete_data():
-    print('[ CONTROLLER ] delete_data')
+    print(f"{'[ CONTROLLER ]':<15} Delete Matkul Pilihan")
     req = request.get_json('data')
     data = dao.delete_data(req)
     return jsonify( data )

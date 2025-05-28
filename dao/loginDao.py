@@ -8,24 +8,25 @@ class loginDao:
         self.connection = Database(MONGO_DB)
 
     def signUp(self, username, password):
-        print('  [ DAO ] sign up user', username)
+        print(f"{'':<5}{'[ DAO ]':<10} Sign Up User: {username}")
+        # # PYTHON 3.7.9 (Method Hash: "pbkdf2:sha256")
+        # result = self.connection.insert_one(db_users, {'u_id': username, 'role': 'ADMIN', 'password': generate_password_hash(password, method='pbkdf2:sha256')})
+        # DEFAULT HASH: "scrypt"
         result = self.connection.insert_one(db_users, {'u_id': username, 'role': 'ADMIN', 'password': generate_password_hash(password)})
         return result
     
     def get_user_id(self, u_id):
-        print('  [ DAO ] get user id', u_id)
-        # print('  [ generate "kaprodi" ]', generate_password_hash('kaprodi'))
+        print(f"{'':<5}{'[ DAO ]':<10} Get User ID: {u_id}")
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result['data']['u_id'] if result and result.get('status') else None
 
     def get_user(self, u_id):
-        print('  [ DAO ] get user', u_id)
-        # print('  [ generate "kaprodi" ]', generate_password_hash('kaprodi'))
+        print(f"{'':<5}{'[ DAO ]':<10} Get User: {u_id}")
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result if result and result.get('status') else None
     
     def get_menu(self, role):
-        print('  [ DAO ] get menu', role)
+        print(f"{'':<5}{'[ DAO ]':<10} get menu: {role}")
         general_menu = self.connection.find_many(db_urls, {"role": "GENERAL"})
         user_menu = self.connection.find_many(db_urls, {"role": role})
         if general_menu and general_menu.get('status'):
@@ -33,21 +34,21 @@ class loginDao:
                 for x in user_menu['data']:
                     general_menu['data'].append(x)
             for x in general_menu['data']:
-                print('    general menu', x  )
+                print(f"{'':<15} General Menu {x}")
                 del x['role']
             return general_menu['data'] if general_menu['data'] else None
         return None
 
     def verify_user(self, u_id, password):
-        print('  [ DAO ] verify user', u_id, password)
+        print(f"{'':<5}{'[ DAO ]':<10} Verify User: {u_id}, {password}")
         user = self.get_user(u_id)
-        print('    user', user) 
+        print(f"{'':<15} User: {user}")
         if user:
             user_data = user['data']
             stored_password = user_data.get('password', '')
-            print('    stored_password      :', type(stored_password), stored_password)
-            print('    password param       :', type(password), password)
-            print('    check_password_hash  :', check_password_hash(stored_password, password))
+            print(f"{'':<15} stored_password      : {type(stored_password)}, {stored_password}")
+            print(f"{'':<15} password param       : {type(password)}, {password}")
+            print(f"{'':<15} check_password_hash  : {check_password_hash(stored_password, password)}")
             if check_password_hash(stored_password, password):
                 del user_data['password']
                 session['user'] = user['data']

@@ -8,13 +8,12 @@ class settingDao:
         self.connection = Database(MONGO_DB)
 
     def get_user(self, u_id):
-        print('  [ DAO ] get user', u_id)
-        # print('  [ generate "kaprodi" ]', generate_password_hash('kaprodi'))
+        print(f"{'':<5}{'[ DAO ]':<10} Get User (u_id: {u_id})")
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result if result and result.get('status') else None
 
     def register_new_password(self, oldPassword, newPassword, verifyNewPassword):
-        print('  [ DAO ] register new password', oldPassword, newPassword, verifyNewPassword)
+        print(f"{'':<5}{'[ DAO ]':<10} Register New Password")
         user = self.get_user(session['user']['u_id'])
         if user:
             user_data = user['data']
@@ -25,7 +24,6 @@ class settingDao:
                     return {'status': False, 'message': 'Silahkan masukkan password yang berbeda!'}
                 
                 if (newPassword == verifyNewPassword):
-                    print('   GENERATOR', generate_password_hash(newPassword))
                     register_user_password = self.connection.update_one(
                         db_users, 
                         { 'u_id': session['user']['u_id'] }, 

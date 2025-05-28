@@ -7,12 +7,12 @@ class dashboardDao:
         self.connection = Database(MONGO_DB)
 
     def get_user(self, u_id):
-        print('  [ DAO ] get user', u_id)
+        print(f"{'':<5}{'[ DAO ]':<10} Get User (u_id: {u_id})")
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result if result and result.get('status') else None
 
     def update_general(self, params):
-        print('  [ DAO ] update general', params)
+        print(f"{'':<5}{'[ DAO ]':<10} Update General (Parameter: {params})")
         if params:
             user = self.get_user(session['user']['u_id'])
             if user:
@@ -31,7 +31,7 @@ class dashboardDao:
         return {'status': False, 'message': 'Tidak ada yang perlu disimpan'}
     
     def update_kelompokMatkul(self, data):
-        print('  [ DAO ] update kelompok matkul', data)
+        print(f"{'':<5}{'[ DAO ]':<10} Update Kelompok Matkul (Parameter: {data})")
 
         if data:
             newGroup = [item["kelompok_matkul"] for item in data]
@@ -51,7 +51,7 @@ class dashboardDao:
         return {'status': updateData.get('status'), 'message': updateData.get('message')}
     
     def update_os(self, data):
-        print('  [ DAO ] update os', data)
+        print(f"{'':<5}{'[ DAO ]':<10} Update OS (Parameter: {data})")
         
         if data:
             newGroup = [item["os"] for item in data]
@@ -69,7 +69,7 @@ class dashboardDao:
         return {'status': updateData.get('status'), 'message': updateData.get('message')}
         
     def update_processor(self, data):
-        print('  [ DAO ] update processor', data)
+        print(f"{'':<5}{'[ DAO ]':<10} Update Processor (Parameter: {data})")
 
         if data:
             newGroup = [item["processor"] for item in data]

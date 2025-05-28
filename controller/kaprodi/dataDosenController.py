@@ -8,6 +8,7 @@ dao = dataDosenDao()
 @dosen.route("/data_dosen")
 @login_required
 def dosen_index():
+    print(f"{'[ RENDER ]':<15} Data Dosen (Role: {session['user']['role']})")
     print('========== ========== ========== ========== RENDER DATA DOSEN  ========== ========== ========== ==========')
     if session['user']['role'] != 'KEPALA PROGRAM STUDI':
         return redirect(url_for('signin.error403'))
@@ -22,14 +23,14 @@ def dosen_index():
 @dosen.route("/data_dosen/get_dosen", methods=['GET'])
 @login_required
 def get_dosen():
-    print('[ CONTROLLER ] get_dosen')
+    print(f"{'[ CONTROLLER ]':<15} Get Dosen")
     data = dao.get_dosen()
     return jsonify({ 'data': data })
 
 @dosen.route("/data_dosen/post_dosen", methods=['POST'])
 @login_required
 def post_dosen():
-    print('[ CONTROLLER ] post_dosen')
+    print(f"{'[ CONTROLLER ]':<15} Post Dosen")
     req = request.get_json('data')
     data = dao.post_dosen(req)
     return jsonify( data )
@@ -37,7 +38,7 @@ def post_dosen():
 @dosen.route("/data_dosen/put_dosen", methods=['POST'])
 @login_required
 def put_dosen():
-    print('[ CONTROLLER ] put_dosen')
+    print(f"{'[ CONTROLLER ]':<15} Put Dosen")
     req = request.get_json('data')
     data = dao.put_dosen(req)
     return jsonify( data )
@@ -45,7 +46,7 @@ def put_dosen():
 @dosen.route("/data_dosen/delete_dosen", methods=['POST'])
 @login_required
 def delete_dosen():
-    print('[ CONTROLLER ] delete_dosen')
+    print(f"{'[ CONTROLLER ]':<15} Delete Dosen")
     req = request.get_json('data')
     data = dao.delete_dosen(req)
     return jsonify( data )

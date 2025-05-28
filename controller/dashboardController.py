@@ -8,7 +8,7 @@ dashboardDao = dashboardDao()
 @dashboard.route("/dashboard")
 @login_required
 def dashboard_index():
-    print('========== ========== ========== ========== RENDER DASHBOARD  ========== ========== ========== ==========')
+    print(f"{'[ RENDER ]':<15} Dashboard (Role: {session['user']['role']})")
     if session['user']['role'] == 'KEPALA PROGRAM STUDI':
         return render_template(
                 '/kaprodi/dashboard.html', 
@@ -37,7 +37,7 @@ def dashboard_index():
 @dashboard.route("/update_general", methods=['POST'])
 @login_required
 def dashboardKaprodi_updateGeneral():
-    print('[ CONTROLLER ] update_general', request.method, session.get('user'))
+    print(f"{'[ CONTROLLER ]':<15} Update General")
     req = request.get_json('data')
 
     result = dashboardDao.update_general(req)
@@ -50,7 +50,7 @@ def dashboardKaprodi_updateGeneral():
 @dashboard.route("/update_kelompok_matkul", methods=['POST'])
 @login_required
 def dashboardKaprodi_updateKelompokMatkul():
-    print('[ CONTROLLER ] update_kelompokMatkul')
+    print(f"{'[ CONTROLLER ]':<15} Update Kelompok Matkul")
     
     req = request.get_json('data')
 
@@ -61,7 +61,7 @@ def dashboardKaprodi_updateKelompokMatkul():
 @dashboard.route("/update_os", methods=['POST'])
 @login_required
 def dashboardLaboran_updateOs():
-    print('[ CONTROLLER ] update_os')
+    print(f"{'[ CONTROLLER ]':<15} Update OS")
     
     req = request.get_json('data')
 
@@ -72,7 +72,7 @@ def dashboardLaboran_updateOs():
 @dashboard.route("/update_processor", methods=['POST'])
 @login_required
 def dashboardLaboran_updateProcessor():
-    print('[ CONTROLLER ] update_processor')
+    print(f"{'[ CONTROLLER ]':<15} Update Processor")
     
     req = request.get_json('data')
 

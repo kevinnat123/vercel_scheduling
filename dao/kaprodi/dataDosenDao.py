@@ -12,7 +12,7 @@ class dataDosenDao:
         self.connection = Database(MONGO_DB)
 
     def get_dosen(self):
-        print('  [ DAO ] get dosen', session['user']['prodi'])
+        print(f"{'':<5}{'[ DAO ]':<10} Get Dosen (Prodi: {session['user']['prodi']})")
         result = self.connection.find_many(db_dosen, {'prodi': session['user']['prodi']}, sort=[("nip", 1)])
         if result.get('status'):
             for y in result['data']:
@@ -21,8 +21,8 @@ class dataDosenDao:
         return result['data'] if result and result.get('status') else None
     
     def post_dosen(self, params: dict):
+        print(f"{'':<5}{'[ DAO ]':<10} Post Dosen (Parameter: {params})")
         result = { 'status': False }
-        print('  [ DAO ] post dosen')
 
         try:
             # # Hapus key yang memiliki value kosong
@@ -53,18 +53,17 @@ class dataDosenDao:
             if e.error_dict.get('target'):
                 result.update({ 'target': e.error_dict.get('target') })
         except Exception as e:
+            print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
-        print('    result', result)
+        print(f"{'':<15} Result: {result}")
         return result
     
     def put_dosen(self, params: dict):
+        print(f"{'':<5}{'[ DAO ]':<10} Put Dosen (Parameter: {params})")
         result = { 'status': False }
-        print('  [ DAO ] put dosen')
 
         try:
-            print('    params', params)
-
             if params.get('nip'):
                 # Check exist
                 res = self.connection.find_one(db_dosen, {'nip': params['nip']})
@@ -89,14 +88,15 @@ class dataDosenDao:
             if e.error_dict.get('target'):
                 result.update({ 'target': e.error_dict.get('target') })
         except Exception as e:
+            print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
-        print('    result', result)
+        print(f"{'':<15} Result: {result}")
         return result
     
     def delete_dosen(self, params: dict):
+        print(f"{'':<5}{'[ DAO ]':<10} Delete Dosen (Parameter: {params})")
         result = { 'status': False }
-        print('  [ DAO ] delete dosen')
 
         try:
             list_nip = [item["nip"] for item in params]
@@ -114,7 +114,8 @@ class dataDosenDao:
         except CustomError as e:
             result.update({ "message": f"{e.error_dict.get('message')}" })
         except Exception as e:
-            print(f'[ ERROR ] delete dosen: {e}')
+            print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
+        print(f"{'':<15} Result: {result}")
         return result

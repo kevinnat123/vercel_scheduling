@@ -17,9 +17,8 @@ class ruangKelasDao:
         self.connection = Database(MONGO_DB)
 
     def post_kelas(self, params):
+        print(f"{'':<5}{'[ DAO ]':<10} Post Kelas (Parameter: {params})")
         result = { 'status': False }
-        print('  [ DAO ] post kelas')
-        print('    params', params)
 
         try:
             res = self.connection.find_many()
@@ -30,7 +29,7 @@ class ruangKelasDao:
         except CustomError as e:
             result.update({ "message": f"{e.error_dict.get('message')}" })
         except Exception as e:
-            print(f'[ ERROR ] delete matkul: {e}')
+            print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
@@ -38,8 +37,8 @@ class ruangKelasDao:
     
 
     def func(self):
+        print(f"{'':<5}{'[ DAO ]':<10} Func")
         result = { 'status': False }
-        print('  [ DAO ] func')
         
         try:
             res = self.connection.find_one()
@@ -54,6 +53,7 @@ class ruangKelasDao:
             if e.error_dict.get('target'):
                 result.update({ 'target': e.error_dict.get('target') })
         except Exception as e:
+            print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result

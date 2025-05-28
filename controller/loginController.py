@@ -13,17 +13,17 @@ def check_session():
     safe_endpoints = ['signin.login', 'signin.logout', 'static', 'signin.ping']
     current_endpoint = request.endpoint
 
-    print(f"🔍 Before request: {current_endpoint}")
+    print(f"{'[ 🔍 Before request ]':<15} Current Endpoint: {current_endpoint}")
 
     if current_endpoint not in safe_endpoints:
         # Cek apakah session masih ada
         if not session.get('user') or 'u_id' not in session['user']:
-            print("⚠️ Session kosong atau tidak valid")
+            print(f"{'':<15} ⚠️ Session kosong atau tidak valid")
             return redirect(url_for('signin.logout'))
 
         # Jangan reset lifetime kalau hanya /ping
         if not request.path.startswith('/ping'):
-            print('🔄 Perpanjang lifetime session')
+            print(f"{'':<15} 🔄 Perpanjang lifetime session")
             session.permanent = True
             session.modified = True
 
@@ -33,28 +33,27 @@ def check_session():
             user_id_in_db = loginDao.get_user_id(user_id_in_session)
 
             if not user_id_in_db or user_id_in_db != user_id_in_session:
-                print("🚫 User tidak valid di database")
+                print(f"{'':<15} 🚫 User tidak valid di database")
                 session.clear()
                 return redirect(url_for('signin.logout'))
 
 @signin.route("/ping")
 def ping():
-    print('❤❤❤❤❤ ❤❤❤❤❤ ❤❤❤❤❤ ❤❤❤❤❤ HEARTBEAT ❤❤❤❤❤ ❤❤❤❤❤ ❤❤❤❤❤ ❤❤❤❤❤')
-    print('session', True if session.get('user') else False)
+    print(f"{'❤ HEARTBEAT ❤':<15} Session: {True if session.get('user') else False}")
     if not session.get('user'):
         return jsonify({'status': False, 'expired': True}), 401
     return jsonify({'status': True, 'expired': False}), 200
             
 @signin.route("/")
 def home():
-    print('[ CONTROLLER ] render website')
+    print(f"{'[ THROW ]':<15} Login Page / Dashboard")
     if session.get('user') and 'u_id' in session['user']:
         return redirect(url_for('signin.dashboard'))
     return redirect(url_for('signin.login'))
     
 @signin.route("/login", methods=['GET', 'POST'])
 def login():
-    print('[ CONTROLLER ] login', request.method, session.get('user'))
+    print(f"{'[ CONTROLLER ]':<15} Login (Method: {request.method})")
     if session.get('user') and 'u_id' in session['user']:
         return redirect(url_for('signin.dashboard'))
     
@@ -62,12 +61,9 @@ def login():
         req = request.get_json('data')
         nip = req.get('nip')
         password = req.get('password')
-        print('  nip', nip)
-        print('  password', password)
 
         # user = loginDao.signUp(nip, password)
         user = loginDao.verify_user(nip, password)
-        print('  user', user)
 
         if user['status']:
             user_obj = User(nip, user['data'])
@@ -79,9 +75,9 @@ def login():
 
             session.permanent = True  # Aktifkan waktu hidup session
 
-            print('  session academic_details   :', session['academic_details'])
-            print('  session user               :', session['user'])
-            print('  session menu               :', session['menu'])
+            print(f"{'':<15} {'Session Academic_Details':<30}: {session['academic_details']}")
+            print(f"{'':<15} {'Session User':<30}: {session['user']}")
+            print(f"{'':<15} {'Session Menu':<30}: {session['menu']}")
             return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
             # return jsonify({'status': True, 'redirect_url': url_for('signin.dashboard')}), 200
 
@@ -91,7 +87,7 @@ def login():
 @signin.route("/dashboard")
 @login_required
 def dashboard():
-    print('========== ========== ========== ========== RENDER DASHBOARD  ========== ========== ========== ==========')
+    print(f"{'[ RENDER ]':<15} Dashboard")
 
     # Pastikan session masih valid
     if not session.get('user') or 'u_id' not in session['user']:
@@ -157,7 +153,7 @@ def get_academic_details():
 @signin.route("/404NotFound")
 @login_required
 def error404():
-    print('[ CONTROLLER ] error404')
+    print(f"{'[ RENDER ]':<15} Error 404")
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
@@ -166,7 +162,7 @@ def error404():
 @signin.route("/403Forbidden")
 @login_required
 def error403():
-    print('[ CONTROLLER ] error403')
+    print(f"{'[ RENDER ]':<15} Error 403")
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
@@ -174,7 +170,7 @@ def error403():
 
 @signin.route("/logout")
 def logout():
-    print('[ CONTROLLER ] logout')
+    print(f"{'[ THROW ]':<15} Logout")
     logout_user()
     session.clear()  # Pastikan semua session terhapus
     return redirect(url_for('signin.login'))
