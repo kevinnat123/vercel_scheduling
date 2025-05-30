@@ -31,6 +31,15 @@ $(document).on("keydown", "form", function (e) {
   }
 });
 
+$(document).on("click", ".btn-close-badge", function () {
+  const $badge = $(this).closest("span.badge");
+  const $formGroup = $badge.closest("div.form-group");
+  const fieldId = $badge.closest("div").attr("id");
+
+  $badge.remove(); // hapus badge
+  if (!retrieveBadgeValues(fieldId).length) $formGroup.attr("hidden", true);
+});
+
 function capitalizeWords(string) {
   return string.replace(/\b\w/g, (char) => char.toUpperCase());
 }
@@ -92,6 +101,25 @@ function retrieveBadgeValues(elements) {
   });
 
   return values;
+}
+
+function addBadge(container_id, div_list_id, value) {
+  current_badge_values = retrieveBadgeValues(div_list_id);
+  if (!current_badge_values.includes(value)) {
+    if ($("#" + container_id).prop("hidden") === true)
+      $("#" + container_id).attr("hidden", false);
+    $("#" + div_list_id).append(
+      `<span class="badge bg-primary me-2">` +
+        value +
+        `<button type="button" class="btn-close btn-close-white btn-close-badge ms-1" aria-label="Close"></button>
+              </span>`
+    );
+  } else
+    popUpTimer(
+      "info",
+      div_list_id.substring(5) + " '" + user_input + "' sudah anda input!",
+      "Silahkan input " + div_list_id.substring(5) + " lain!"
+    );
 }
 
 /**
