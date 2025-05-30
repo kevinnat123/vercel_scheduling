@@ -75,18 +75,18 @@ class Database:
         except errors.PyMongoError as e:
             return {'status': False, 'data': None, 'message': f'Error pymongo: {e}'}
     
-    def insert_one(self, collection_name, data, sensitive = False):
+    def insert_one(self, collection_name, data):
         try:
             collection = self.get_collection(collection_name)
-            insert_result = collection.insert_one(data if sensitive else self.to_uppercase(data))
+            insert_result = collection.insert_one(data)
             return {'status': True, 'data': {'inserted_id': str(insert_result.inserted_id)}, 'message': 'Data berhasil ditambahkan'}
         except errors.PyMongoError as e:
             return {'status': False, 'data': None, 'message': f'Error pymongo: {e}'}
     
-    def insert_many(self, collection_name, data, sensitive = False):
+    def insert_many(self, collection_name, data):
         try:
             collection = self.get_collection(collection_name)
-            insert_result = collection.insert_many(data if sensitive else self.to_uppercase(data))
+            insert_result = collection.insert_many(data)
             return {'status': True, 'data': {'inserted_ids': [str(id) for id in insert_result.inserted_ids]}, 'message': 'Data berhasil ditambahkan'}
         except errors.PyMongoError as e:
             return {'status': False, 'data': None, 'message': f'Error pymongo: {e}'}
