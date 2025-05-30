@@ -80,15 +80,27 @@ document.addEventListener("input", function (event) {
 });
 
 /**
+ * Retrieve values of checked checkbox.
+ *
+ * @param {string} [cbName] - Checkbox's name attribute
+ */
+function getCheckedCheckboxValue(cbName) {
+  return $("input[name=" + cbName + "]:checked")
+    .map(function () {
+      return this.value;
+    })
+    .get();
+}
+
+/**
  * Retrieve values of badges inside a div.
  *
- * @param {string} [elements] - Div's ID
+ * @param {string} [div_list_id] - Div's ID
  */
-function retrieveBadgeValues(elements) {
+function retrieveBadgeValues(div_list_id) {
   let values = [];
 
-  $("#" + elements + " span.badge").each(function () {
-    // Clone untuk hapus button tanpa memengaruhi asli
+  $("#" + div_list_id + " span.badge").each(function () {
     let text = $(this)
       .clone()
       .children()
@@ -120,6 +132,26 @@ function addBadge(container_id, div_list_id, value) {
       div_list_id.substring(5) + " '" + user_input + "' sudah anda input!",
       "Silahkan input " + div_list_id.substring(5) + " lain!"
     );
+}
+
+async function clearBadge(container_id, div_list_id) {
+  if (retrieveBadgeValues(div_list_id).length > 0)
+    await Swal.fire({
+      title:
+        "Yakin akan hapus semua data " +
+        div_list_id.replaceAll("_", " ").substring(5) +
+        "?",
+      showDenyButton: true,
+      confirmButtonText: "Ya",
+      denyButtonText: `Batal`,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $("#" + div_list_id + " span.badge").remove();
+        $("#" + container_id).attr("hidden", true);
+      } else if (result.isDenied) {
+        return;
+      }
+    });
 }
 
 /**
