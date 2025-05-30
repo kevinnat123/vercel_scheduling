@@ -22,7 +22,7 @@ class mataKuliahPilihanDao:
             db_open_courses, 
             {
                 'prodi': session['user']['prodi'], 
-                'u_id': { "$regex": "^" + str(session['academic_details']['tahun_ajaran_1']) + str(session['academic_details']['semester_depan']) }
+                'u_id': { "$regex": "^" + str(session['academic_details']['tahun_ajaran_berikutnya']) + str(session['academic_details']['semester_depan']) }
             }, 
             sort=[("angkatan", 1)] 
         )
@@ -35,7 +35,7 @@ class mataKuliahPilihanDao:
         try:
             if params.get('angkatan'):
                 params.update({
-                    'u_id': (str(session['academic_details']['tahun_ajaran_1']) + str(session['academic_details']['semester_depan']) + str(params['angkatan'])).upper(),
+                    'u_id': (str(session['academic_details']['tahun_ajaran_berikutnya']) + str(session['academic_details']['semester_depan']) + str(params['angkatan'])).upper(),
                     'prodi': session['user']['prodi']
                 })
 
@@ -75,7 +75,7 @@ class mataKuliahPilihanDao:
         try:
             if params.get('angkatan'):
                 params.update({
-                    'u_id': (str(session['academic_details']['tahun_ajaran_1']) + str(session['academic_details']['semester_depan']) + str(params['angkatan'])).upper(),
+                    'u_id': (str(session['academic_details']['tahun_ajaran_berikutnya']) + str(session['academic_details']['semester_depan']) + str(params['angkatan'])).upper(),
                     'prodi': session['user']['prodi']
                 })
 

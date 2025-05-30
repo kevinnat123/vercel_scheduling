@@ -420,7 +420,8 @@
       <div class="container">
         <span id="current-date"></span> | Semester {{
         session['academic_details']['semester_saat_ini'] | safe or '-' }} Tahun
-        Ajaran {{ session['academic_details']['tahun_ajaran'] | safe or '-' }}
+        Ajaran {{ session['academic_details']['tahun_ajaran_saat_ini'] | safe or
+        '-' }}
       </div>
     </div>
 
