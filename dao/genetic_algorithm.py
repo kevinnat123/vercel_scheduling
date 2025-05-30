@@ -144,7 +144,14 @@ def export_jadwal_to_excel(jadwal_list, filename, matakuliah_list, dosen_list):
     print('Excel disimpan di:', os.getcwd())
     return FileLink(filename)
 
-def restructureOutput(jadwal_list):
+def convertOutputToDict(jadwal_list):
+    """
+    Menkonversi object jadwal menjadi dictionary.
+
+    Returns:
+        dict: Jadwal dalam bentuk dictionary.
+    """
+
     jadwal = []
 
     for sesi in jadwal_list:
@@ -833,7 +840,7 @@ def mutasi(individu, dosen_list, matakuliah_list, ruang_list, peluang_mutasi=0.1
 
     Args:
         individu (list): Daftar sesi jadwal dalam satu individu.
-        dosen_list (list): Daftar dosen yang tersedia (belum digunakan dalam fungsi ini).
+        dosen_list (list): Daftar dosen yang tersedia.
         ruang_list (list): Daftar ruangan yang tersedia, masing-masing berupa dict dengan key 'kode'.
         peluang_mutasi (float, optional): Peluang untuk setiap sesi dimutasi. Default 0.1.
 
@@ -893,21 +900,39 @@ def mutasi(individu, dosen_list, matakuliah_list, ruang_list, peluang_mutasi=0.1
     return individu
 
 def genetic_algorithm(matakuliah_list, dosen_list, ruang_list, ukuran_populasi=75, jumlah_generasi=100, peluang_mutasi=0.1, proporsi_elite=0.05):
+    """
+    Melakukan mutasi pada individu (jadwal) secara acak berdasarkan peluang yang ditentukan.
+
+    Setiap sesi dalam individu memiliki kemungkinan untuk dimodifikasi secara acak 
+    pada atribut `hari`, `jam_mulai` + `jam_selesai`, atau `kode_ruangan`.
+
+    Args:
+        matakuliah_list (list): Daftar matakuliah yang dibuka pada semester berikutnya.
+        dosen_list (list): Daftar dosen yang tersedia.
+        ruang_list (list): Daftar ruangan yang tersedia, masing-masing berupa dict dengan key 'kode'.
+        ukuran_populasi (int, optional): Jumlah populasi dalam setiap generasi. Default 75.
+        jumlah_generasi (int, optional): Jumlah algoritma menghasilkan penerus. Default 100.
+        peluang_mutasi (float, optional): Peluang untuk setiap sesi dimutasi. Default 0.1.
+
+    Returns:
+        dict: Jadwal hasil algoritma genetika dalam bentuk dictionary.
+    """
+
     populasi = generate_populasi(matakuliah_list, dosen_list, ruang_list, ukuran_populasi)
     populasi = [repair_jadwal(j, matakuliah_list, dosen_list, ruang_list) for j in populasi]
     
     best_fitness_global = float('-inf')
     best_individual_global = None
 
-    # jumlah_elite = max(1, int(ukuran_populasi * proporsi_elite))
+    jumlah_elite = max(1, int(ukuran_populasi * proporsi_elite))
 
     for gen in range(jumlah_generasi):
         fitness_scores = [hitung_fitness(individu, matakuliah_list, dosen_list, ruang_list) for individu in populasi]
         next_gen = []
 
-        # # Simpan individu terbaik
-        # individu_elite = [individu for _, individu in sorted(zip(fitness_scores, populasi), key=lambda x: x[0], reverse=True)][:jumlah_elite]
-        # next_gen = individu_elite.copy()
+        # Simpan individu terbaik
+        individu_elite = [individu for _, individu in sorted(zip(fitness_scores, populasi), key=lambda x: x[0], reverse=True)][:jumlah_elite]
+        next_gen = individu_elite.copy()
 
         # Generate anak baru
         while len(next_gen) < ukuran_populasi:
@@ -936,12 +961,6 @@ def genetic_algorithm(matakuliah_list, dosen_list, ruang_list, ukuran_populasi=7
             best_fitness_global = gen_best_fitness
             best_individual_global = copy.deepcopy(gen_best_individual)
 
-        # # REMINDER: HAPUS SECTION INI KALAU LESAI DEV
-        # best_fitness_global = gen_best_fitness
-        # best_individual_global = copy.deepcopy(gen_best_individual)
-        
-        # export_jadwal_to_excel(best_individual_global, filename=f"jadwal_kuliah-{gen}.xlsx")
-
         avg = sum(fitness_scores) / len(fitness_scores)
         print(f"[Gen {gen}] [({len(populasi)} population)] AVG : {round(avg, 2):<10} BEST ALLTIME: {best_fitness_global}")
         print(f"{'':<5}Min: {min(fitness_scores):<5}Max: {max(fitness_scores):<5}Best Gen: {gen_best_fitness}")
@@ -951,4 +970,4 @@ def genetic_algorithm(matakuliah_list, dosen_list, ruang_list, ukuran_populasi=7
 
     print(f"GLOBAL BEST FITNESS {best_fitness_global}")
     hitung_fitness(best_individual_global, matakuliah_list, dosen_list, ruang_list, True)
-    return restructureOutput(best_individual_global)
+    return convertOutputToDict(best_individual_global)
