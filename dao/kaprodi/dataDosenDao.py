@@ -1,5 +1,5 @@
 from dao import Database
-from config import MONGO_DB, MONGO_LECTURERS_COLLECTION as db_dosen
+from config import MONGO_DB, MONGO_LECTURERS_COLLECTION as db_dosen, MONGO_COURSES_COLLECTION as db_matkul
 from flask import session
 
 class CustomError(Exception):
@@ -119,3 +119,8 @@ class dataDosenDao:
 
         print(f"{'':<15} Result: {result}")
         return result
+    
+    def get_matkul(self, prodi: str):
+        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul (Prodi: {prodi})")
+        result = self.connection.find_many(db_matkul, {'prodi': prodi}, sort=[("kode", 1)])
+        return result['data'] if result and result.get('status') else None
