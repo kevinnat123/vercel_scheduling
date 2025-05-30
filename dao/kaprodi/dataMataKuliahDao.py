@@ -12,7 +12,7 @@ class dataMataKuliahDao:
         self.connection = Database(MONGO_DB)
 
     def put_kelompok(self, nama_baru):
-        print(f"{'':<5}{'[ DAO ]':<10} Put Kelompok (Data Baru: {nama_baru})")
+        print(f"{'':<7}{'[ DAO ]':<8} Put Kelompok (Data Baru: {nama_baru})")
         result = { 'status': False }
         try:
             if nama_baru.upper() in session['user']['kelompok_matkul']:
@@ -35,7 +35,7 @@ class dataMataKuliahDao:
         return result
     
     def get_matkul(self):
-        print(f"{'':<5}{'[ DAO ]':<10} Get Matkul (Prodi: {session['user']['prodi']})")
+        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul (Prodi: {session['user']['prodi']})")
         result = self.connection.find_many(
             db_courses, 
             {'prodi': { '$in' : [session['user']['prodi']] }}, 
@@ -45,7 +45,7 @@ class dataMataKuliahDao:
         return result['data'] if result and result.get('status') else None
     
     def post_matkul(self, params: dict):
-        print(f"{'':<5}{'[ DAO ]':<10} Post Matkul (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Post Matkul (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -86,7 +86,7 @@ class dataMataKuliahDao:
         return result
     
     def put_matkul(self, params: dict):
-        print(f"{'':<5}{'[ DAO ]':<10} Put Matkul (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Put Matkul (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -126,7 +126,7 @@ class dataMataKuliahDao:
         return result
     
     def delete_matkul(self, params: dict):
-        print(f"{'':<5}{'[ DAO ]':<10} Delete Matkul (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Delete Matkul (Parameter: {params})")
         result = { 'status': False }
 
         try:

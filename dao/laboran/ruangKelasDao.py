@@ -17,7 +17,7 @@ class ruangKelasDao:
         self.connection = Database(MONGO_DB)
 
     def post_kelas(self, params):
-        print(f"{'':<5}{'[ DAO ]':<10} Post Kelas (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Post Kelas (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -37,7 +37,7 @@ class ruangKelasDao:
     
 
     def func(self):
-        print(f"{'':<5}{'[ DAO ]':<10} Func")
+        print(f"{'':<7}{'[ DAO ]':<8} Func")
         result = { 'status': False }
         
         try:

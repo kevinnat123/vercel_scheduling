@@ -12,12 +12,12 @@ class mataKuliahPilihanDao:
         self.connection = Database(MONGO_DB)
 
     def get_lovMatkul(self):
-        print(f"{'':<5}{'[ DAO ]':<10} Get LOV Matkul (Prodi: {session['user']['prodi']})")
+        print(f"{'':<7}{'[ DAO ]':<8} Get LOV Matkul (Prodi: {session['user']['prodi']})")
         result = self.connection.find_many(db_courses, {'prodi': { '$in' : ['GENERAL', session['user']['prodi']] }}, sort=[("kode", 1)])
         return result['data'] if result and result.get('status') else None
 
     def get_listMatkulTersimpan(self):
-        print(f"{'':<5}{'[ DAO ]':<10} Get List Matkul Tersimpan (Prodi: {session['user']['prodi']})")
+        print(f"{'':<7}{'[ DAO ]':<8} Get List Matkul Tersimpan (Prodi: {session['user']['prodi']})")
         result = self.connection.find_many(
             db_open_courses, 
             {
@@ -29,7 +29,7 @@ class mataKuliahPilihanDao:
         return result['data'] if result and result.get('status') else []
 
     def post_matkul(self, params):
-        print(f"{'':<5}{'[ DAO ]':<10} Post Matkul (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Post Matkul (Parameter: {params})")
         result = { 'status': False }
         
         try:
@@ -69,7 +69,7 @@ class mataKuliahPilihanDao:
         return result
     
     def put_matkul(self, params):
-        print(f"{'':<5}{'[ DAO ]':<10} Put Matkul (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Put Matkul (Parameter: {params})")
         result = { 'status': False }
         
         try:
@@ -111,7 +111,7 @@ class mataKuliahPilihanDao:
         return result
     
     def delete_data(self, req):
-        print(f"{'':<5}{'[ DAO ]':<10} Delete Matkul (Parameter: {req})")
+        print(f"{'':<7}{'[ DAO ]':<8} Delete Matkul (Parameter: {req})")
         result = { 'status': False }
         
         try:

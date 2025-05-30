@@ -12,16 +12,16 @@ class dataDosenDao:
         self.connection = Database(MONGO_DB)
 
     def get_dosen(self):
-        print(f"{'':<5}{'[ DAO ]':<10} Get Dosen (Prodi: {session['user']['prodi']})")
+        print(f"{'':<7}{'[ DAO ]':<8} Get Dosen (Prodi: {session['user']['prodi']})")
         result = self.connection.find_many(db_dosen, {'prodi': session['user']['prodi']}, sort=[("nip", 1)])
         if result.get('status'):
             for y in result['data']:
-                if not y.get('konsentrasi'):
-                    y.update({ 'konsentrasi': '' })
+                if not y.get('pakar'):
+                    y.update({ 'pakar': '' })
         return result['data'] if result and result.get('status') else None
     
     def post_dosen(self, params: dict):
-        print(f"{'':<5}{'[ DAO ]':<10} Post Dosen (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Post Dosen (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -60,7 +60,7 @@ class dataDosenDao:
         return result
     
     def put_dosen(self, params: dict):
-        print(f"{'':<5}{'[ DAO ]':<10} Put Dosen (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Put Dosen (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -95,7 +95,7 @@ class dataDosenDao:
         return result
     
     def delete_dosen(self, params: dict):
-        print(f"{'':<5}{'[ DAO ]':<10} Delete Dosen (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Delete Dosen (Parameter: {params})")
         result = { 'status': False }
 
         try:

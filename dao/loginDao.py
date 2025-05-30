@@ -7,26 +7,26 @@ class loginDao:
     def __init__(self):
         self.connection = Database(MONGO_DB)
 
-    def signUp(self, username, password):
-        print(f"{'':<5}{'[ DAO ]':<10} Sign Up User: {username}")
+    def signUp(self, u_id, role, password):
+        print(f"{'':<7}{'[ DAO ]':<8} Sign Up User: {u_id}")
         # # PYTHON 3.7.9 (Method Hash: "pbkdf2:sha256")
-        # result = self.connection.insert_one(db_users, {'u_id': username, 'role': 'ADMIN', 'password': generate_password_hash(password, method='pbkdf2:sha256')})
+        # result = self.connection.insert_one(db_users, {'u_id': u_id, 'role': 'ADMIN', 'password': generate_password_hash(password, method='pbkdf2:sha256')})
         # DEFAULT HASH: "scrypt"
-        result = self.connection.insert_one(db_users, {'u_id': username, 'role': 'ADMIN', 'password': generate_password_hash(password)})
+        result = self.connection.insert_one(db_users, {'u_id': u_id, 'role': role.upper(), 'password': generate_password_hash(password)}, True)
         return result
     
     def get_user_id(self, u_id):
-        print(f"{'':<5}{'[ DAO ]':<10} Get User ID: {u_id}")
+        print(f"{'':<7}{'[ DAO ]':<8} Get User ID: {u_id}")
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result['data']['u_id'] if result and result.get('status') else None
 
     def get_user(self, u_id):
-        print(f"{'':<5}{'[ DAO ]':<10} Get User: {u_id}")
+        print(f"{'':<7}{'[ DAO ]':<8} Get User: {u_id}")
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result if result and result.get('status') else None
     
     def get_menu(self, role):
-        print(f"{'':<5}{'[ DAO ]':<10} get menu: {role}")
+        print(f"{'':<7}{'[ DAO ]':<8} get menu: {role}")
         general_menu = self.connection.find_many(db_urls, {"role": "GENERAL"})
         user_menu = self.connection.find_many(db_urls, {"role": role})
         if general_menu and general_menu.get('status'):
@@ -40,7 +40,7 @@ class loginDao:
         return None
 
     def verify_user(self, u_id, password):
-        print(f"{'':<5}{'[ DAO ]':<10} Verify User: {u_id}, {password}")
+        print(f"{'':<7}{'[ DAO ]':<8} Verify User: {u_id}, {password}")
         user = self.get_user(u_id)
         print(f"{'':<15} User: {user}")
         if user:
