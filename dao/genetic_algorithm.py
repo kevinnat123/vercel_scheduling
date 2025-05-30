@@ -144,6 +144,25 @@ def export_jadwal_to_excel(jadwal_list, filename, matakuliah_list, dosen_list):
     print('Excel disimpan di:', os.getcwd())
     return FileLink(filename)
 
+def restructureOutput(jadwal_list):
+    jadwal = []
+
+    for sesi in jadwal_list:
+        s = {}
+        s['kode_matkul'] = sesi.kode_matkul
+        s['kode_dosen'] = sesi.kode_dosen
+        s['sks_akademik'] = sesi.sks_akademik
+        s['kode_ruangan'] = sesi.kode_ruangan
+        s['kapasitas'] = sesi.kapasitas
+        s['hari'] = sesi.hari
+        s['jam_mulai'] = sesi.jam_mulai
+        s['jam_selesai'] = sesi.jam_selesai
+        s['tipe_kelas'] = sesi.tipe_kelas  # 'TEORI' atau 'PRAKTIKUM'
+        s['program_studi'] = sesi.program_studi
+        jadwal.append(s)
+
+    return jadwal
+
 def find_available_schedule(jadwal:list, kode:str, hari:str):
     """
     Mencari waktu yang tersedia dari jadwal yang sudah ada berdasarkan hari yang dipilih.
@@ -932,4 +951,4 @@ def genetic_algorithm(matakuliah_list, dosen_list, ruang_list, ukuran_populasi=7
 
     print(f"GLOBAL BEST FITNESS {best_fitness_global}")
     hitung_fitness(best_individual_global, matakuliah_list, dosen_list, ruang_list, True)
-    return best_individual_global
+    return restructureOutput(best_individual_global)

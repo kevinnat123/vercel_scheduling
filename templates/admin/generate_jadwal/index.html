@@ -2,7 +2,7 @@
 <div class="container-fluid mt-4" id="main-window">
   <div class="card">
     <div class="card-body">
-      <button type="button" id="generate">Generate</button>
+      <button type="button" id="generate" onclick="generate()">Generate</button>
     </div>
   </div>
 </div>
@@ -10,19 +10,99 @@
 <script>
   $(document).ready(function () {});
 
-  $.ajax({
-    type: "GET",
-    url: "/generate_jadwal/generate",
-    cache: false,
-    beforeSend: () => {
-      console.log("beforesend ajax");
-    },
-    complete: () => {},
-    success: async function (res) {
-      console.log("res ajax", res);
-      asd = res;
-    },
-  });
+  function generate() {
+    $.ajax({
+      type: "GET",
+      url: "/generate_jadwal/generate",
+      cache: false,
+      beforeSend: () => {
+        console.log("beforesend ajax");
+      },
+      complete: () => {},
+      success: async function (res) {
+        console.log("res ajax", res);
+        downloadExcel(res.data);
+      },
+    });
+  }
+
+  /**
+   * Get the required format date for Excel's filename (ex. 300525_MAY2425)
+   */
+  function excelDate() {
+    let now = new Date();
+
+    let DD = String(now.getDate()).padStart(2, "0"); // Tanggal (2 digit)
+    let MM = String(now.getMonth() + 1).padStart(2, "0"); // Bulan (2 digit)
+    let RR = String(now.getFullYear()).slice(-2); // Tahun (2 digit)
+    let MMM = now.toLocaleString("en", { month: "short" }).toUpperCase(); // Bulan (3 huruf, uppercase)
+    let HH = String(now.getHours()).padStart(2, "0"); // Jam (2 digit)
+    let MI = String(now.getMinutes()).padStart(2, "0"); // Menit (2 digit)
+    let SS = String(now.getSeconds()).padStart(2, "0"); // Detik (2 digit)
+
+    return `${DD}${MM}${RR}_${MMM}_${HH}${MI}${SS}`;
+  }
+
+  /**
+   * @returns {link} - link download document
+   */
+  async function downloadExcel(jadwal) {
+    console.warn("downloading...");
+    try {
+      let filename;
+      // const date = new Date();
+      // const d = moment(date).format("D-MMM-YYYY");
+      filename = `Jadwal_Kuliah_${excelDate()}`;
+      console.log("filename", filename);
+
+      let params = {
+        filename: filename,
+        jadwal: jadwal,
+      };
+
+      const data = await $.ajax({
+        type: "POST",
+        url: "/generate_jadwal/download_excel",
+        data: JSON.stringify(params),
+        contentType: "application/json",
+        xhrFields: {
+          responseType: "blob",
+        },
+        beforeSend: () => {
+          Swal.fire({
+            html: `<p><b>Sedang Membuat File Laporan...</b></p><p style="text-align: center;">Jangan menutup halaman ini!</p>`,
+            allowOutsideClick: false,
+            allowEnterKey: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            willOpen: (_) => {
+              $("#modal_loading").modal("show");
+            },
+          });
+        },
+        complete: () => {
+          $("#modal_loading").modal("hide");
+        },
+      });
+
+      Swal.fire({
+        title: "Sukses!",
+        text: "Berhasil Download Laporan",
+        icon: "success",
+      });
+
+      const url = URL.createObjectURL(data);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = filename + ".xlsx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      popUpTimer("error", error.status, error.statusText);
+    }
+  }
 
   // $.ajax({
   //   type: "POST",
