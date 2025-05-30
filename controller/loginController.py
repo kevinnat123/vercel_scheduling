@@ -120,7 +120,7 @@ def dashboard():
 def get_academic_details():
     today = datetime.today()
     current_year = today.year
-    max_year = current_year if today.month >= 7 else current_year - 1
+    max_year = current_year if today.month > 3 else current_year - 1
     min_year = max_year - 7
 
     # Menentukan semester saat ini
@@ -135,8 +135,8 @@ def get_academic_details():
         semester_depan = "Antara"
 
     # Menentukan tahun ajaran
-    tahun_ajaran_1 = (current_year - 1) if today.month <= 8 else current_year
-    tahun_ajaran = f"{current_year - 1}/{current_year}" if today.month <= 8 else f"{current_year}/{current_year + 1}"
+    tahun_ajaran_saat_ini = f"{current_year - 1}/{current_year}" if today.month <= 8 else f"{current_year}/{current_year + 1}"
+    tahun_ajaran_berikutnya = f"{current_year}/{current_year + 1}" if today.month > 3 else f"{current_year - 1}/{current_year}"
 
     list_angkatan = list(range(min_year, max_year + 1))
 
@@ -145,8 +145,8 @@ def get_academic_details():
         "max_year": max_year,
         "semester_saat_ini": semester_saat_ini,
         "semester_depan": semester_depan,
-        "tahun_ajaran_1": tahun_ajaran_1,
-        "tahun_ajaran": tahun_ajaran,
+        "tahun_ajaran_saat_ini": tahun_ajaran_saat_ini,
+        "tahun_ajaran_berikutnya": tahun_ajaran_berikutnya,
         "list_angkatan": list_angkatan
     }
 
