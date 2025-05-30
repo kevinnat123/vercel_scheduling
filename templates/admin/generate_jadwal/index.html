@@ -2,7 +2,9 @@
 <div class="container-fluid mt-4" id="main-window">
   <div class="card">
     <div class="card-body">
-      <button type="button" id="generate" onclick="generate()">Generate</button>
+      <button type="button" id="generate" onclick="generate_jadwal()">
+        Generate
+      </button>
     </div>
   </div>
 </div>
@@ -10,51 +12,33 @@
 <script>
   $(document).ready(function () {});
 
-  function generate() {
+  function generate_jadwal() {
     $.ajax({
       type: "GET",
       url: "/generate_jadwal/generate",
       cache: false,
       beforeSend: () => {
         console.log("beforesend ajax");
+        showLoading();
       },
-      complete: () => {},
+      complete: () => {
+        hideLoading();
+      },
       success: async function (res) {
         console.log("res ajax", res);
-        downloadExcel(res.data);
+
+        if (res.status) export_jadwal_to_excel(res.filename, res.data);
+        else popUpTimer("error", res.message);
       },
     });
   }
 
   /**
-   * Get the required format date for Excel's filename (ex. 300525_MAY2425)
-   */
-  function excelDate() {
-    let now = new Date();
-
-    let DD = String(now.getDate()).padStart(2, "0"); // Tanggal (2 digit)
-    let MM = String(now.getMonth() + 1).padStart(2, "0"); // Bulan (2 digit)
-    let RR = String(now.getFullYear()).slice(-2); // Tahun (2 digit)
-    let MMM = now.toLocaleString("en", { month: "short" }).toUpperCase(); // Bulan (3 huruf, uppercase)
-    let HH = String(now.getHours()).padStart(2, "0"); // Jam (2 digit)
-    let MI = String(now.getMinutes()).padStart(2, "0"); // Menit (2 digit)
-    let SS = String(now.getSeconds()).padStart(2, "0"); // Detik (2 digit)
-
-    return `${DD}${MM}${RR}_${MMM}_${HH}${MI}${SS}`;
-  }
-
-  /**
    * @returns {link} - link download document
    */
-  async function downloadExcel(jadwal) {
+  async function export_jadwal_to_excel(filename, jadwal) {
     console.warn("downloading...");
     try {
-      let filename;
-      // const date = new Date();
-      // const d = moment(date).format("D-MMM-YYYY");
-      filename = `Jadwal_Kuliah_${excelDate()}`;
-      console.log("filename", filename);
-
       let params = {
         filename: filename,
         jadwal: jadwal,
@@ -103,54 +87,5 @@
       popUpTimer("error", error.status, error.statusText);
     }
   }
-
-  // $.ajax({
-  //   type: "POST",
-  //   url: "/user",
-  //   cache: false,
-  //   data: JSON.stringify({}),
-  //   beforeSend: () => {
-  //     console.log("beforesend ajax");
-  //   },
-  //   complete: () => {},
-  //   success: async function (res) {
-  //     console.log("res ajax", res);
-  //     asd = res;
-  //   },
-  // });
-  // testing_tab.clear().rows.add(asd).draw()
-
-  // let testing_tab = $("#testing").DataTable({
-  //   scrollX: true,
-  //   scrollY: "50vh",
-  //   scrollCollapse: true,
-  //   paging: false,
-  //   responsive: true,
-  //   info: false,
-  //   // ajax: {
-  //   //   type: "POST",
-  //   //   url: "/user",
-  //   //   cache: false,
-  //   //   data: {},
-  //   //   beforeSend: () => {
-  //   //     console.log("beforesend datatable");
-  //   //   },
-  //   //   complete: () => {},
-  //   //   // success: function (res) {
-  //   //   //   console.log("dtble", res);
-  //   //   // },
-  //   // },
-  //   columns: [
-  //     {
-  //       data: "id",
-  //     },
-  //     {
-  //       data: "name",
-  //     },
-  //     {
-  //       data: "email",
-  //     },
-  //   ],
-  // });
 </script>
 {% endblock %}
