@@ -1,12 +1,28 @@
 {% extends "layout.html" %} {% block content %}
 <div class="container-fluid mt-4" id="main-window">
   <div class="card">
-    <div class="card-body"></div>
+    <div class="card-body">
+      <button type="button" id="generate">Generate</button>
+    </div>
   </div>
 </div>
 {% endblock %} {% block script %}
 <script>
   $(document).ready(function () {});
+
+  $.ajax({
+    type: "GET",
+    url: "/generate_jadwal/generate",
+    cache: false,
+    beforeSend: () => {
+      console.log("beforesend ajax");
+    },
+    complete: () => {},
+    success: async function (res) {
+      console.log("res ajax", res);
+      asd = res;
+    },
+  });
 
   // $.ajax({
   //   type: "POST",
