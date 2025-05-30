@@ -62,7 +62,7 @@ def login():
         nip = req.get('nip')
         password = req.get('password')
 
-        # user = loginDao.signUp(nip, password)
+        # user = loginDao.signUp(nip, role="admin", password)
         user = loginDao.verify_user(nip, password)
 
         if user['status']:

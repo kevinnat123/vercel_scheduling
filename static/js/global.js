@@ -31,6 +31,10 @@ $(document).on("keydown", "form", function (e) {
   }
 });
 
+function capitalizeWords(string) {
+  return string.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 // auto uppercase input
 $("input").on("input", function () {
   if (!$(this).hasClass("sensitive-case"))
@@ -65,6 +69,30 @@ document.addEventListener("input", function (event) {
       sanitizedValue === "" ? "" : formatCurrency(sanitizedValue);
   }
 });
+
+/**
+ * Retrieve values of badges inside a div.
+ *
+ * @param {string} [elements] - Div's ID
+ */
+function retrieveBadgeValues(elements) {
+  let values = [];
+
+  $("#" + elements + " span.badge").each(function () {
+    // Clone untuk hapus button tanpa memengaruhi asli
+    let text = $(this)
+      .clone()
+      .children()
+      .remove()
+      .end()
+      .text()
+      .trim()
+      .toUpperCase();
+    if (!values.includes(text)) values.push(text);
+  });
+
+  return values;
+}
 
 /**
  * @param {string} [icon] - The icon type (e.g., "success", "error", "warning", "info"). Leave as `undefined` to skip.
