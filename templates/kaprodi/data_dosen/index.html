@@ -26,17 +26,21 @@
           <input
             type="radio"
             name="rbStatus"
-            id="1"
-            value="1"
+            id="Dosen Tetap"
+            value="Dosen Tetap"
             class="ms-5 me-2"
-          /><label class="form-check-label ms-2" for="1"> Tetap </label>
+          /><label class="form-check-label ms-2" for="Dosen Tetap">
+            Tetap
+          </label>
           <input
             type="radio"
             name="rbStatus"
-            id="0"
-            value="0"
+            id="Dosen Tidak Tetap"
+            value="Dosen Tidak Tetap"
             class="ms-5 me-2"
-          /><label class="form-check-label ms-2" for="0"> Tidak Tetap </label>
+          /><label class="form-check-label ms-2" for="Dosen Tidak Tetap">
+            Tidak Tetap
+          </label>
         </div>
       </div>
       <!-- NIP + STATUS END -->
@@ -74,7 +78,7 @@
       <!-- PAKAR -->
       <div class="form-group row">
         <label for="input_pakar" class="col-2 col-form-label">Pakar</label>
-        <div class="col">
+        <div class="col input-group">
           <input
             type="text"
             class="form-control"
@@ -82,6 +86,13 @@
             autocomplete="off"
             placeholder="Input data pakar dosen disini..."
           />
+          <button
+            type="button"
+            class="btn btn-danger"
+            onclick="clearBadge('field_pakar', 'list_pakar')"
+          >
+            Hapus Data
+          </button>
         </div>
       </div>
       <div class="form-group row" id="field_pakar" hidden>
@@ -94,7 +105,7 @@
         <label for="input_matkul_ajar" class="col-2 col-form-label"
           >Matkul Ajar</label
         >
-        <div class="col">
+        <div class="col input-group">
           <input
             type="text"
             class="form-control"
@@ -102,6 +113,13 @@
             autocomplete="off"
             placeholder="Tekan 'F9' untuk lihat list matkul | Input kata kunci..."
           />
+          <button
+            type="button"
+            class="btn btn-danger"
+            onclick="clearBadge('field_matkul_ajar', 'list_matkul_ajar')"
+          >
+            Hapus Data
+          </button>
         </div>
       </div>
       <div class="form-group row" id="field_matkul_ajar" hidden>
@@ -115,15 +133,71 @@
           >Preferensi</label
         >
         <div class="col d-flex align-items-center">
-          <input type="checkbox" name="cbPreferensi" />
+          <input type="checkbox" class="form-check-input" name="cbPreferensi" />
         </div>
       </div>
+
       <div class="form-group row">
         <label for="input_hindari_hari" class="col-2 col-form-label"
           >Hindari Hari</label
         >
-        <div class="col">
-          <input type="text" class="form-control" placeholder="Tag..." />
+        <div class="col d-flex align-items-center">
+          <div class="checkbox-group">
+            <div class="form-check form-check-inline">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                name="cbHari"
+                id="Senin"
+                value="Senin"
+              />
+              <label for="Senin" class="form-check-label">Senin</label>
+            </div>
+
+            <div class="form-check form-check-inline">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                name="cbHari"
+                id="Selasa"
+                value="Selasa"
+              />
+              <label for="Selasa" class="form-check-label">Selasa</label>
+            </div>
+
+            <div class="form-check form-check-inline">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                name="cbHari"
+                id="Rabu"
+                value="Rabu"
+              />
+              <label for="Rabu" class="form-check-label">Rabu</label>
+            </div>
+
+            <div class="form-check form-check-inline">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                name="cbHari"
+                id="Kamis"
+                value="Kamis"
+              />
+              <label for="Kamis" class="form-check-label">Kamis</label>
+            </div>
+
+            <div class="form-check form-check-inline">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                name="cbHari"
+                id="Jumat"
+                value="Jumat"
+              />
+              <label for="Jumat" class="form-check-label">Jumat</label>
+            </div>
+          </div>
         </div>
       </div>
       <!-- PREFERENSI END -->
@@ -282,13 +356,24 @@
         $("#input_nama").focus();
       }, 1500);
       return;
+    } else if (!$("input[name='rbStatus']:checked").val()) {
+      popUpTimer("error", "Status Dosen belum diisi!");
+      setTimeout(() => {
+        $("input[name='rbStatus']").focus();
+      }, 1500);
+      return;
     }
 
     let params = {
       nip: $("#input_nip").val(),
       nama: $("#input_nama").val(),
-      pakar: $("#input_pakar").val(),
+      status: $("input[name='rbStatus']:checked").val(),
       prodi: prodi,
+      pakar: retrieveBadgeValues("list_pakar"),
+      matkul_ajar: retrieveBadgeValues("list_matkul_ajar"),
+      preferensi: {
+        hindari_hari: getCheckedCheckboxValue("cbHari"),
+      },
     };
 
     $.ajax({

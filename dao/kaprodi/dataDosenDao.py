@@ -25,9 +25,11 @@ class dataDosenDao:
         result = { 'status': False }
 
         try:
-            # # Hapus key yang memiliki value kosong
-            # params = {k: v for k, v in params.items() if v}
-            # print('    params', params)
+            # Hapus key yang memiliki value kosong
+            params = {k: v for k, v in params.items() if v}
+            if params.get('preferensi'):
+                params['preferensi'] = {k: v for k, v in params['preferensi'].items() if v}
+            print(f"params {params}")
 
             if params.get('nip'):
                 # Check exist
@@ -36,12 +38,18 @@ class dataDosenDao:
                     raise CustomError({ 'message': 'Data dengan NIP ' + params['nip'] + ' sudah ada!' })
 
                 if params.get('nama'):
-                    params.update({'prodi': session['user']['prodi']})
-                    res = self.connection.insert_one(db_dosen, params)
-                    if res['status'] == False:
-                        raise CustomError({ 'message': res['message'] })
+                    if params.get("status"):
+                        if session['user']['role'] == "KAPRODI":
+                            params.update({'prodi': session['user']['prodi']})
+                            
+                        res = self.connection.insert_one(db_dosen, params)
+
+                        if res['status'] == True:
+                            result.update({ 'message': res['message'] })
+                        else:
+                            raise CustomError({ 'message': res['message'] })
                     else:
-                        result.update({ 'message': res['message'] })
+                        raise CustomError({ 'message': 'Status Dosen belum diisi!' })
                 else:
                     raise CustomError({ 'message': 'Nama belum diisi!', 'target': 'input_nama' })
             else:
