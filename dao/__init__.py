@@ -91,20 +91,27 @@ class Database:
         except errors.PyMongoError as e:
             return {'status': False, 'data': None, 'message': f'Error pymongo: {e}'}
     
-    def update_one(self, collection_name, filter, update_data, sensitive = False):
+    def update_one(self, collection_name, filter, update_data, unset_data={}):
         try:
             collection = self.get_collection(collection_name)
-            update_result = collection.update_one(filter, {'$set': update_data if sensitive else self.update_data})
+
+            update_query = {'$set': update_data}
+            if unset_data: update_query['$unset'] = unset_data
+            update_result = collection.update_one(filter, update_query)
+            # {'$set': update_data if sensitive else self.update_data}
             if update_result.modified_count > 0:
                 return {'status': True, 'message': 'Data berhasil diperbarui'}
             return {'status': False, 'message': 'Tidak ada data yang diperbarui'}
         except errors.PyMongoError as e:
             return {'status': False, 'message': f'Error pymongo: {e}'}
         
-    def update_many(self, collection_name, filter, update_data, sensitive = False):
+    def update_many(self, collection_name, filter, update_data, unset_data={}):
         try:
             collection = self.get_collection(collection_name)
-            update_result = collection.update_many(filter, {'$set': update_data if sensitive else self.update_data})
+
+            update_query = {'$set': update_data}
+            if unset_data: update_query['$unset'] = unset_data
+            update_result = collection.update_many(filter, update_query)
             if update_result.modified_count > 0:
                 return {'status': True, 'modified_count': update_result.modified_count, 'message': 'Data berhasil diperbarui'}
             return {'status': False, 'modified_count': 0, 'message': 'Tidak ada data yang diperbarui'}
