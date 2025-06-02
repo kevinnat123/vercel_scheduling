@@ -31,41 +31,38 @@ class dataDosenDao:
             params = {k: v for k, v in params.items() if v}
 
             if params.get('nip'):
-                if params.get('nama'):
-                    if params.get("status"):
-                        if params.get('prodi'):
-                            # Check exist
-                            res = self.connection.find_one(db_dosen, {'nip': params['nip']})
-                            if (res['status'] == True):
-                                raise CustomError({ 'message': 'Data dengan NIP ' + params['nip'] + ' sudah ada!' })
-                            if session['user']['role'] == "KAPRODI":
-                                if params['prodi'] != session['user']['prodi']:
-                                    raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
-                                
-                            res = self.connection.insert_one(db_dosen, params)
-
-                            # update matkul
-                            if params.get('matkul_ajar'):
-                                for matkul in params['matkul_ajar']:
-                                    exist = self.connection.find_one(db_matkul, {"nama": matkul})
-                                    if exist and exist.get('status'):
-                                        dosen_ajar_lama = exist['data'].get('dosen_ajar') or []
-                                        if params['nama'] not in dosen_ajar_lama:
-                                            dosen_ajar_lama.append(params['nama'])
-                                            self.connection.update_one(db_matkul, {"nama": matkul}, {"dosen_ajar": dosen_ajar_lama})
-
-                            if res['status'] == True:
-                                result.update({ 'message': res['message'] })
-                            else:
-                                raise CustomError({ 'message': res['message'] })
-                        else:
-                            raise CustomError({ 'message': 'Program Studi belum diisi!' })
-                    else:
-                        raise CustomError({ 'message': 'Status Dosen belum diisi!' })
-                else:
-                    raise CustomError({ 'message': 'Nama belum diisi!', 'target': 'input_nama' })
-            else:
                 raise CustomError({ 'message': 'NIP belum diisi!', 'target': 'input_nip' })
+            elif params.get('nama'):
+                raise CustomError({ 'message': 'Nama belum diisi!', 'target': 'input_nama' })
+            elif params.get("status"):
+                raise CustomError({ 'message': 'Status Dosen belum diisi!' })
+            elif params.get('prodi'):
+                raise CustomError({ 'message': 'Program Studi belum diisi!' })
+            
+            # Check exist
+            res = self.connection.find_one(db_dosen, {'nip': params['nip']})
+            if (res['status'] == True):
+                raise CustomError({ 'message': 'Data dengan NIP ' + params['nip'] + ' sudah ada!' })
+            if session['user']['role'] == "KAPRODI":
+                if params['prodi'] != session['user']['prodi']:
+                    raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
+                
+            res = self.connection.insert_one(db_dosen, params)
+
+            # update matkul
+            if params.get('matkul_ajar'):
+                for matkul in params['matkul_ajar']:
+                    exist = self.connection.find_one(db_matkul, {"nama": matkul})
+                    if exist and exist.get('status'):
+                        dosen_ajar_lama = exist['data'].get('dosen_ajar') or []
+                        if params['nama'] not in dosen_ajar_lama:
+                            dosen_ajar_lama.append(params['nama'])
+                            self.connection.update_one(db_matkul, {"nama": matkul}, {"dosen_ajar": dosen_ajar_lama})
+
+            if res['status'] == True:
+                result.update({ 'message': res['message'] })
+            else:
+                raise CustomError({ 'message': res['message'] })
 
             result.update({ 'status': True })
         except CustomError as e:
@@ -104,58 +101,55 @@ class dataDosenDao:
             params = {k: v for k, v in params.items() if v}
 
             if params.get('nip'):
-                if params.get('nama'):
-                    if params.get('status'):
-                        if params.get('prodi'):
-                            # Check exist
-                            dosen_exist = self.connection.find_one(db_dosen, {'nip': params['nip']})
-                            if (dosen_exist['status'] == False and dosen_exist['data'] == None):
-                                raise CustomError({ 'message': 'Data dengan NIP ' + params['nip'] + ' tidak ditemukan!' })
-                            if session['user']['role'] == "KAPRODI":    
-                                if params['prodi'] != session['user']['prodi']:
-                                    raise CustomError({ 'message': 'Anda mengubah program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
-                                
-                            res = self.connection.update_one(db_dosen, {'nip': params['nip']}, params, unset)
-
-                            # update matkul
-                            if params.get('matkul_ajar'):
-                                for matkul in params['matkul_ajar']:
-                                    exist = self.connection.find_one(db_matkul, {"nama": matkul})
-                                    if exist and exist.get('status'):
-                                        dosen_ajar_lama = exist['data'].get('dosen_ajar') or []
-                                        if params['nama'] not in dosen_ajar_lama:
-                                            dosen_ajar_lama.append(params['nama'])
-                                            self.connection.update_one(db_matkul, {"nama": matkul}, {"dosen_ajar": dosen_ajar_lama})
-
-                            if len(params.get('matkul_ajar') or []) < len(dosen_exist['data'].get('matkul_ajar') or []):
-                                matkul_ajar_lama = dosen_exist['data'].get('matkul_ajar') or []
-                                matkul_ajar_baru = params.get('matkul_ajar') or []
-                                data_dihapus = [dt for dt in matkul_ajar_lama if dt not in matkul_ajar_baru]
-
-                                for matkul in data_dihapus:
-                                    data_matkul = self.connection.find_one(db_matkul, {'nama': matkul})
-                                    if data_matkul and data_matkul.get('status'):
-                                        old_data = data_matkul['data']
-                                        old_data['dosen_ajar'].remove(params['nama'])
-                                        if old_data['dosen_ajar']:
-                                            self.connection.update_one(db_matkul, {'nama': matkul}, {'dosen_ajar': old_data['dosen_ajar']})
-                                        else:
-                                            self.connection.update_one(db_matkul, {'nama': matkul}, {}, {'dosen_ajar': ""})
-                                    else:
-                                        raise Exception
-                            
-                            if res['status'] == True:
-                                result.update({ 'message': res['message'] })
-                            else:
-                                raise CustomError({ 'message': res['message'] })
-                        else:
-                            raise CustomError({ 'message': 'Program Studi belum diisi!' })
-                    else:
-                        raise CustomError({ 'message': 'Status Dosen belum diisi!' })
-                else:
-                    raise CustomError({ 'message': 'Nama belum diisi!', 'target': 'input_nama' })
-            else:
                 raise CustomError({ 'message': 'NIP belum diisi!' })
+            elif params.get('nama'):
+                raise CustomError({ 'message': 'Nama belum diisi!', 'target': 'input_nama' })
+            elif params.get('status'):
+                raise CustomError({ 'message': 'Status Dosen belum diisi!' })
+            elif params.get('prodi'):
+                raise CustomError({ 'message': 'Program Studi belum diisi!' })
+
+            # Check exist
+            dosen_exist = self.connection.find_one(db_dosen, {'nip': params['nip']})
+            if (dosen_exist['status'] == False and dosen_exist['data'] == None):
+                raise CustomError({ 'message': 'Data dengan NIP ' + params['nip'] + ' tidak ditemukan!' })
+            if session['user']['role'] == "KAPRODI":    
+                if params['prodi'] != session['user']['prodi']:
+                    raise CustomError({ 'message': 'Anda mengubah program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
+                
+            res = self.connection.update_one(db_dosen, {'nip': params['nip']}, params, unset)
+
+            # update matkul
+            if params.get('matkul_ajar'):
+                for matkul in params['matkul_ajar']:
+                    exist = self.connection.find_one(db_matkul, {"nama": matkul})
+                    if exist and exist.get('status'):
+                        dosen_ajar_lama = exist['data'].get('dosen_ajar') or []
+                        if params['nama'] not in dosen_ajar_lama:
+                            dosen_ajar_lama.append(params['nama'])
+                            self.connection.update_one(db_matkul, {"nama": matkul}, {"dosen_ajar": dosen_ajar_lama})
+
+            if len(params.get('matkul_ajar') or []) < len(dosen_exist['data'].get('matkul_ajar') or []):
+                matkul_ajar_lama = dosen_exist['data'].get('matkul_ajar') or []
+                matkul_ajar_baru = params.get('matkul_ajar') or []
+                data_dihapus = [dt for dt in matkul_ajar_lama if dt not in matkul_ajar_baru]
+
+                for matkul in data_dihapus:
+                    data_matkul = self.connection.find_one(db_matkul, {'nama': matkul})
+                    if data_matkul and data_matkul.get('status'):
+                        old_data = data_matkul['data']
+                        old_data['dosen_ajar'].remove(params['nama'])
+                        if old_data['dosen_ajar']:
+                            self.connection.update_one(db_matkul, {'nama': matkul}, {'dosen_ajar': old_data['dosen_ajar']})
+                        else:
+                            self.connection.update_one(db_matkul, {'nama': matkul}, {}, {'dosen_ajar': ""})
+                    else:
+                        raise Exception
+            
+            if res['status'] == True:
+                result.update({ 'message': res['message'] })
+            else:
+                raise CustomError({ 'message': res['message'] })
 
             result.update({ 'status': True })
         except CustomError as e:
