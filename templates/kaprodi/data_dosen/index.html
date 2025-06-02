@@ -26,19 +26,17 @@
           <input
             type="radio"
             name="rbStatus"
-            id="Dosen Tetap"
-            value="Dosen Tetap"
+            id="TETAP"
+            value="TETAP"
             class="ms-5 me-2"
-          /><label class="form-check-label ms-2" for="Dosen Tetap">
-            Tetap
-          </label>
+          /><label class="form-check-label ms-2" for="Tetap"> Tetap </label>
           <input
             type="radio"
             name="rbStatus"
-            id="Dosen Tidak Tetap"
-            value="Dosen Tidak Tetap"
+            id="TIDAK_TETAP"
+            value="TIDAK_TETAP"
             class="ms-5 me-2"
-          /><label class="form-check-label ms-2" for="Dosen Tidak Tetap">
+          /><label class="form-check-label ms-2" for="Tidak Tetap">
             Tidak Tetap
           </label>
         </div>
@@ -151,10 +149,10 @@
                 type="checkbox"
                 class="form-check-input"
                 name="cbHari"
-                id="Senin"
-                value="Senin"
+                id="SENIN"
+                value="SENIN"
               />
-              <label for="Senin" class="form-check-label">Senin</label>
+              <label for="SENIN" class="form-check-label">Senin</label>
             </div>
 
             <div class="form-check form-check-inline">
@@ -162,10 +160,10 @@
                 type="checkbox"
                 class="form-check-input"
                 name="cbHari"
-                id="Selasa"
-                value="Selasa"
+                id="SELASA"
+                value="SELASA"
               />
-              <label for="Selasa" class="form-check-label">Selasa</label>
+              <label for="SELASA" class="form-check-label">Selasa</label>
             </div>
 
             <div class="form-check form-check-inline">
@@ -173,10 +171,10 @@
                 type="checkbox"
                 class="form-check-input"
                 name="cbHari"
-                id="Rabu"
-                value="Rabu"
+                id="RABU"
+                value="RABU"
               />
-              <label for="Rabu" class="form-check-label">Rabu</label>
+              <label for="RABU" class="form-check-label">Rabu</label>
             </div>
 
             <div class="form-check form-check-inline">
@@ -184,10 +182,10 @@
                 type="checkbox"
                 class="form-check-input"
                 name="cbHari"
-                id="Kamis"
-                value="Kamis"
+                id="KAMIS"
+                value="KAMIS"
               />
-              <label for="Kamis" class="form-check-label">Kamis</label>
+              <label for="KAMIS" class="form-check-label">Kamis</label>
             </div>
 
             <div class="form-check form-check-inline">
@@ -195,10 +193,10 @@
                 type="checkbox"
                 class="form-check-input"
                 name="cbHari"
-                id="Jumat"
-                value="Jumat"
+                id="JUMAT"
+                value="JUMAT"
               />
-              <label for="Jumat" class="form-check-label">Jumat</label>
+              <label for="JUMAT" class="form-check-label">Jumat</label>
             </div>
           </div>
         </div>
@@ -312,6 +310,7 @@
     $("#card-form span.badge").remove();
     $("#field_pakar").attr("hidden", true);
     $("#field_matkul_ajar").attr("hidden", true);
+    $(".preferensi_detail").attr("hidden", true);
   }
 
   async function form_dosen(
@@ -334,9 +333,14 @@
     }
     $("#input_prodi").prop("disabled", true);
     $("#input_prodi").val(prodi);
+
     if (data) {
       $("#input_nip").val(data.nip);
       $("#input_nama").val(data.nama);
+      $("#input_prodi").val(data.prodi);
+      $("#" + data.status).prop("checked", true);
+      $("input[name='cbPreferensi']").prop("checked", data.preferensi);
+      $(".preferensi_detail").attr("hidden", data.preferensi ? false : true);
       if (data.pakar)
         data.pakar.forEach((element) => {
           addBadge("field_pakar", "list_pakar", element);
@@ -345,6 +349,11 @@
         data.matkul_ajar.forEach((element) => {
           addBadge("field_matkul_ajar", "list_matkul_ajar", element);
         });
+      if (data.preferensi && data.preferensi.hindari_hari) {
+        data.preferensi.hindari_hari.forEach((element) => {
+          $("#" + element).prop("checked", true);
+        });
+      }
     }
     $("#card-form").prop("hidden", hidden ? true : false);
   }
@@ -390,6 +399,7 @@
       pakar: retrieveBadgeValues("list_pakar"),
       matkul_ajar: retrieveBadgeValues("list_matkul_ajar"),
       preferensi: {
+        value: getCheckedItemValue("cbPreferensi")[0],
         hindari_hari: getCheckedItemValue("cbHari"),
       },
     };
@@ -434,6 +444,7 @@
       pakar: retrieveBadgeValues("list_pakar"),
       matkul_ajar: retrieveBadgeValues("list_matkul_ajar"),
       preferensi: {
+        value: getCheckedItemValue("cbPreferensi")[0],
         hindari_hari: getCheckedItemValue("cbHari"),
       },
     };

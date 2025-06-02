@@ -25,18 +25,13 @@ class dataDosenDao:
         result = { 'status': False }
 
         try:
-            # Hapus key yang memiliki value kosong
-            if params.get('preferensi'):
-                params['preferensi'] = {k: v for k, v in params['preferensi'].items() if v}
-            params = {k: v for k, v in params.items() if v}
-
-            if params.get('nip'):
+            if not params.get('nip'):
                 raise CustomError({ 'message': 'NIP belum diisi!', 'target': 'input_nip' })
-            elif params.get('nama'):
+            elif not params.get('nama'):
                 raise CustomError({ 'message': 'Nama belum diisi!', 'target': 'input_nama' })
-            elif params.get("status"):
+            elif not params.get("status"):
                 raise CustomError({ 'message': 'Status Dosen belum diisi!' })
-            elif params.get('prodi'):
+            elif not params.get('prodi'):
                 raise CustomError({ 'message': 'Program Studi belum diisi!' })
             
             # Check exist
@@ -46,6 +41,15 @@ class dataDosenDao:
             if session['user']['role'] == "KAPRODI":
                 if params['prodi'] != session['user']['prodi']:
                     raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
+                
+            # Hapus key yang memiliki value kosong
+            if params.get('preferensi'):
+                if params['preferensi'].get('value'):
+                    params['preferensi'] = {k: v for k, v in params['preferensi'].items() if v}
+                    params['preferensi'].pop('value')
+                else:
+                    params.pop('preferensi')
+            params = {k: v for k, v in params.items() if v}
                 
             res = self.connection.insert_one(db_dosen, params)
 
@@ -80,42 +84,47 @@ class dataDosenDao:
         result = { 'status': False }
 
         try:
-            unset = {k: "" for k, v in params.items() if not v}
-
-            if params.get('preferensi'):
-                # params['preferensi'] = {k: v for k, v in params['preferensi'].items() if v}
-                for k, v in dict(params['preferensi']).items():
-                    if v:
-                        params['preferensi'][k] = v
-                    else:
-                        unset['preferensi.' + k] = ""
-                        params['preferensi'].pop(k)
-
-            if not params.get('preferensi'): 
-                unset['preferensi'] = ""
-
-                for x in list(unset.keys()):
-                    if len(x.split('.')) > 1 and x.split('.')[0] == 'preferensi':
-                        unset.pop(x)
-
-            params = {k: v for k, v in params.items() if v}
-
-            if params.get('nip'):
+            if not params.get('nip'):
                 raise CustomError({ 'message': 'NIP belum diisi!' })
-            elif params.get('nama'):
+            elif not params.get('nama'):
                 raise CustomError({ 'message': 'Nama belum diisi!', 'target': 'input_nama' })
-            elif params.get('status'):
+            elif not params.get('status'):
                 raise CustomError({ 'message': 'Status Dosen belum diisi!' })
-            elif params.get('prodi'):
+            elif not params.get('prodi'):
                 raise CustomError({ 'message': 'Program Studi belum diisi!' })
-
+            
             # Check exist
             dosen_exist = self.connection.find_one(db_dosen, {'nip': params['nip']})
             if (dosen_exist['status'] == False and dosen_exist['data'] == None):
                 raise CustomError({ 'message': 'Data dengan NIP ' + params['nip'] + ' tidak ditemukan!' })
+
             if session['user']['role'] == "KAPRODI":    
                 if params['prodi'] != session['user']['prodi']:
                     raise CustomError({ 'message': 'Anda mengubah program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
+            
+            unset = {k: "" for k, v in params.items() if not v}
+
+            if params.get('preferensi'):
+                if params['preferensi'].get('value'):
+                    params['preferensi'].pop('value')
+
+                    # params['preferensi'] = {k: v for k, v in params['preferensi'].items() if v}
+                    for k, v in dict(params['preferensi']).items():
+                        if v:
+                            continue
+                        else:
+                            unset[f'preferensi.{k}'] = ""
+                            params['preferensi'].pop(k)
+
+                    if not params['preferensi']:
+                        params.pop('preferensi')
+                        unset = {k: v for k, v in unset.items() if not k.startswith('preferensi.')}
+                        unset['preferensi'] = ""
+                else:
+                    params.pop('preferensi')
+                    unset['preferensi'] = ""
+
+            params = {k: v for k, v in params.items() if v}
                 
             res = self.connection.update_one(db_dosen, {'nip': params['nip']}, params, unset)
 
