@@ -5,11 +5,18 @@
       <button type="button" id="generate" onclick="generate_jadwal()">
         Generate
       </button>
+      <button type="button" id="export_excel" onclick="download_excel_by()">
+        Download Excel
+      </button>
     </div>
   </div>
 </div>
 {% endblock %} {% block script %}
 <script>
+  const semester_depan =
+    "{{ session['academic_details']['semester_depan'] | safe }}";
+  const tahun_ajaran_berikutnya =
+    "{{ session['academic_details']['tahun_ajaran_berikutnya'] | safe }}";
   $(document).ready(function () {});
 
   function generate_jadwal() {
@@ -27,26 +34,51 @@
       success: async function (res) {
         console.log("res ajax", res);
 
-        if (res.status) export_jadwal_to_excel(res.filename, res.data);
+        if (res.status) export_to_excel("Jadwal_Kuliah");
         else popUpTimer("error", res.message);
       },
+    });
+  }
+
+  function download_excel_by() {
+    Swal.fire({
+      title: "Cetak apa?",
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: "Jadwal Kuliah",
+      denyButtonText: `Jadwal Ruangan`,
+      confirmButtonColor: "#007bff",
+      denyButtonColor: "#28a745",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        export_to_excel("Jadwal_Kuliah");
+      } else if (result.isDenied) {
+        export_to_excel("Jadwal_Ruangan");
+      }
     });
   }
 
   /**
    * @returns {link} - link download document
    */
-  async function export_jadwal_to_excel(filename, jadwal) {
+  async function export_to_excel(downloadBy) {
     console.warn("downloading...");
+    let filename =
+      downloadBy +
+      "_Semester-" +
+      semester_depan +
+      "_" +
+      tahun_ajaran_berikutnya.replaceAll("/", "-");
+    console.log(filename);
     try {
       let params = {
         filename: filename,
-        jadwal: jadwal,
+        downloadBy: downloadBy.toLowerCase(),
       };
 
       const data = await $.ajax({
         type: "POST",
-        url: "/generate_jadwal/download_excel",
+        url: "/export/export_to_excel",
         data: JSON.stringify(params),
         contentType: "application/json",
         xhrFields: {

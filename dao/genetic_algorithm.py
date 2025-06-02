@@ -1,9 +1,4 @@
 import random, copy
-from pprint import pprint
-import xlsxwriter
-from IPython.display import FileLink
-import os
-from collections import defaultdict
 
 class JadwalKuliah:
     def __init__(
@@ -45,104 +40,6 @@ BOBOT_PENALTI = {
     "istirahat": 5,
     "salah_tipe_ruangan": 3,
 }
-
-def export_jadwal_to_excel(jadwal_list, filename, matakuliah_list, dosen_list):
-    fixed_headers = [
-        'kode_matkul', 'nama_matkul',
-        'kode_dosen', 'nama_dosen', 'sks_akademik', 
-        'kode_ruangan', 'kapasitas', 
-        'hari', 'jam_mulai', 'jam_selesai',
-        'tipe_kelas'
-    ]
-
-    # 🔹 Group berdasarkan program_studi
-    grouped = defaultdict(list)
-    for jadwal in jadwal_list:
-        grouped[jadwal.program_studi].append(jadwal)
-
-    # 🔹 Buat workbook
-    workbook = xlsxwriter.Workbook(filename)
-
-    # Format header
-    format_header = workbook.add_format({
-        'align': 'center',
-        'bg_color': '#99CCFF',
-        'valign': 'vcenter',
-        'bold': True
-    })
-    format_as = workbook.add_format({
-        'align': 'center',
-        'bg_color': '#b9ebc6',
-    })
-
-    # Loop setiap group dan tulis ke sheet terpisah
-    for program_studi in sorted(grouped.keys()):
-        sheet_name = program_studi[:31]  # Sheet name max 31 chars
-        worksheet = workbook.add_worksheet(sheet_name)
-
-        row_idx = 0
-        col_widths = [len(h) for h in fixed_headers]
-
-        # Tulis header kolom
-        for col_idx, header in enumerate(fixed_headers):
-            worksheet.write(row_idx, col_idx, header.replace('_', ' '), format_header)
-        row_idx += 1
-
-        # Sort dan tulis data
-        # sorted_group = sorted(grouped[program_studi], key=lambda x: (x.kode_ruangan, x.hari, x.jam_mulai))
-        sorted_group = sorted(grouped[program_studi], key=lambda x: x.kode_matkul)
-        for jadwal in sorted_group:
-            for col_idx, attr in enumerate(fixed_headers):
-                if attr == "nama_matkul":
-                    value = getattr(jadwal, 'kode_matkul')
-                    value = next((m['nama'] for m in matakuliah_list if m['kode'] == value[:-1] or m['kode'] == value[:-4]), None)
-                elif attr == "nama_dosen":
-                    value = getattr(jadwal, 'kode_dosen')
-                    value = next((d['nama'] for d in dosen_list if d['nip'] == value), None)
-                elif attr == "kapasitas":
-                    value = getattr(jadwal, "kode_matkul")
-                    if value[-2:] == "AS":
-                        kapasitas_dosen = next((sesi.kapasitas for sesi in jadwal_list if sesi.kode_matkul == value[:-3]), None)
-                        value = kapasitas_dosen
-                    else:
-                        value = getattr(jadwal, attr)
-                else:
-                    value = getattr(jadwal, attr)
-
-                worksheet.write(row_idx, col_idx, value, format_as if getattr(jadwal, 'kode_dosen') == "AS" else None)
-
-                val_len = len(str(value))
-                if val_len > col_widths[col_idx]:
-                    col_widths[col_idx] = val_len
-            row_idx += 1
-
-        # Set lebar kolom
-        for col_idx, width in enumerate(col_widths):
-            worksheet.set_column(col_idx, col_idx, width + 2)
-
-        # Data beban dosen
-        beban_dosen = {}
-        for sesi in sorted_group:
-            if sesi.kode_dosen != "AS":
-                if sesi.kode_dosen not in beban_dosen: beban_dosen[sesi.kode_dosen] = 0
-                beban_dosen[sesi.kode_dosen] += sesi.sks_akademik
-        # Tulis data beban dosen
-        start_col = len(fixed_headers) + 2
-        row_idx = 0
-        worksheet.write(row_idx, start_col, "NIP", format_header)
-        worksheet.write(row_idx, start_col + 1, "Beban SKS", format_header)
-        row_idx += 1
-        
-        for nip, sks in dict(sorted(beban_dosen.items())).items():
-            worksheet.write(row_idx, start_col, nip)
-            worksheet.write(row_idx, start_col + 1, sks)
-            row_idx += 1
-
-    # Simpan workbook
-    workbook.close()
-    print(f"✅ File '{filename}' berhasil dibuat.")
-    print('Excel disimpan di:', os.getcwd())
-    return FileLink(filename)
 
 def convertOutputToDict(jadwal_list):
     """

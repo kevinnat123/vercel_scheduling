@@ -26,13 +26,19 @@ class generateJadwalDao:
         print(f"{'':<7}{'[ DAO ]':<8} Get kelas")
         result = self.connection.find_many(db_kelas)
         return result['data'] if result and result.get('status') else []
+
+    def get_jadwal(self):
+        print(f"{'':<7}{'[ DAO ]':<8} Get jadwal")
+        u_id = str(session['academic_details']['semester_depan']) + "_" + str(session['academic_details']['tahun_ajaran_berikutnya']).replace("/", "-")
+        result = self.connection.find_one(db_jadwal, {'u_id': u_id})
+        return result['data'] if result and result.get('status') else []
     
     def upload_jadwal(self, jadwal):
         print(f"{'':<7}{'[ DAO ]':<8} Upload Jadwal")
         result = { 'status': False }
 
         try:
-            u_id = str(session['academic_details']['semester_depan']) + str(session['academic_details']['tahun_ajaran_berikutnya'])
+            u_id = str(session['academic_details']['semester_depan']) + "_" + str(session['academic_details']['tahun_ajaran_berikutnya']).replace("/", "-")
             res = self.connection.find_one(db_jadwal, {'u_id': u_id})
             data = {
                 "u_id": u_id,
