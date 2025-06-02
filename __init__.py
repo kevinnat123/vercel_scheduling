@@ -7,6 +7,7 @@ from datetime import timedelta
 from controller.loginController import signin
 from controller.dashboardController import dashboard
 from controller.settingController import setting
+from controller.excelController import export
 
 # ADMIN
 from controller.admin.generateJadwalController import generateJadwal
@@ -41,6 +42,7 @@ def create_app():
     app.register_blueprint(signin)
     app.register_blueprint(dashboard)
     app.register_blueprint(setting)
+    app.register_blueprint(export)
 
     # ADMIN
     app.register_blueprint(generateJadwal)
