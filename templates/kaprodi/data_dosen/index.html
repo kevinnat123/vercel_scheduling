@@ -342,7 +342,6 @@
       $("#input_prodi").val(data.prodi);
       $("#" + data.status).prop("checked", true);
       $("input[name='cbPreferensi']").prop("checked", data.preferensi);
-      $(".preferensi_detail").attr("hidden", data.preferensi ? false : true);
       if (data.pakar)
         data.pakar.forEach((element) => {
           addBadge("field_pakar", "list_pakar", element);
@@ -351,6 +350,7 @@
         data.matkul_ajar.forEach((element) => {
           addBadge("field_matkul_ajar", "list_matkul_ajar", element);
         });
+      $(".preferensi_detail").attr("hidden", data.preferensi ? false : true);
       if (data.preferensi && data.preferensi.hindari_hari) {
         data.preferensi.hindari_hari.forEach((element) => {
           $("#" + element).prop("checked", true);
@@ -435,8 +435,37 @@
   });
 
   $("#btn-update").on("click", function () {
-    if (!$("#input_nama").val())
-      return popUpTimer("error", "Nama belum diisi!");
+    if (!$("#input_nip").val()) {
+      popUpTimer("error", "NIP belum diisi!");
+      setTimeout(() => {
+        $("#input_nip").focus();
+      }, 1500);
+      return;
+    } else if (
+      !dosen_tab
+        .data()
+        .toArray()
+        .some((item) => item.nip === $("#input_nip").val())
+    ) {
+      popUpTimer(
+        "error",
+        "Data dengan NIP " + $("#input_nip").val() + " tidak ditemukan!"
+      );
+      form_dosen(false);
+      return;
+    } else if (!$("#input_nama").val()) {
+      popUpTimer("error", "Nama belum diisi!");
+      setTimeout(() => {
+        $("#input_nama").focus();
+      }, 1500);
+      return;
+    } else if (!$("input[name='rbStatus']:checked").val()) {
+      popUpTimer("error", "Status Dosen belum diisi!");
+      setTimeout(() => {
+        $("input[name='rbStatus']").focus();
+      }, 1500);
+      return;
+    }
 
     let params = {
       nip: $("#input_nip").val(),
@@ -528,6 +557,7 @@
             $('input[name="cbDosenTabAll"]').prop("checked", false);
             dosen_tab.ajax.reload(null, false);
           }
+          $("#btn-batal").click();
         },
       });
     }
