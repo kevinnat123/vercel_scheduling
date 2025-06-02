@@ -27,8 +27,7 @@ class settingDao:
                     register_user_password = self.connection.update_one(
                         db_users, 
                         { 'u_id': session['user']['u_id'] }, 
-                        { 'password': generate_password_hash(newPassword) },
-                        sensitive= True
+                        { 'password': generate_password_hash(newPassword) }
                     )
                     if register_user_password and register_user_password['status']:
                         return {'status': True, 'message': 'Password berhasil disimpan!'}
