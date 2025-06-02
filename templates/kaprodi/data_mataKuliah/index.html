@@ -7,9 +7,10 @@
       <div class="row">
         <h4 id="formTitle"></h4>
       </div>
+      <!-- KODE -->
       <div class="form-group row">
         <label for="input_kode" class="col-2 col-form-label text-end"
-          >Kode</label
+          >Kode<span class="text-danger" aria-hidden="true">*</span></label
         >
         <div class="col-2">
           <input
@@ -17,12 +18,16 @@
             class="form-control"
             id="input_kode"
             autocomplete="off"
+            maxlength="5"
+            placeholder="Input kode"
           />
         </div>
       </div>
+      <!-- KODE END -->
+      <!-- NAMA -->
       <div class="form-group row">
         <label for="input_nama" class="col-2 col-form-label text-end"
-          >Nama</label
+          >Nama<span class="text-danger" aria-hidden="true">*</span></label
         >
         <div class="col">
           <input
@@ -30,12 +35,15 @@
             class="form-control"
             id="input_nama"
             autocomplete="off"
+            placeholder="Input nama mata kuliah"
           />
         </div>
       </div>
+      <!-- NAMA END -->
+      <!-- KELOMPOK -->
       <div class="form-group row">
         <label for="input_kelompok" class="col-2 col-form-label text-end"
-          >Kelompok</label
+          >Kelompok&ensp;</label
         >
         <div class="col">
           <select class="form-select" id="input_kelompok">
@@ -65,9 +73,13 @@
           </div>
         </div>
       </div>
+      <!-- KELOMPOK END -->
+      <!-- PROGRAM STUDI -->
       <div class="form-group row">
         <label for="input_prodi" class="col-2 col-form-label text-end"
-          >Program Studi</label
+          >Program Studi<span class="text-danger" aria-hidden="true"
+            >*</span
+          ></label
         >
         <div class="col">
           <input
@@ -78,37 +90,188 @@
           />
         </div>
       </div>
+      <!-- PROGRAM STUDI -->
+      <!-- TIPE KELAS -->
+      <div class="form-group row">
+        <label for="cbTipeKelas" class="col-2 col-form-label text-end"
+          >Tipe Kelas<span class="text-danger" aria-hidden="true"
+            >*</span
+          ></label
+        >
+        <div class="col d-flex align-items-center">
+          <div class="radio-group">
+            <div class="form-check form-check-inline">
+              <input
+                type="radio"
+                class="form-check-input"
+                name="rbTipeKelas"
+                id="TEORI"
+                value="TEORI"
+              />
+              <label for="TEORI" class="form-check-label">Teori</label>
+            </div>
+          </div>
+          <div class="radio-group">
+            <div class="form-check form-check-inline">
+              <input
+                type="radio"
+                class="form-check-input"
+                name="rbTipeKelas"
+                id="PRAKTIKUM"
+                value="PRAKTIKUM"
+              />
+              <label for="PRAKTIKUM" class="form-check-label">Praktikum</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- TIPE KELAS END -->
+      <!-- SKS -->
       <div class="form-group row">
         <label for="input_sksA" class="col-2 col-form-label text-end"
-          >SKS Akademik</label
+          >SKS Akademik<span class="text-danger" aria-hidden="true"
+            >*</span
+          ></label
         >
-        <div class="col-1">
+        <div class="col-2">
           <input
             type="text"
-            class="form-control"
+            class="form-control numberOnly"
             id="input_sksA"
             autocomplete="off"
+            maxlength="2"
+            placeholder="Input SKS akademik"
           />
         </div>
         <label for="input_sksB" class="col-2 col-form-label text-end"
-          >SKS Bayar</label
+          >SKS Bayar<span class="text-danger" aria-hidden="true">*</span></label
         >
-        <div class="col-1">
+        <div class="col-2">
+          <input
+            type="text"
+            class="form-control numberOnly"
+            id="input_sksB"
+            autocomplete="off"
+            maxlength="2"
+            placeholder="Input SKS bayar"
+          />
+        </div>
+      </div>
+      <!-- SKS END -->
+      <!-- BIDANG -->
+      <div class="form-group row">
+        <label for="input_bidang" class="col-2 col-form-label text-end"
+          >Bidang&ensp;</label
+        >
+        <div class="col input-group">
           <input
             type="text"
             class="form-control"
-            id="input_sksB"
+            id="input_bidang"
             autocomplete="off"
+            placeholder="Input data bidang matkul"
           />
-        </div>
-        <div class="col"></div>
-        <label for="cbPraktikum" class="col-2 col-form-label text-end"
-          >Praktikum</label
-        >
-        <div class="col-1 d-flex align-items-center">
-          <input type="checkbox" id="cbPraktikum" />
+          <button
+            type="button"
+            class="btn btn-danger"
+            onclick="clearBadge('field_bidang', 'list_bidang')"
+          >
+            Hapus Data
+          </button>
         </div>
       </div>
+      <div class="form-group row" id="field_bidang" hidden>
+        <label for="input_bidang" class="col-2 col-form-label"></label>
+        <div class="col" id="list_bidang"></div>
+      </div>
+      <!-- BIDANG END -->
+      <!-- DOSEN AJAR -->
+      <div class="form-group row">
+        <label for="input_dosen_ajar" class="col-2 col-form-label text-end"
+          >Dosen Ajar&ensp;</label
+        >
+        <div class="col input-group">
+          <input
+            type="text"
+            class="form-control"
+            id="input_dosen_ajar"
+            autocomplete="off"
+            placeholder="Tekan 'F9' untuk lihat list dosen | Input kata kunci"
+          />
+          <button
+            type="button"
+            class="btn btn-danger"
+            onclick="clearBadge('field_dosen_ajar', 'list_dosen_ajar')"
+          >
+            Hapus Data
+          </button>
+        </div>
+      </div>
+      <div class="form-group row" id="field_dosen_ajar" hidden>
+        <label for="input_dosen_ajar" class="col-2 col-form-label"></label>
+        <div class="col" id="list_dosen_ajar"></div>
+      </div>
+      <!-- DOSEN AJAR END -->
+      <!-- ASISTENSI -->
+      <div class="form-group row">
+        <label for="cbAsistensi" class="col-2 col-form-label text-end"
+          >Asistensi&ensp;</label
+        >
+        <div class="col d-flex align-items-center">
+          <input type="checkbox" class="form-check-input" name="cbAsistensi" />
+        </div>
+
+        <label
+          for="cbIntegratedClass"
+          class="col-3 col-form-label text-end asistensi_detail"
+          hidden
+          >Kelas Gabungan</label
+        >
+        <div class="col d-flex align-items-center">
+          <input
+            type="checkbox"
+            class="form-check-input asistensi_detail"
+            name="cbIntegratedClass"
+            hidden
+          />
+        </div>
+      </div>
+
+      <div class="form-group row asistensi_detail" hidden>
+        <label for="rbTipeKelasAsistensi" class="col-2 col-form-label text-end"
+          >Tipe Kelas Asisten&ensp;</label
+        >
+        <div class="col d-flex align-items-center">
+          <div class="radio-group">
+            <div class="form-check form-check-inline">
+              <input
+                type="radio"
+                class="form-check-input"
+                name="rbTipeKelasAsistensi"
+                id="ASISTEN_TEORI"
+                value="TEORI"
+              />
+              <label for="ASISTEN_TEORI" class="form-check-label">Teori</label>
+            </div>
+          </div>
+          <div class="radio-group">
+            <div class="form-check form-check-inline">
+              <input
+                type="radio"
+                class="form-check-input"
+                name="rbTipeKelasAsistensi"
+                id="ASISTEN_PRAKTIKUM"
+                value="PRAKTIKUM"
+              />
+              <label for="ASISTEN_PRAKTIKUM" class="form-check-label"
+                >Praktikum</label
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ASISTENSI END -->
+      <!-- FORM ACTION -->
       <div class="col text-end">
         <button type="button" class="btn btn-primary" id="btn-simpan">
           Simpan
@@ -125,6 +288,7 @@
           Batal
         </button>
       </div>
+      <!-- FORM ACTION END -->
     </form>
   </div>
 </div>
@@ -154,7 +318,7 @@
           <th>Nama</th>
           <th>SKS A</th>
           <th>SKS B</th>
-          <th>Kelompok</th>
+          <th>Asistensi</th>
           <th></th>
         </thead>
         <tbody></tbody>
@@ -162,10 +326,54 @@
     </div>
   </div>
 </div>
+
+<!-- MODAL LOV DOSEN -->
+<div class="modal fade" id="modal-dosen">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">List Mata Kuliah</h4>
+        <button type="button" class="close" data-bs-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table
+          class="table table-hover table-bordered w-100"
+          style="overflow: auto"
+          id="table_lov_dosen"
+        >
+          <thead>
+            <th>NIP</th>
+            <th>Nama</th>
+          </thead>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-default pull-left"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- MODAL LOV DOSEN END -->
 {% endblock %} {% block script %}
 <script>
   const prodi = "{{ prodi | safe }}";
   $(document).ready(function () {
+    $("#modal-dosen tbody").on("click", "tr", async function () {
+      let row = dosen_lov.row(this).data();
+      $("#modal-dosen").modal("hide");
+      await addBadge("field_dosen_ajar", "list_dosen_ajar", row.nama);
+    });
+
     document
       .getElementById("input_kelompok")
       .addEventListener("change", function () {
@@ -232,8 +440,21 @@
       });
   });
 
-  function form_matkul(update = undefined, hidden = false, data = undefined) {
+  function clear_form() {
     $("#frm")[0].reset();
+    $("#card-form span.badge").remove();
+    $("#field_bidang").attr("hidden", true);
+    $("#field_dosen_ajar").attr("hidden", true);
+    $(".asistensi_detail").attr("hidden", true);
+  }
+
+  async function form_matkul(
+    update = undefined,
+    hidden = false,
+    data = undefined
+  ) {
+    await $("#frm")[0].reset();
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (update === false) {
       document.getElementById("formTitle").innerText = "Tambah Data";
       $("#card-form input").prop("disabled", false);
@@ -247,16 +468,31 @@
     }
     $("#input_prodi").prop("disabled", true);
     $("#input_prodi").val(prodi);
+
     if (data) {
       $("#input_kode").val(data.kode);
       $("#input_nama").val(data.nama);
       $("#input_kelompok").val(data.kelompok);
       $("#input_sksA").val(data.sks_akademik);
       $("#input_sksB").val(data.sks_bayar);
-      $("#cbPraktikum").prop("checked", data.praktikum ?? false);
+      $("#input_prodi").val(data.prodi);
+      $("#" + data.tipe_kelas).prop("checked", true);
+      if (data.bidang)
+        data.bidang.forEach((element) => {
+          addBadge("field_bidang", "list_bidang", element);
+        });
+      if (data.dosen_ajar)
+        data.dosen_ajar.forEach((element) => {
+          addBadge("field_dosen_ajar", "list_dosen_ajar", element);
+        });
+      $("input[name='cbAsistensi']").prop("checked", data.asistensi);
+      $("input[name='cbIntegratedClass']").prop(
+        "checked",
+        data.integrated_class
+      );
+      $("#ASISTENSI_" + data.tipe_kelas_asistensi).prop("checked", true);
     }
     $("#card-form").prop("hidden", hidden ? true : false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   $("#btn-simpan").on("click", function () {
@@ -292,16 +528,43 @@
           : $("#input_sksB").focus();
       }, 1500);
       return;
+    } else if (!$("#input_prodi").val()) {
+      popUpTimer("error", "Program Studi belum diisi!");
+      setTimeout(() => {
+        $("#input_prodi").focus();
+      }, 1500);
+      return;
+    } else if (!getCheckedItemValue("rbTipeKelas")[0]) {
+      popUpTimer("error", "Tipe Kelas belum diisi!");
+      setTimeout(() => {
+        $("#rbTipeKelas").focus();
+      }, 1500);
+      return;
+    } else if (
+      getCheckedItemValue("cbAsistensi")[0] &&
+      !getCheckedItemValue("rbTipeKelasAsistensi")[0]
+    ) {
+      popUpTimer("error", "Tipe Kelas Asisten belum diisi!");
+      setTimeout(() => {
+        $("#rbTipeKelas").focus();
+      }, 1500);
+      return;
     }
 
     let params = {
       kode: $("#input_kode").val(),
       nama: $("#input_nama").val(),
       kelompok: $("#input_kelompok").val(),
-      prodi: prodi,
-      sks_akademik: $("#input_sksA").val(),
-      sks_bayar: $("#input_sksB").val(),
-      praktikum: $("#cbPraktikum").prop("checked"),
+      sks_akademik: Number($("#input_sksA").val()),
+      sks_bayar: Number($("#input_sksB").val()),
+      prodi: $("#input_prodi").val(),
+      tipe_kelas: getCheckedItemValue("rbTipeKelas")[0],
+      bidang: retrieveBadgeValues("list_bidang"),
+      asistensi: getCheckedItemValue("cbAsistensi")[0] ? true : false,
+      tipe_kelas_asistensi: getCheckedItemValue("rbTipeKelas")[0],
+      integrated_class: getCheckedItemValue("cbIntegratedClass")[0]
+        ? true
+        : false,
     };
 
     $.ajax({
@@ -333,18 +596,23 @@
   });
 
   $("#btn-update").on("click", function () {
-    if ($("#input_prodi").val() === "GENERAL")
-      return popUpTimer(
-        "error",
-        "Matkul ini tidak bisa diedit!",
-        "Silahkan hubungi admin untuk modifikasi matkul ini.",
-        2500
-      );
-    else if (!$("#input_kode").val()) {
+    if (!$("#input_kode").val()) {
       popUpTimer("error", "Kode Matkul belum diisi!");
       setTimeout(() => {
         $("#input_kode").focus();
       }, 1500);
+      return;
+    } else if (
+      matkul_tab
+        .data()
+        .toArray()
+        .some((item) => item.kode === $("#input_kode").val())
+    ) {
+      popUpTimer(
+        "error",
+        "Data dengan Kode Matkul " + $("#input_kode").val() + " sudah ada!"
+      );
+      form_matkul(false);
       return;
     } else if (!$("#input_nama").val()) {
       popUpTimer("error", "Nama Matkul belum diisi!");
@@ -360,16 +628,43 @@
           : $("#input_sksB").focus();
       }, 1500);
       return;
+    } else if (!$("#input_prodi").val()) {
+      popUpTimer("error", "Program Studi belum diisi!");
+      setTimeout(() => {
+        $("#input_prodi").focus();
+      }, 1500);
+      return;
+    } else if (!getCheckedItemValue("rbTipeKelas")[0]) {
+      popUpTimer("error", "Tipe Kelas belum diisi!");
+      setTimeout(() => {
+        $("#rbTipeKelas").focus();
+      }, 1500);
+      return;
+    } else if (
+      getCheckedItemValue("cbAsistensi")[0] &&
+      !getCheckedItemValue("rbTipeKelasAsistensi")[0]
+    ) {
+      popUpTimer("error", "Tipe Kelas Asisten belum diisi!");
+      setTimeout(() => {
+        $("#rbTipeKelas").focus();
+      }, 1500);
+      return;
     }
 
     let params = {
       kode: $("#input_kode").val(),
       nama: $("#input_nama").val(),
       kelompok: $("#input_kelompok").val(),
-      prodi: prodi,
-      sks_akademik: $("#input_sksA").val(),
-      sks_bayar: $("#input_sksB").val(),
-      praktikum: $("#cbPraktikum").prop("checked"),
+      sks_akademik: Number($("#input_sksA").val()),
+      sks_bayar: Number($("#input_sksB").val()),
+      prodi: $("#input_prodi").val(),
+      tipe_kelas: getCheckedItemValue("rbTipeKelas")[0],
+      bidang: retrieveBadgeValues("list_bidang"),
+      asistensi: getCheckedItemValue("cbAsistensi")[0] ? true : false,
+      tipe_kelas_asistensi: getCheckedItemValue("rbTipeKelas")[0],
+      integrated_class: getCheckedItemValue("cbIntegratedClass")[0]
+        ? true
+        : false,
     };
 
     $.ajax({
@@ -478,7 +773,94 @@
       );
   }
 
+  $("#input_bidang").on("keydown", function (event) {
+    if (event.key === "Enter") {
+      let user_input = $("#input_bidang").val();
+      if (user_input.length >= 3) {
+        addBadge("field_bidang", "list_bidang", user_input);
+        $("#input_bidang").val("");
+      } else popUpTimer("info", "Input minimal 3 karakter!");
+    }
+  });
+
+  $("#input_dosen_ajar").on("keydown", async function (event) {
+    if (event.key === "F9") {
+      event.preventDefault();
+      $("#modal-dosen").modal("show");
+      $("#table_lov_dosen_filter input").focus(); // focus ke field search saat modal matkul dibuka
+    } else if (event.key === "Enter" && this.value.length >= 3) {
+      event.preventDefault();
+      let resultKode = dosen_lov
+        .data()
+        .toArray()
+        .filter(
+          (dosen) =>
+            dosen.nip.includes(this.value) || dosen.nama.includes(this.value)
+        );
+
+      if (resultKode.length === 1)
+        await addBadge(
+          "field_dosen_ajar",
+          "list_dosen_ajar",
+          resultKode[0].nama
+        );
+      else if (resultKode.length > 1) {
+        let infoData = [];
+        resultKode.forEach((element) => {
+          if (!retrieveBadgeValues("list_dosen_ajar").includes(element.nama))
+            infoData.push(element);
+        });
+
+        if (infoData.length > 1) {
+          let selectOptions = resultKode
+            .map((data) => `<option value="${data.nama}">${data.nama}</option>`)
+            .join("");
+
+          Swal.fire({
+            title: "Dosen Mana?",
+            text: "Hasil pencarian jamak. Dosen mana yang anda maksud?",
+            icon: "question",
+            html: `
+              <select id="swal-select" class="form-select">
+                <option value="">-- Pilih --</option>
+                ${selectOptions}
+              </select>
+            `,
+            showCancelButton: true,
+            confirmButtonText: "OK",
+            preConfirm: () => {
+              const selected = document.getElementById("swal-select").value;
+              if (!selected) {
+                Swal.showValidationMessage("Silakan pilih salah satu opsi.");
+              }
+              return selected;
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              addBadge("field_dosen_ajar", "list_dosen_ajar", result.value);
+            }
+          });
+        } else
+          addBadge("field_dosen_ajar", "list_dosen_ajar", infoData[0].nama);
+      } else
+        await popUpTimer(
+          "error",
+          "Data tidak ditemukan!",
+          "Jika bersikeras, harap tambahkan data terlebih dahulu.",
+          2000
+        );
+
+      this.value = "";
+    } else if (event.key === "Enter")
+      popUpTimer("info", "Input minimal 3 karakter!");
+  });
+
   // CHECKBOX
+  $('input[name="cbAsistensi"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $(".asistensi_detail").attr("hidden", isChecked ? false : true);
+  });
+
   // Event ketika cbMatkulTabAll di-click
   $('input[name="cbMatkulTabAll"]').on("change", function () {
     let isChecked = $(this).prop("checked");
@@ -543,7 +925,7 @@
         className: "text-end",
       },
       {
-        data: "kelompok",
+        data: "asistensi",
         width: "",
       },
       {
@@ -554,6 +936,42 @@
         },
         // orderable: false,
         className: "text-center",
+      },
+    ],
+  });
+
+  let dosen_lov = $("#table_lov_dosen").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    info: false,
+    ajax: {
+      type: "GET",
+      url: "/data_dosen/get_dosen",
+      data: function (d) {
+        return {
+          prodi: prodi ? prodi : $("#input_prodi").val(),
+        };
+      },
+      cache: false,
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+    },
+    columns: [
+      {
+        data: "nip",
+        width: "75px",
+      },
+      {
+        data: "nama",
+        width: "300px",
       },
     ],
   });
