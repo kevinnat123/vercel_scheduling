@@ -80,12 +80,12 @@ document.addEventListener("input", function (event) {
 });
 
 /**
- * Retrieve values of checked checkbox.
+ * Retrieve values of checked Item.
  *
- * @param {string} [cbName] - Checkbox's name attribute
+ * @param {string} [Name] - Item's name attribute
  */
-function getCheckedCheckboxValue(cbName) {
-  return $("input[name=" + cbName + "]:checked")
+function getCheckedItemValue(Name) {
+  return $("input[name=" + Name + "]:checked")
     .map(function () {
       return this.value;
     })
@@ -129,7 +129,7 @@ function addBadge(container_id, div_list_id, value) {
   } else
     popUpTimer(
       "info",
-      div_list_id.substring(5) + " '" + user_input + "' sudah anda input!",
+      div_list_id.substring(5) + " '" + value + "' sudah anda input!",
       "Silahkan input " + div_list_id.substring(5) + " lain!"
     );
 }
