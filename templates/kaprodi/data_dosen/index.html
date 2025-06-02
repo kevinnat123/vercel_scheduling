@@ -14,7 +14,7 @@
         <div class="col-2">
           <input
             type="text"
-            class="form-control"
+            class="form-control numberOnly"
             id="input_nip"
             autocomplete="off"
           />
@@ -83,7 +83,7 @@
             type="text"
             class="form-control"
             id="input_pakar"
-            autocomplete="off"
+            autocomplete="on"
             placeholder="Input data pakar dosen disini..."
           />
           <button
@@ -137,7 +137,7 @@
         </div>
       </div>
 
-      <div class="form-group row">
+      <div class="form-group row preferensi_detail" hidden>
         <label for="input_hindari_hari" class="col-2 col-form-label"
           >Hindari Hari</label
         >
@@ -303,13 +303,21 @@
     });
   });
 
-  function form_dosen(update = undefined, hidden = false, data = undefined) {
+  function clear_form() {
     $("#frm")[0].reset();
-    if (update === false) {
-      $("#card-form span.badge").remove();
-      $("#field_pakar").attr("hidden", true);
-      $("#field_matkul_ajar").attr("hidden", true);
+    $("#card-form span.badge").remove();
+    $("#field_pakar").attr("hidden", true);
+    $("#field_matkul_ajar").attr("hidden", true);
+  }
 
+  async function form_dosen(
+    update = undefined,
+    hidden = false,
+    data = undefined
+  ) {
+    await clear_form();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (update === false) {
       document.getElementById("formTitle").innerText = "Tambah Data";
       $("#card-form input").prop("disabled", false);
       $("#btn-simpan").attr("hidden", false);
@@ -325,10 +333,16 @@
     if (data) {
       $("#input_nip").val(data.nip);
       $("#input_nama").val(data.nama);
-      $("#input_pakar").val(data.pakar);
+      if (data.pakar)
+        data.pakar.forEach((element) => {
+          addBadge("field_pakar", "list_pakar", element);
+        });
+      if (data.matkul_ajar)
+        data.matkul_ajar.forEach((element) => {
+          addBadge("field_matkul_ajar", "list_matkul_ajar", element);
+        });
     }
     $("#card-form").prop("hidden", hidden ? true : false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   $("#btn-simpan").on("click", function () {
@@ -411,9 +425,14 @@
     let params = {
       nip: $("#input_nip").val(),
       nama: $("#input_nama").val(),
-      pakar: $("#input_pakar").val(),
+      status: $("input[name='rbStatus']:checked").val(),
+      prodi: prodi,
+      pakar: retrieveBadgeValues("list_pakar"),
+      matkul_ajar: retrieveBadgeValues("list_matkul_ajar"),
+      preferensi: {
+        hindari_hari: getCheckedCheckboxValue("cbHari"),
+      },
     };
-    console.log("[ btn-update ] params", params);
 
     $.ajax({
       type: "POST",
@@ -470,8 +489,6 @@
         return false;
       }
     });
-
-    console.log("decision", decision);
 
     if (decision === true) {
       $.ajax({
@@ -596,7 +613,7 @@
   // CHECKBOX
   $('input[name="cbPreferensi"]').on("change", function () {
     let isChecked = $(this).prop("checked");
-    console.log(isChecked);
+    $(".preferensi_detail").attr("hidden", isChecked ? false : true);
   });
 
   // Event ketika cbDosenTabAll di-click
