@@ -170,7 +170,7 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                 if beban_dosen[dosen['nip']] > (12 - sesi_dosen.sks_akademik):
                     dosen_pakar = [
                         d for d in dosen_list 
-                            if (d["prodi"] == matkul['prodi'] or d['status'] == "DOSEN TIDAK TETAP") and 
+                            if (d["prodi"] == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
                                 len(set(d['pakar']) & set(matkul['bidang'])) > 0
                     ]
                     if len(dosen_pakar) > 1:
@@ -378,7 +378,7 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
     for matkul in matakuliah_list:
         dosen_pakar = [
             d for d in dosen_list 
-                if (d["prodi"] == matkul['prodi'] or d['status'] == "DOSEN TIDAK TETAP") and 
+                if (d["prodi"] == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
                     len(set(d['pakar']) & set(matkul['bidang'])) > 0
         ]
         
