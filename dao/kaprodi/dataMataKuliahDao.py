@@ -1,5 +1,5 @@
 from dao import Database
-from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_COURSES_COLLECTION as db_courses
+from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_COURSES_COLLECTION as db_matkul, MONGO_LECTURERS_COLLECTION as db_dosen
 from flask import session
 
 class CustomError(Exception):
@@ -37,7 +37,7 @@ class dataMataKuliahDao:
     def get_matkul(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get Matkul (Prodi: {session['user']['prodi']})")
         result = self.connection.find_many(
-            db_courses, 
+            db_matkul, 
             {'prodi': { '$in' : [session['user']['prodi']] }}, 
             sort=[("kode", 1)]
         )
@@ -49,29 +49,50 @@ class dataMataKuliahDao:
         result = { 'status': False }
 
         try:
+            if not params.get('kode'):
+                raise CustomError({ 'message': 'Kode Matkul belum diisi!', 'target': 'input_kode' })
+            elif not params.get('nama'):
+                raise CustomError({ 'message': 'Nama Matkul belum diisi!', 'target': 'input_nama' })
+            elif not params.get('sks_akademik') or not params.get('sks_bayar'):
+                raise CustomError({ 'message': 'SKS Akademik / Bayar belum diisi!', 'target': 'input_sksA' if not params.get('sks_akademik') else 'input_sksB' })
+            elif not params.get('prodi'):
+                raise CustomError({ 'message': 'Program Studi belum diisi!' })
+            elif not params.get('tipe_kelas'):
+                raise CustomError({ 'message': 'Tipe Kelas belum diisi!' })
+            elif params.get('asistensi') and not params.get('tipe_kelas_asistensi'):
+                raise CustomError({ 'message': 'Tipe Kelas Asistensi belum diisi!' })
+
+            if session['user']['role'] == "KAPRODI":
+                if params['prodi'] != session['user']['prodi']:
+                    raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
+
             # Hapus key yang memiliki value kosong
+            if not params.get('asistensi'):
+                if 'asistensi' in params: params.pop('asistensi')
+                if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
+                if 'integrated_class' in params: params.pop('integrated_class')
             params = {k: v for k, v in params.items() if v}
 
-            if params.get('kode'):
-                # Check exist
-                res = self.connection.find_one(db_courses, {'kode': params['kode']})
-                if (res['status'] == True):
-                    raise CustomError({ 'message': 'Data dengan Kode Matkul ' + params['kode'] + ' sudah ada!' })
+            # Check exist
+            res = self.connection.find_one(db_matkul, {'kode': params['kode']})
+            if (res['status'] == True):
+                raise CustomError({ 'message': 'Data dengan Kode Matkul ' + params['kode'] + ' sudah ada!' })
 
-                if params.get('nama'):
-                    if params.get('sks_akademik') and params.get('sks_bayar'):
-                        params.update({'prodi': session['user']['prodi']})
-                        res = self.connection.insert_one(db_courses, params)
-                        if res['status'] == False:
-                            raise CustomError({ 'message': res['message'] })
-                        else:
-                            result.update({ 'message': res['message'] })
-                    else:
-                        raise CustomError({ 'message': 'SKS Akademik / Bayar belum diisi!', 'target': 'input_sksA' if not params.get('sks_akademik') else 'input_sksB' })
-                else:
-                    raise CustomError({ 'message': 'Nama Matkul belum diisi!', 'target': 'input_nama' })
+            # Update Dosen
+            if params.get('dosen_ajar'):
+                for dosen in params['dosen_ajar']:
+                    data_dosen = self.connection.find_one(db_dosen, {'nama': dosen})
+                    if data_dosen and data_dosen.get('status'):
+                        data_dosen = data_dosen['data'].get('matkul_ajar') or []
+                        if params['nama'] not in data_dosen:
+                            data_dosen.append(params['nama'])
+                            self.connection.update_one(db_dosen, {'nama': dosen}, {'matkul_ajar': data_dosen})
+
+            res = self.connection.insert_one(db_matkul, params)
+            if res['status'] == True:
+                result.update({ 'message': res['message'] })
             else:
-                raise CustomError({ 'message': 'Kode Matkul belum diisi!', 'target': 'input_kode' })
+                raise CustomError({ 'message': res['message'] })
 
             result.update({ 'status': True })
         except CustomError as e:
@@ -90,28 +111,69 @@ class dataMataKuliahDao:
         result = { 'status': False }
 
         try:
-            if params.get('prodi') != 'GENERAL':
-                if params.get('kode'):
-                    res = self.connection.find_one(db_courses, {'kode': params['kode']})
-                    if (res['status'] == False and res['data'] == None):
-                        raise CustomError({ 'message': 'Data dengan Kode Matkul ' + params['kode'] + ' tidak ditemukan!' })
-                    
-                    if params.get('nama'):
-                        if params.get('sks_akademik') and params.get('sks_bayar'):
-                            params.update({'prodi': session['user']['prodi']})
-                            res = self.connection.update_one(db_courses, {'kode': params['kode']}, params)
-                            if res['status'] == False:
-                                raise CustomError({ 'message': res['message'] })
-                            else:
-                                result.update({ 'message': res['message'] })
-                        else:
-                            raise CustomError({ 'message': 'SKS Akademik / Bayar belum diisi!', 'target': 'input_sksA' if not params.get('sks_akademik') else 'input_sksB' })
+            if not params.get('kode'):
+                raise CustomError({ 'message': 'Kode Matkul belum diisi!', 'target': 'input_kode' })
+            elif not params.get('nama'):
+                raise CustomError({ 'message': 'Nama Matkul belum diisi!', 'target': 'input_nama' })
+            elif not params.get('sks_akademik') or not params.get('sks_bayar'):
+                raise CustomError({ 'message': 'SKS Akademik / Bayar belum diisi!', 'target': 'input_sksA' if not params.get('sks_akademik') else 'input_sksB' })
+            elif not params.get('prodi'):
+                raise CustomError({ 'message': 'Program Studi belum diisi!' })
+            elif not params.get('tipe_kelas'):
+                raise CustomError({ 'message': 'Tipe Kelas belum diisi!' })
+            elif params.get('asistensi') and not params.get('tipe_kelas_asistensi'):
+                raise CustomError({ 'message': 'Tipe Kelas Asistensi belum diisi!' })
+                
+            if session['user']['role'] == "KAPRODI":
+                if params['prodi'] != session['user']['prodi']:
+                    raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
+                
+            matkul_exist = self.connection.find_one(db_matkul, {'kode': params['kode']})
+            if (matkul_exist['status'] == False and matkul_exist['data'] == None):
+                raise CustomError({ 'message': 'Data dengan Kode Matkul ' + params['kode'] + ' tidak ditemukan!' })
+            
+            # Hapus key yang memiliki value kosong
+            if not params.get('asistensi'):
+                if 'asistensi' in params: params.pop('asistensi')
+                if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
+                if 'integrated_class' in params: params.pop('integrated_class')
+            params = {k: v for k, v in params.items() if v}
+            
+            res = self.connection.update_one(db_matkul, {'kode': params['kode']}, params)
+
+            # Update Dosen
+            if params.get('dosen_ajar'):
+                for dosen in params['dosen_ajar']:
+                    data_dosen = self.connection.find_one(db_dosen, {'nama': dosen})
+                    if data_dosen and data_dosen.get('status'):
+                        data_dosen = data_dosen['data'].get('matkul_ajar') or []
+                        if params['nama'] not in data_dosen:
+                            data_dosen.append(params['nama'])
+                            self.connection.update_one(db_dosen, {'nama': dosen}, {'matkul_ajar': data_dosen})
                     else:
-                        raise CustomError({ 'message': 'Nama Matkul belum diisi!', 'target': 'input_nama' })
-                else:
-                    raise CustomError({ 'message': 'Kode Matkul belum diisi!', 'target': 'input_kode' })
+                        raise Exception
+
+            if len(params.get('dosen_ajar') or []) < len(matkul_exist['data'].get('dosen_ajar') or []):
+                dosen_ajar_lama = matkul_exist['data'].get('dosen_ajar') or []
+                dosen_ajar_baru = params.get('dosen_ajar') or []
+                data_dihapus = [dt for dt in dosen_ajar_lama if dt not in dosen_ajar_baru]
+
+                for dosen in data_dihapus:
+                    data_dosen = self.connection.find_one(db_dosen, {'nama': dosen})
+                    if data_dosen and data_dosen.get('status'):
+                        data_dosen = data_dosen['data']
+                        data_dosen['matkul_ajar'].remove(params['nama'])
+                        if data_dosen['matkul_ajar']:
+                            self.connection.update_one(db_dosen, {'nama': dosen}, {'matkul_ajar': data_dosen["matkul_ajar"]})
+                        else:
+                            self.connection.update_one(db_dosen, {'nama': dosen}, {}, {'matkul_ajar': ''})
+                    else:
+                        raise Exception
+                                        
+            if res['status'] == True:
+                result.update({ 'message': res['message'] })
             else:
-                raise CustomError({ 'message': 'Matkul ini tidak bisa diedit!' })
+                raise CustomError({ 'message': res['message'] })
                     
             result.update({ 'status': True })
         except CustomError as e:
@@ -135,9 +197,28 @@ class dataMataKuliahDao:
                 raise CustomError({ 'message': 'Matkul ' + [item.get('kode') for item in params if item["prodi"] == "GENERAL"] + ' tidak bisa dihapus!' })
                 
             list_kode = [item["kode"] for item in params]
-            print(f"{'':<15} List Kode: {list_kode}")
+            
+            for kode in list_kode:
+                data_matkul = self.connection.find_one(db_matkul, {'kode': kode})
+                if data_matkul and data_matkul.get('status'):
+                    data_matkul = data_matkul['data']
+                    dosen_ajar_matkul = data_matkul.get('dosen_ajar') or []
+                    for dosen in dosen_ajar_matkul:
+                        data_dosen = self.connection.find_one(db_dosen, {'nama': dosen})
+                        if data_dosen and data_dosen.get('status'):
+                            data_dosen = data_dosen['data']
+                            data_dosen['matkul_ajar'].remove(data_matkul['nama'])
+                            if data_dosen['matkul_ajar']:
+                                self.connection.update_one(db_dosen, {'nama': dosen}, {'matkul_ajar': data_dosen['matkul_ajar']})
+                            else:
+                                self.connection.update_one(db_dosen, {'nama': dosen}, {}, {'matkul_ajar': ""})
+                        else:
+                            raise Exception
+                else:
+                    raise Exception
+            
             res = self.connection.delete_many(
-                db_courses, 
+                db_matkul, 
                 { 
                     'kode' : { '$in': list_kode }, 
                     'prodi': session['user']['prodi'] 

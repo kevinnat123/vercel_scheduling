@@ -453,7 +453,7 @@
     hidden = false,
     data = undefined
   ) {
-    await $("#frm")[0].reset();
+    await clear_form();
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (update === false) {
       document.getElementById("formTitle").innerText = "Tambah Data";
@@ -485,12 +485,13 @@
         data.dosen_ajar.forEach((element) => {
           addBadge("field_dosen_ajar", "list_dosen_ajar", element);
         });
+      $(".asistensi_detail").attr("hidden", data.asistensi ? false : true);
       $("input[name='cbAsistensi']").prop("checked", data.asistensi);
       $("input[name='cbIntegratedClass']").prop(
         "checked",
         data.integrated_class
       );
-      $("#ASISTENSI_" + data.tipe_kelas_asistensi).prop("checked", true);
+      $("#ASISTEN_" + data.tipe_kelas_asistensi).prop("checked", true);
     }
     $("#card-form").prop("hidden", hidden ? true : false);
   }
@@ -560,6 +561,7 @@
       prodi: $("#input_prodi").val(),
       tipe_kelas: getCheckedItemValue("rbTipeKelas")[0],
       bidang: retrieveBadgeValues("list_bidang"),
+      dosen_ajar: retrieveBadgeValues("list_dosen_ajar"),
       asistensi: getCheckedItemValue("cbAsistensi")[0] ? true : false,
       tipe_kelas_asistensi: getCheckedItemValue("rbTipeKelas")[0],
       integrated_class: getCheckedItemValue("cbIntegratedClass")[0]
@@ -603,14 +605,16 @@
       }, 1500);
       return;
     } else if (
-      matkul_tab
+      !matkul_tab
         .data()
         .toArray()
         .some((item) => item.kode === $("#input_kode").val())
     ) {
       popUpTimer(
         "error",
-        "Data dengan Kode Matkul " + $("#input_kode").val() + " sudah ada!"
+        "Data dengan Kode Matkul " +
+          $("#input_kode").val() +
+          " tidak ditemukan!"
       );
       form_matkul(false);
       return;
@@ -660,6 +664,7 @@
       prodi: $("#input_prodi").val(),
       tipe_kelas: getCheckedItemValue("rbTipeKelas")[0],
       bidang: retrieveBadgeValues("list_bidang"),
+      dosen_ajar: retrieveBadgeValues("list_dosen_ajar"),
       asistensi: getCheckedItemValue("cbAsistensi")[0] ? true : false,
       tipe_kelas_asistensi: getCheckedItemValue("rbTipeKelas")[0],
       integrated_class: getCheckedItemValue("cbIntegratedClass")[0]
@@ -756,6 +761,7 @@
             $('input[name="cbMatkulTabAll"]').prop("checked", false);
             matkul_tab.ajax.reload(null, false);
           }
+          $("#btn-batal").click();
         },
       });
     }
