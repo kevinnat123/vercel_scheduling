@@ -171,7 +171,7 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                     dosen_pakar = [
                         d for d in dosen_list 
                             if (d["prodi"] == matkul['prodi'] or d['status'] == "DOSEN TIDAK TETAP") and 
-                                len(set(d['kepakaran']) & set(matkul['bidang'])) > 0
+                                len(set(d['pakar']) & set(matkul['bidang'])) > 0
                     ]
                     if len(dosen_pakar) > 1:
                         calon_dosen_pengganti = [d for d in dosen_pakar if beban_dosen[d['nip']] + sesi_dosen.sks_akademik <= 12]
@@ -185,7 +185,7 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                                         else beban_dosen[d['nip']] <= max(sks_dosen_pakar))
                             ]
                         bobot_calon_dosen_pengganti = [
-                            len(set(d['kepakaran']) & set(matkul['bidang'])) > 0
+                            len(set(d['pakar']) & set(matkul['bidang'])) > 0
                             for d in calon_dosen_pengganti
                         ]
                         dosen = random.choices(
@@ -379,7 +379,7 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
         dosen_pakar = [
             d for d in dosen_list 
                 if (d["prodi"] == matkul['prodi'] or d['status'] == "DOSEN TIDAK TETAP") and 
-                    len(set(d['kepakaran']) & set(matkul['bidang'])) > 0
+                    len(set(d['pakar']) & set(matkul['bidang'])) > 0
         ]
         
         # RUANGAN
@@ -418,7 +418,7 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
                                 else beban_dosen[d['nip']] <= max(sks_dosen_pakar))
                     ]
                 bobot_calon_dosen = [
-                    len(set(d['kepakaran']) & set(matkul['bidang'])) > 0
+                    len(set(d['pakar']) & set(matkul['bidang'])) > 0
                     for d in calon_dosen
                 ]
                 dosen = random.choices(
