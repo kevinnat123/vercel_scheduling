@@ -18,6 +18,7 @@ def mataKuliahPilihan_index():
                 title = 'Mata Kuliah Pilihan', 
                 prodi = session['user']['prodi'],
                 maks_sks = int(session['user']['maks_sks_prodi']),
+                # bidang_minat = [d['kelompok'] for d in dao.get_lovMatkul()]
                 data_sebelum = dao.get_listMatkulTersimpan() or []
             )
     

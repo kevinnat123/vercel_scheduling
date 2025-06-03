@@ -21,11 +21,14 @@ class mataKuliahPilihanDao:
         result = self.connection.find_many(
             db_open_courses, 
             {
-                'prodi': session['user']['prodi'], 
-                'u_id': { "$regex": "^" + str(session['academic_details']['tahun_ajaran_berikutnya']) + str(session['academic_details']['semester_depan']) }
+                '$and': [
+                    {'prodi': session['user']['prodi']}, 
+                    {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }}
+                ]
             }, 
             sort=[("angkatan", 1)] 
         )
+        print('result', result)
         return result['data'] if result and result.get('status') else []
 
     def post_matkul(self, params):
@@ -33,29 +36,34 @@ class mataKuliahPilihanDao:
         result = { 'status': False }
         
         try:
-            if params.get('angkatan'):
-                params.update({
-                    'u_id': (str(session['academic_details']['tahun_ajaran_berikutnya']) + str(session['academic_details']['semester_depan']) + str(params['angkatan'])).upper(),
-                    'prodi': session['user']['prodi']
-                })
+            if not params.get('angkatan'):
+               raise CustomError({ 'message': 'Input Angkatan belum diisi!', 'target': 'input_angkatan' })
+            if not params.get('jumlah_mahasiswa') and not params.get('angkatan') == 'ALL':
+                raise CustomError({ 'message': 'Jumlah Mahasiswa Aktif belum diisi!', 'target': 'input_mhsAktif' })
+            if not params.get('list_matkul'):
+                raise CustomError({ 'message': 'Belum ada matkul yang dibuka untuk semester ini!', 'target': 'input_matkul' })
 
-                res = self.connection.find_one(db_open_courses, {'u_id': params['u_id']})
-                if (res['status'] == True):
-                    raise CustomError({ 'message': 'Data matkul untuk angkatan ' + str(params['angkatan']) + ' sudah ada!' })
-                
-                if params.get('jumlah_mahasiswa') or params.get('angkatan') == 'ALL':
-                    if params.get('list_matkul'):
-                        res = self.connection.insert_one(db_open_courses, params)
-                        if res['status'] == False:
-                            raise CustomError({ 'message': res['message'] })
-                        else:
-                            result.update({ 'message': res['message'], 'data': params['u_id'] })
-                    else:
-                        raise CustomError({ 'message': 'Belum ada matkul yang dibuka untuk semester ini!', 'target': 'input_matkul' })
-                else:
-                    raise CustomError({ 'message': 'Jumlah Mahasiswa Aktif belum diisi!', 'target': 'input_mhsAktif' })
+            params = {k: v for k, v in params.items() if v}
+
+            u_id = (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper()
+            u_id = u_id + ("_" + params['bidang_minat'].replace(" ", "_") if params.get('bidang_minat') else '') + "_" + str(params['angkatan'])
+            params.update({
+                'u_id': u_id,
+                'prodi': session['user']['prodi']
+            })
+
+            res = self.connection.find_one(db_open_courses, {'u_id': params['u_id']})
+            if (res['status'] == True):
+                if not params.get('bidang_minat') and not res['data'].get('bidang_minat'):
+                    raise CustomError({ 'message': f"Data matkul untuk angkatan {params['angkatan']} sudah ada!" })
+                elif params.get('bidang_minat') and (params['bidang_minat'] == res['data'].get('bidang_minat')):
+                    raise CustomError({ 'message': f"Data matkul untuk angkatan {params['angkatan']} dengan bidang minat {params['bidang_minat']} sudah ada!" })
+            
+            res = self.connection.insert_one(db_open_courses, params)
+            if res['status'] == True:
+                result.update({ 'message': res['message'], 'data': params['u_id'] })
             else:
-                raise CustomError({ 'message': 'Input Angkatan belum diisi!', 'target': 'input_angkatan' })
+                raise CustomError({ 'message': res['message'] })
 
             result.update({ 'status': True })
         except CustomError as e:
@@ -65,39 +73,47 @@ class mataKuliahPilihanDao:
         except Exception as e:
             print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
-
+        print(f"{'':<15} {result}")
         return result
     
     def put_matkul(self, params):
         print(f"{'':<7}{'[ DAO ]':<8} Put Matkul (Parameter: {params})")
         result = { 'status': False }
-        
-        try:
-            if params.get('angkatan'):
-                params.update({
-                    'u_id': (str(session['academic_details']['tahun_ajaran_berikutnya']) + str(session['academic_details']['semester_depan']) + str(params['angkatan'])).upper(),
-                    'prodi': session['user']['prodi']
-                })
 
-                res = self.connection.find_one(db_open_courses, {'u_id': params['u_id']})
-                print(f"{'':<15} Found ? {res}")
-                if (res['status'] == False):
-                    raise CustomError({ 'message': 'Data matkul untuk angkatan ' + str(params['angkatan']) + ' belum ada!' })
-                
-                if params.get('jumlah_mahasiswa') or params.get('angkatan') == 'ALL':
-                    if params.get('list_matkul'):
-                        res = self.connection.update_one(db_open_courses, {'u_id': params['u_id'], 'prodi': params['prodi']}, params)
-                        print(f"{'':<15} Update Result: {res}")
-                        if res['status'] == False:
-                            raise CustomError({ 'message': res['message'] })
-                        else:
-                            result.update({ 'message': res['message'], 'data': params['u_id'] })
-                    else:
-                        raise CustomError({ 'message': 'Belum ada matkul yang dibuka untuk semester ini!', 'target': 'input_matkul' })
-                else:
-                    raise CustomError({ 'message': 'Jumlah Mahasiswa Aktif belum diisi!', 'target': 'input_mhsAktif' })
-            else:
+        try:
+            if not params.get('angkatan'):
                 raise CustomError({ 'message': 'Input Angkatan belum diisi!', 'target': 'input_angkatan' })
+            if not params.get('jumlah_mahasiswa') and not params.get('angkatan') == 'ALL':
+                raise CustomError({ 'message': 'Jumlah Mahasiswa Aktif belum diisi!', 'target': 'input_mhsAktif' })
+            if not params.get('list_matkul'):
+                raise CustomError({ 'message': 'Belum ada matkul yang dibuka untuk semester ini!', 'target': 'input_matkul' })
+
+            params = {k: v for k, v in params.items() if v}
+
+            u_id = (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper()
+            u_id = u_id + ("_" + params['bidang_minat'].replace(" ", "_") if params.get('bidang_minat') else '') + "_" + str(params['angkatan'])
+            params.update({
+                'u_id': u_id,
+                'prodi': session['user']['prodi']
+            })
+
+            res = self.connection.find_one(db_open_courses, {'u_id': params['u_id']})
+            if (res['status'] == True):
+                # CODE BAGIAN INI MEMUSINGKAN T_T
+                if res['data']['u_id'] != u_id and params['angkatan'] == res['data']['angkatan']:
+                    if not params.get('bidang_minat') and not res['data'].get('bidang_minat'):
+                        raise CustomError({ 'message': f"Data matkul untuk angkatan {params['angkatan']} sudah ada!" })
+                    elif params.get('bidang_minat') and (params['bidang_minat'] == res['data'].get('bidang_minat')):
+                        raise CustomError({ 'message': f"Data matkul untuk angkatan {params['angkatan']} dengan bidang minat {params['bidang_minat']} sudah ada!" })
+            elif (res['status'] == False):
+                raise CustomError({ 'message': 'Data matkul untuk angkatan ' + str(params['angkatan']) + ' belum ada!' })
+            
+            res = self.connection.update_one(db_open_courses, {'u_id': params['u_id'], 'prodi': params['prodi']}, params)
+            print(f"{'':<15} Update Result: {res}")
+            if res['status'] == False:
+                raise CustomError({ 'message': res['message'] })
+            else:
+                result.update({ 'message': res['message'], 'data': params['u_id'] })
 
             result.update({ 'status': True })
         except CustomError as e:
@@ -111,11 +127,11 @@ class mataKuliahPilihanDao:
         return result
     
     def delete_data(self, req):
-        print(f"{'':<7}{'[ DAO ]':<8} Delete Matkul (Parameter: {req})")
+        print(f"{'':<7}{'[ DAO ]':<8} Delete Matkul (Parameter: {req}; {req[5:]})")
         result = { 'status': False }
         
         try:
-            res = self.connection.delete_one(db_open_courses, {'u_id': req[5::].upper()})
+            res = self.connection.delete_one(db_open_courses, {'u_id': req[5:].upper()})
             if res['status'] == False:
                 raise CustomError({ 'message': res['message'] })
             else:
