@@ -84,38 +84,39 @@ def login():
         return jsonify({'status': False, 'message': user['message']}), 401
     return render_template('signin.html')
 
-@signin.route("/dashboard")
-@login_required
-def dashboard():
-    print(f"{'[ RENDER ]':<15} Dashboard")
+# @signin.route("/dashboard")
+# @login_required
+# def dashboard():
+#     print(f"{'[ RENDER ]':<15} Dashboard")
 
-    # Pastikan session masih valid
-    if not session.get('user') or 'u_id' not in session['user']:
-        print("⚠️ Session tidak valid, redirect ke login")
-        return redirect(url_for('signin.login'))
+#     # Pastikan session masih valid
+#     if not session.get('user') or 'u_id' not in session['user']:
+#         print("⚠️ Session tidak valid, redirect ke login")
+#         return redirect(url_for('signin.login'))
     
-    if session['user']['role'] == 'KEPALA PROGRAM STUDI':
-        return render_template(
-                '/kaprodi/dashboard.html', 
-                menu = 'Dashboard', 
-                title = 'Dashboard', 
-                prodi = session['user']['prodi'],
-                kelompok_matkul = session['user']['kelompok_matkul']
-            )
-    elif session['user']['role'] == 'LABORAN':
-        return render_template(
-                '/laboran/dashboard.html', 
-                menu = 'Dashboard', 
-                title = 'Dashboard', 
-                list_os = session['user']['list_os'],
-                list_processor = session['user']['list_processor']
-            )
-    elif session['user']['role'] == 'ADMIN':
-        return render_template(
-                '/admin/dashboard.html', 
-                menu = 'Dashboard', 
-                title = 'Dashboard', 
-            )
+#     if session['user']['role'] == 'KEPALA PROGRAM STUDI':
+#         return render_template(
+#                 '/kaprodi/dashboard.html', 
+#                 menu = 'Dashboard', 
+#                 title = 'Dashboard', 
+#                 prodi = session['user']['prodi'],
+#                 kelompok_matkul = session['user']['kelompok_matkul']
+
+#             )
+#     elif session['user']['role'] == 'LABORAN':
+#         return render_template(
+#                 '/laboran/dashboard.html', 
+#                 menu = 'Dashboard', 
+#                 title = 'Dashboard', 
+#                 list_os = session['user']['list_os'],
+#                 list_processor = session['user']['list_processor']
+#             )
+#     elif session['user']['role'] == 'ADMIN':
+#         return render_template(
+#                 '/admin/dashboard.html', 
+#                 menu = 'Dashboard', 
+#                 title = 'Dashboard', 
+#             )
 
 def get_academic_details():
     today = datetime.today()

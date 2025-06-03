@@ -50,6 +50,26 @@ class dashboardDao:
 
         return {'status': updateData.get('status'), 'message': updateData.get('message')}
     
+    def update_bidangMinat(self, data):
+        print(f"{'':<7}{'[ DAO ]':<8} Update Bidang Minat (Parameter: {data})")
+
+        if data:
+            newGroup = [item["bidang_minat"] for item in data]
+        elif data == []:
+            newGroup = data
+        else:
+            return {'status': False, 'message': 'Data tidak valid'}
+
+        updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'bidang_minat': newGroup})
+
+        if updateData and updateData['status']:
+            session['user']['bidang_minat'] = newGroup
+            session.modified = True
+        else:
+            self.connection.find_one(db_users, {'u_id': session['user']['u_id']})
+
+        return {'status': updateData.get('status'), 'message': updateData.get('message')}
+    
     def update_os(self, data):
         print(f"{'':<7}{'[ DAO ]':<8} Update OS (Parameter: {data})")
         

@@ -15,7 +15,8 @@ def dashboard_index():
                 menu = 'Dashboard', 
                 title = 'Dashboard', 
                 prodi = session['user']['prodi'],
-                kelompok_matkul = session['user']['kelompok_matkul']
+                kelompok_matkul = session['user']['kelompok_matkul'],
+                bidang_minat = session['user']['bidang_minat']
             )
     elif session['user']['role'] == 'LABORAN':
         return render_template(
@@ -55,6 +56,17 @@ def dashboardKaprodi_updateKelompokMatkul():
     req = request.get_json('data')
 
     result = dashboardDao.update_kelompokMatkul(req)
+
+    return jsonify( result )
+
+@dashboard.route("/update_bidang_minat", methods=['POST'])
+@login_required
+def dashboardKaprodi_updateBidangMinat():
+    print(f"{'[ CONTROLLER ]':<15} Update Bidang Minat")
+    
+    req = request.get_json('data')
+
+    result = dashboardDao.update_bidangMinat(req)
 
     return jsonify( result )
 

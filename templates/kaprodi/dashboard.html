@@ -99,11 +99,83 @@
     </div>
   </div>
 </div>
+
+<div class="card close-able" id="card-bidang_minat">
+  <div class="card-body">
+    <div class="row align-items-center justify-content-between mb-3">
+      <h4 id="formTitle" class="col btn-toggle-card">
+        <i class="fas fa-folder-open fa-fw toggle-icon me-2"></i
+        ><span>Setting Bidang Minat</span>
+      </h4>
+      <div class="col-auto text-end">
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="btn-simpanBidangMinat"
+        >
+          Simpan
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          id="btn-hapusBidangMinat"
+          style="display: none"
+        >
+          Hapus
+        </button>
+        <button type="button" class="btn btn-secondary btn-batal">Clear</button>
+      </div>
+    </div>
+
+    <div class="card-content">
+      <form role="form" class="form-horizontal" id="frmDetail">
+        <div class="form-group row">
+          <label for="input-bidang_minat_baru" class="col-3 col-form-label"
+            >Bidang Minat Baru</label
+          >
+          <div class="input-group col">
+            <input
+              type="text"
+              id="input-bidang_minat_baru"
+              class="form-control"
+              placeholder="Masukkan bidang minat baru"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              id="tambah_bidang_minat"
+              class="btn btn-primary"
+              onclick="tambahBidangMinat($('#input-bidang_minat_baru').val())"
+            >
+              Tambah
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table
+              class="table table-bordered table-stripped table-hover w-100"
+              id="table_bidang_minat"
+            >
+              <thead>
+                <th><input type="checkbox" name="cbBidangMinatAll" /></th>
+                <th>Bidang Minat</th>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %} {% block script %}
 <script>
   const list_matkul = JSON.parse(`{{ kelompok_matkul | tojson | safe }}`);
+  const list_bidang_minat = JSON.parse(`{{ bidang_minat | tojson | safe }}`);
   var json_matkul = list_matkul.map((kelompok) => ({
     kelompok_matkul: kelompok,
+  }));
+  var json_bidang_minat = list_bidang_minat.map((bidang_minat) => ({
+    bidang_minat: bidang_minat,
   }));
 
   $(document).ready(function () {
@@ -230,6 +302,83 @@
     });
   });
 
+  $("#input-bidang_minat_baru").on("keydown", function (event) {
+    if (event.key === "Enter") {
+      tambahBidangMinat($(this).val().trim());
+      $("#input-bidang_minat_baru").val("");
+    }
+  });
+
+  function tambahBidangMinat(data) {
+    let newData = String(data).toUpperCase();
+    let isExist = json_bidang_minat.findIndex(
+      (bidang_minat) => bidang_minat.bidang_minat === newData
+    );
+    if (isExist !== -1)
+      returnpopUpTimer("error", "Data Bidang Minat ini sudah ada!");
+
+    json_bidang_minat.push({ bidang_minat: newData });
+    bidang_minat_tab.clear().rows.add(json_bidang_minat).draw(false);
+  }
+
+  $("#btn-simpanBidangMinat").on("click", function () {
+    $.ajax({
+      type: "POST",
+      url: "/update_bidang_minat",
+      cache: false,
+      data: JSON.stringify(json_bidang_minat),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        if (res.status == false) popUpTimer("error", res.message);
+        else {
+          await popUpTimer("success", res.message);
+        }
+      },
+    });
+  });
+
+  $("#btn-hapusBidangMinat").on("click", function () {
+    let selectedData = [];
+    $("input[name='cbBidangMinat']:checked").each(function () {
+      let row = $(this).closest("tr"); // Dapatkan baris terkait
+      let rowData = bidang_minat_tab.row(row).data(); // Ambil data baris dari DataTable
+
+      if (rowData) {
+        selectedData.push(rowData.bidang_minat);
+      }
+    });
+
+    let filtered_data = json_bidang_minat.filter(
+      (bidang_minat) => !selectedData.includes(bidang_minat.bidang_minat)
+    );
+
+    $.ajax({
+      type: "POST",
+      url: "/update_bidang_minat",
+      cache: false,
+      data: JSON.stringify(filtered_data),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        if (res.status == false) popUpTimer("error", res.message);
+        else {
+          json_bidang_minat = JSON.parse(JSON.stringify(filtered_data));
+          bidang_minat_tab.clear().rows.add(json_bidang_minat).draw(false);
+          await popUpTimer("success", res.message);
+        }
+      },
+    });
+  });
+
   // Event ketika cbKelompokAll di-click
   $('input[name="cbKelompokAll"]').on("change", function () {
     let isChecked = $(this).prop("checked");
@@ -249,6 +398,29 @@
 
     let anyChecked = $('input[name="cbKelompok"]:checked').length > 0;
     document.getElementById("btn-hapusKelompok").style.display = anyChecked
+      ? "inline-block"
+      : "none";
+  });
+
+  // Event ketika cbBidangMinatAll di-click
+  $('input[name="cbBidangMinatAll"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $('input[name="cbBidangMinat"]').prop("checked", isChecked);
+
+    document.getElementById("btn-hapusBidangMinat").style.display = isChecked
+      ? "inline-block"
+      : "none";
+  });
+
+  // Event ketika salah satu cbBidangMinat di-click
+  $(document).on("change", 'input[name="cbBidangMinat"]', function () {
+    let allChecked =
+      $('input[name="cbBidangMinat"]').length ===
+      $('input[name="cbBidangMinat"]:checked').length;
+    $('input[name="cbBidangMinatAll"]').prop("checked", allChecked);
+
+    let anyChecked = $('input[name="cbBidangMinat"]:checked').length > 0;
+    document.getElementById("btn-hapusBidangMinat").style.display = anyChecked
       ? "inline-block"
       : "none";
   });
@@ -276,6 +448,34 @@
       },
       {
         data: "kelompok_matkul",
+        width: "",
+      },
+    ],
+  });
+
+  let bidang_minat_tab = $("#table_bidang_minat").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    searching: false,
+    info: false,
+    data: json_bidang_minat,
+    columns: [
+      {
+        data: null,
+        width: "10%",
+        className: "text-center",
+        render: function (data, type, row) {
+          return `
+              <input type="checkbox" name="cbKelompok"/>
+            `;
+        },
+      },
+      {
+        data: "bidang_minat",
         width: "",
       },
     ],
