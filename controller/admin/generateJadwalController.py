@@ -1,5 +1,6 @@
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for
 from dao.admin.generateJadwalDao import generateJadwalDao
+from dao import genetic_algorithm as ga
 from flask_login import login_required
 
 generateJadwal = Blueprint('generateJadwal', __name__)
@@ -25,9 +26,16 @@ def generate_jadwal():
     print(f"{'[ CONTROLLER ]':<15} Generate Jadwal")
 
     try:
+        param = request.args.to_dict()
+        regenerate = True if param['regenerate'] == 'true' else False
+        
+        jadwal = dao.get_jadwal()
+        if jadwal and jadwal.get('jadwal') and not regenerate:
+            return jsonify({ 'status': False, 'reason': 'exist'})
+        
         data_dosen = dao.get_dosen()
-        data_matkul = dao.get_matkul()
         data_ruang = dao.get_kelas()
+        data_matkul = dao.get_matkul()
 
         best_schedule = ga.genetic_algorithm(
             data_matkul, data_dosen, data_ruang, 

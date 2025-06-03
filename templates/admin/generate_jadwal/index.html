@@ -16,13 +16,16 @@
   const semester_ajaran_depan = "{{ semester_ajaran_depan | safe }}";
   $(document).ready(function () {});
 
-  function generate_jadwal() {
+  function generate_jadwal(generate_ulang = false) {
+    param = {
+      regenerate: generate_ulang,
+    };
     $.ajax({
       type: "GET",
       url: "/generate_jadwal/generate",
+      data: param,
       cache: false,
       beforeSend: () => {
-        console.log("beforesend ajax");
         showLoading();
       },
       complete: () => {
@@ -32,7 +35,26 @@
         console.log("res ajax", res);
 
         if (res.status) export_to_excel("Jadwal_Kuliah");
-        else popUpTimer("error", res.message);
+        else {
+          if (res.reason === "exist") {
+            Swal.fire({
+              icon: "info",
+              title: "Jadwal sudah pernah dibuat!",
+              text: "Apakah mau buat ulang?",
+              showDenyButton: true,
+              showCancelButton: false,
+              confirmButtonText: "Buat Ulang",
+              denyButtonText: "Batal",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                return generate_jadwal(true);
+              } else if (result.isDenied) {
+                return;
+              }
+            });
+          }
+          popUpTimer("error", res.message);
+        }
       },
     });
   }
