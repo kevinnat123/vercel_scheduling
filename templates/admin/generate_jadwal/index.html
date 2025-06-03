@@ -13,10 +13,7 @@
 </div>
 {% endblock %} {% block script %}
 <script>
-  const semester_depan =
-    "{{ session['academic_details']['semester_depan'] | safe }}";
-  const tahun_ajaran_berikutnya =
-    "{{ session['academic_details']['tahun_ajaran_berikutnya'] | safe }}";
+  const semester_ajaran_depan = "{{ semester_ajaran_depan | safe }}";
   $(document).ready(function () {});
 
   function generate_jadwal() {
@@ -63,12 +60,7 @@
    */
   async function export_to_excel(downloadBy) {
     console.warn("downloading...");
-    let filename =
-      downloadBy +
-      "_Semester-" +
-      semester_depan +
-      "_" +
-      tahun_ajaran_berikutnya.replaceAll("/", "-");
+    let filename = downloadBy + "_Semester-" + semester_ajaran_depan;
     console.log(filename);
     try {
       let params = {

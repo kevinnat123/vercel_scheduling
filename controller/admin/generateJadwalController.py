@@ -16,8 +16,9 @@ def generateJadwal_index():
             '/admin/generate_jadwal/index.html', 
             menu = 'Generate Jadwal', 
             title = 'Generate Jadwal', 
+            semester_ajaran_depan = session['academic_details']['semester_depan'] + "_" + session['academic_details']['tahun_ajaran_berikutnya'].replace("/", "-")
         )
-    
+        
 @generateJadwal.route("/generate_jadwal/generate", methods=['GET'])
 @login_required
 def generate_jadwal():
