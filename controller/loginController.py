@@ -28,7 +28,7 @@ def check_session():
             session.modified = True
 
         # Opsional: validasi extra user (misal di dashboard)
-        if current_endpoint in ['signin.dashboard']:
+        if current_endpoint in ['dashboard.dashboard_index']:
             user_id_in_session = session['user'].get('u_id')
             user_id_in_db = loginDao.get_user_id(user_id_in_session)
 
@@ -48,14 +48,14 @@ def ping():
 def home():
     print(f"{'[ THROW ]':<15} Login Page / Dashboard")
     if session.get('user') and 'u_id' in session['user']:
-        return redirect(url_for('signin.dashboard'))
+        return redirect(url_for('dashboard.dashboard_index'))
     return redirect(url_for('signin.login'))
     
 @signin.route("/login", methods=['GET', 'POST'])
 def login():
     print(f"{'[ CONTROLLER ]':<15} Login (Method: {request.method})")
     if session.get('user') and 'u_id' in session['user']:
-        return redirect(url_for('signin.dashboard'))
+        return redirect(url_for('dashboard.dashboard_index'))
     
     if request.method == 'POST':
         req = request.get_json('data')
@@ -79,7 +79,7 @@ def login():
             print(f"{'':<15} {'Session User':<30}: {session['user']}")
             print(f"{'':<15} {'Session Menu':<30}: {session['menu']}")
             return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
-            # return jsonify({'status': True, 'redirect_url': url_for('signin.dashboard')}), 200
+            # return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
 
         return jsonify({'status': False, 'message': user['message']}), 401
     return render_template('signin.html')
@@ -158,7 +158,7 @@ def error404():
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
-    return render_template('404.html', menu = "404 Not Found", redirect_url = url_for('signin.dashboard'))
+    return render_template('404.html', menu = "404 Not Found", redirect_url = url_for('dashboard.dashboard_index'))
 
 @signin.route("/403Forbidden")
 @login_required
@@ -167,7 +167,7 @@ def error403():
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
-    return render_template('403.html', menu = "403 Forbidden", redirect_url = url_for('signin.dashboard'))
+    return render_template('403.html', menu = "403 Forbidden", redirect_url = url_for('dashboard.dashboard_index'))
 
 @signin.route("/logout")
 def logout():
