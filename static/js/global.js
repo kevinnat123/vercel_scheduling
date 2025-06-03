@@ -219,7 +219,7 @@ window.addRowButton = function (dataTable) {
 window.yearInput = function (targetValue) {
   let today = new Date();
   let currentYear = today.getFullYear();
-  let maxYear = today.getMonth() >= 7 ? currentYear : currentYear - 1; // Agustus = index 7
+  let maxYear = today.getMonth() > 3 ? currentYear : currentYear - 1; // Agustus = index 7
   let minYear = maxYear - 7;
 
   // Hanya angka & maksimal 4 digit
