@@ -37,6 +37,9 @@ def mataKuliah_tambah_kelompok():
 def mataKuliah_get_matkul():
     print(f"{'[ CONTROLLER ]':<15} Get Matkul")
     data = dao.get_matkul()
+    for matkul in data:
+        if not matkul.get('asistensi'):
+            matkul['asistensi'] = False
     return jsonify({ 'data': data })
 
 @mataKuliah.route("/data_mata_kuliah/post_matkul", methods=['POST'])
@@ -60,6 +63,5 @@ def mataKuliah_put_matkul():
 def mataKuliah_delete_matkul():
     print(f"{'[ CONTROLLER ]':<15} Delete Matkul")
     req = request.get_json('data')
-    print('  req', req)
     data = dao.delete_matkul(req)
     return jsonify( data )

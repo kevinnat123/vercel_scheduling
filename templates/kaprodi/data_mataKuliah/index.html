@@ -237,7 +237,7 @@
         </div>
       </div>
 
-      <div class="form-group row asistensi_detail" hidden>
+      <div class="form-group row asistensi_detail tipe_kelas_asisten" hidden>
         <label for="rbTipeKelasAsistensi" class="col-2 col-form-label text-end"
           >Tipe Kelas Asisten&ensp;</label
         >
@@ -286,6 +286,9 @@
           onclick="form_matkul(undefined, true)"
         >
           Batal
+        </button>
+        <button type="button" class="btn btn-danger" id="btn-hapus_individu">
+          Hapus
         </button>
       </div>
       <!-- FORM ACTION END -->
@@ -458,13 +461,15 @@
     if (update === false) {
       document.getElementById("formTitle").innerText = "Tambah Data";
       $("#card-form input").prop("disabled", false);
-      $("#btn-simpan").attr("hidden", false);
-      $("#btn-update").attr("hidden", true);
+      $("#btn-simpan").prop("hidden", false);
+      $("#btn-hapus_individu").prop("hidden", true);
+      $("#btn-update").prop("hidden", true);
     } else {
       document.getElementById("formTitle").innerText = "Update Data";
       $("#input_kode").prop("disabled", true);
-      $("#btn-simpan").attr("hidden", true);
-      $("#btn-update").attr("hidden", false);
+      $("#btn-simpan").prop("hidden", true);
+      $("#btn-hapus_individu").prop("hidden", false);
+      $("#btn-update").prop("hidden", false);
     }
     $("#input_prodi").prop("disabled", true);
     $("#input_prodi").val(prodi);
@@ -491,6 +496,11 @@
         "checked",
         data.integrated_class
       );
+      if (data.asistensi)
+        $(".tipe_kelas_asisten").attr(
+          "hidden",
+          data.integrated_class ? true : false
+        );
       $("#ASISTEN_" + data.tipe_kelas_asistensi).prop("checked", true);
     }
     $("#card-form").prop("hidden", hidden ? true : false);
@@ -543,7 +553,8 @@
       return;
     } else if (
       getCheckedItemValue("cbAsistensi")[0] &&
-      !getCheckedItemValue("rbTipeKelasAsistensi")[0]
+      !getCheckedItemValue("rbTipeKelasAsistensi")[0] &&
+      !getCheckedItemValue("cbIntegratedClass")[0]
     ) {
       popUpTimer("error", "Tipe Kelas Asisten belum diisi!");
       setTimeout(() => {
@@ -563,7 +574,7 @@
       bidang: retrieveBadgeValues("list_bidang"),
       dosen_ajar: retrieveBadgeValues("list_dosen_ajar"),
       asistensi: getCheckedItemValue("cbAsistensi")[0] ? true : false,
-      tipe_kelas_asistensi: getCheckedItemValue("rbTipeKelas")[0],
+      tipe_kelas_asistensi: getCheckedItemValue("rbTipeKelasAsistensi")[0],
       integrated_class: getCheckedItemValue("cbIntegratedClass")[0]
         ? true
         : false,
@@ -646,7 +657,8 @@
       return;
     } else if (
       getCheckedItemValue("cbAsistensi")[0] &&
-      !getCheckedItemValue("rbTipeKelasAsistensi")[0]
+      !getCheckedItemValue("rbTipeKelasAsistensi")[0] &&
+      !getCheckedItemValue("cbIntegratedClass")[0]
     ) {
       popUpTimer("error", "Tipe Kelas Asisten belum diisi!");
       setTimeout(() => {
@@ -666,7 +678,7 @@
       bidang: retrieveBadgeValues("list_bidang"),
       dosen_ajar: retrieveBadgeValues("list_dosen_ajar"),
       asistensi: getCheckedItemValue("cbAsistensi")[0] ? true : false,
-      tipe_kelas_asistensi: getCheckedItemValue("rbTipeKelas")[0],
+      tipe_kelas_asistensi: getCheckedItemValue("rbTipeKelasAsistensi")[0],
       integrated_class: getCheckedItemValue("cbIntegratedClass")[0]
         ? true
         : false,
@@ -700,6 +712,72 @@
     });
   });
 
+  async function hapusData(list_data) {
+    let decision = await Swal.fire({
+      title: "Yakin akan hapus data ini?",
+      showCancelButton: true,
+      confirmButtonText: "Yakin",
+      cancelButtonText: "Batalkan",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        return true;
+      } else if (result.isDismissed) {
+        return false;
+      }
+    });
+
+    if (decision === true) {
+      $.ajax({
+        type: "POST",
+        url: "/data_mata_kuliah/delete_matkul",
+        cache: false,
+        data: JSON.stringify(list_data),
+        beforeSend: () => {
+          showLoading();
+        },
+        complete: () => {
+          hideLoading();
+        },
+        success: function (res) {
+          console.log("[ delete_matkul ] ", res);
+          if (res.status === false) {
+            popUpTimer("error", res.message);
+          } else {
+            popUpTimer("success", res.message);
+            $('input[name="cbMatkulTabAll"]').prop("checked", false);
+            matkul_tab.ajax.reload(null, false);
+          }
+          $("#btn-batal").click();
+        },
+      });
+    }
+  }
+
+  $("#btn-hapus_individu").on("click", async function () {
+    let kode_matkul = $("#input_kode").val();
+    if (
+      matkul_tab
+        .data()
+        .toArray()
+        .find((item) => item.kode == kode_matkul && item.prodi === "GENERAL")
+    )
+      return popUpTimer(
+        "error",
+        "Matkul ini " +
+          matkul_tab
+            .data()
+            .toArray()
+            .find(
+              (item) => item.kode == kode_matkul && item.prodi === "GENERAL"
+            ) +
+          " tidak bisa dihapus!",
+        "Silahkan hubungi admin untuk modifikasi matkul ini.",
+        2500
+      );
+
+    await hapusData([{ kode: kode_matkul }]);
+  });
+
   $("#btn-hapus").on("click", async function () {
     let selectedData = [];
 
@@ -725,46 +803,7 @@
         2500
       );
 
-    let decision = await Swal.fire({
-      title: "Yakin akan hapus data ini?",
-      showCancelButton: true,
-      confirmButtonText: "Yakin",
-      cancelButtonText: "Batalkan",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        return true;
-      } else if (result.isDismissed) {
-        return false;
-      }
-    });
-
-    console.log("decision", decision);
-
-    if (decision === true) {
-      $.ajax({
-        type: "POST",
-        url: "/data_mata_kuliah/delete_matkul",
-        cache: false,
-        data: JSON.stringify(selectedData),
-        beforeSend: () => {
-          showLoading();
-        },
-        complete: () => {
-          hideLoading();
-        },
-        success: function (res) {
-          console.log("[ delete_matkul ] ", res);
-          if (res.status === false) {
-            popUpTimer("error", res.message);
-          } else {
-            popUpTimer("success", res.message);
-            $('input[name="cbMatkulTabAll"]').prop("checked", false);
-            matkul_tab.ajax.reload(null, false);
-          }
-          $("#btn-batal").click();
-        },
-      });
-    }
+    await hapusData(selectedData);
   });
 
   function detail_matkul(object) {
@@ -865,6 +904,11 @@
   $('input[name="cbAsistensi"]').on("change", function () {
     let isChecked = $(this).prop("checked");
     $(".asistensi_detail").attr("hidden", isChecked ? false : true);
+  });
+
+  $('input[name="cbIntegratedClass"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $(".tipe_kelas_asisten").attr("hidden", isChecked ? true : false);
   });
 
   // Event ketika cbMatkulTabAll di-click

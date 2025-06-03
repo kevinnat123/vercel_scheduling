@@ -59,7 +59,7 @@ class dataMataKuliahDao:
                 raise CustomError({ 'message': 'Program Studi belum diisi!' })
             elif not params.get('tipe_kelas'):
                 raise CustomError({ 'message': 'Tipe Kelas belum diisi!' })
-            elif params.get('asistensi') and not params.get('tipe_kelas_asistensi'):
+            elif params.get('asistensi') and not params.get('integrated_class') and not params.get('tipe_kelas_asistensi'):
                 raise CustomError({ 'message': 'Tipe Kelas Asistensi belum diisi!' })
 
             if session['user']['role'] == "KAPRODI":
@@ -71,6 +71,8 @@ class dataMataKuliahDao:
                 if 'asistensi' in params: params.pop('asistensi')
                 if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
                 if 'integrated_class' in params: params.pop('integrated_class')
+            if params.get('integrated_class'):
+                if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
             params = {k: v for k, v in params.items() if v}
 
             # Check exist
@@ -121,7 +123,7 @@ class dataMataKuliahDao:
                 raise CustomError({ 'message': 'Program Studi belum diisi!' })
             elif not params.get('tipe_kelas'):
                 raise CustomError({ 'message': 'Tipe Kelas belum diisi!' })
-            elif params.get('asistensi') and not params.get('tipe_kelas_asistensi'):
+            elif params.get('asistensi') and not params.get('integrated_class') and not params.get('tipe_kelas_asistensi'):
                 raise CustomError({ 'message': 'Tipe Kelas Asistensi belum diisi!' })
                 
             if session['user']['role'] == "KAPRODI":
@@ -137,9 +139,16 @@ class dataMataKuliahDao:
                 if 'asistensi' in params: params.pop('asistensi')
                 if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
                 if 'integrated_class' in params: params.pop('integrated_class')
+            unset = {k: "" for k, v in params.items() if not v}
+            if params.get('integrated_class'):
+                if 'tipe_kelas_asistensi' in params: 
+                    unset['tipe_kelas_asistensi'] = ""
+                    params.pop('tipe_kelas_asistensi')
             params = {k: v for k, v in params.items() if v}
             
-            res = self.connection.update_one(db_matkul, {'kode': params['kode']}, params)
+            print('unset', unset)
+            print(params)
+            res = self.connection.update_one(db_matkul, {'kode': params['kode']}, params, unset)
 
             # Update Dosen
             if params.get('dosen_ajar'):
@@ -192,6 +201,12 @@ class dataMataKuliahDao:
         result = { 'status': False }
 
         try:
+            params = self.connection.find_many(
+                db_matkul, 
+                {'kode': { '$in' : [item['kode'] for item in params] }}, 
+                sort=[("kode", 1)]
+            )
+            params = params['data']
             prodi = list({item["prodi"] for item in params})
             if 'GENERAL' in prodi:
                 raise CustomError({ 'message': 'Matkul ' + [item.get('kode') for item in params if item["prodi"] == "GENERAL"] + ' tidak bisa dihapus!' })
