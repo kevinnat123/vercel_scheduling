@@ -220,6 +220,9 @@
         >
           Batal
         </button>
+        <button type="button" class="btn btn-danger" id="btn-hapus_individu">
+          Hapus
+        </button>
       </div>
       <!-- FORM ACTION END -->
     </form>
@@ -326,11 +329,13 @@
       document.getElementById("formTitle").innerText = "Tambah Data";
       $("#card-form input").prop("disabled", false);
       $("#btn-simpan").attr("hidden", false);
+      $("#btn-hapus_individu").prop("hidden", true);
       $("#btn-update").attr("hidden", true);
     } else {
       document.getElementById("formTitle").innerText = "Update Data";
       $("#input_nip").prop("disabled", true);
       $("#btn-simpan").attr("hidden", true);
+      $("#btn-hapus_individu").prop("hidden", false);
       $("#btn-update").attr("hidden", false);
     }
     $("#input_prodi").prop("disabled", true);
@@ -508,21 +513,7 @@
     });
   });
 
-  $("#btn-hapus").on("click", async function () {
-    let selectedData = [];
-
-    $("input[name='cbDosenTab']:checked").each(function () {
-      let row = $(this).closest("tr"); // Dapatkan baris terkait
-      let rowData = dosen_tab.row(row).data(); // Ambil data baris dari DataTable
-
-      if (rowData) {
-        selectedData.push(rowData);
-      }
-    });
-
-    if (!selectedData.length)
-      return popUpTimer("error", "Tidak ada data untuk dihapus.");
-
+  async function hapusData(list_data) {
     let decision = await Swal.fire({
       title: "Yakin akan hapus data ini?",
       showCancelButton: true,
@@ -541,7 +532,7 @@
         type: "POST",
         url: "/data_dosen/delete_dosen",
         cache: false,
-        data: JSON.stringify(selectedData),
+        data: JSON.stringify(list_data),
         beforeSend: () => {
           showLoading();
         },
@@ -561,6 +552,29 @@
         },
       });
     }
+  }
+
+  $("#btn-hapus_individu").on("click", async function () {
+    let nip = $("#input_nip").val();
+    await hapusData([{ nip: nip }]);
+  });
+
+  $("#btn-hapus").on("click", async function () {
+    let selectedData = [];
+
+    $("input[name='cbDosenTab']:checked").each(function () {
+      let row = $(this).closest("tr"); // Dapatkan baris terkait
+      let rowData = dosen_tab.row(row).data(); // Ambil data baris dari DataTable
+
+      if (rowData) {
+        selectedData.push(rowData);
+      }
+    });
+
+    if (!selectedData.length)
+      return popUpTimer("error", "Tidak ada data untuk dihapus.");
+
+    await hapusData(selectedData);
   });
 
   function detail_dosen(object) {

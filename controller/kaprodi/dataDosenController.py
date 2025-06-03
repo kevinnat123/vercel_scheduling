@@ -50,12 +50,3 @@ def delete_dosen():
     req = request.get_json('data')
     data = dao.delete_dosen(req)
     return jsonify( data )
-
-@dosen.route("/data_dosen/get_matkul", methods=['GET'])
-@login_required
-def get_matkul():
-    print(f"{'[ CONTROLLER ]':<15} Get Matkul")
-    prodi = request.args.get('prodi')
-    print("prodi", prodi)
-    data = dao.get_matkul(prodi)
-    return jsonify({ 'data': data })

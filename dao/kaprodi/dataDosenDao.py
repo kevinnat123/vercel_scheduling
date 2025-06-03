@@ -13,7 +13,11 @@ class dataDosenDao:
 
     def get_dosen(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get Dosen (Prodi: {session['user']['prodi']})")
-        result = self.connection.find_many(db_dosen, {'prodi': session['user']['prodi']}, sort=[("nip", 1)])
+        result = self.connection.find_many(db_dosen, {
+            '$or': [
+                {'prodi': session['user']['prodi']}, 
+                {'status': 'TIDAK_TETAP'}
+            ]}, sort=[("status", 1), ("nip", 1)])
         if result.get('status'):
             for y in result['data']:
                 if not y.get('pakar'):
@@ -49,6 +53,8 @@ class dataDosenDao:
                     params['preferensi'].pop('value')
                 else:
                     params.pop('preferensi')
+            if params.get('status') and str(params.get('status')) == "TIDAK_TETAP":
+                if 'prodi' in params: params.pop('prodi')
             params = {k: v for k, v in params.items() if v}
                 
             res = self.connection.insert_one(db_dosen, params)
@@ -123,6 +129,10 @@ class dataDosenDao:
                 else:
                     params.pop('preferensi')
                     unset['preferensi'] = ""
+            if params.get('status') and str(params.get('status')) == "TIDAK_TETAP":
+                if 'prodi' in params: 
+                    unset['prodi'] = ""
+                    params.pop('prodi')
 
             params = {k: v for k, v in params.items() if v}
                 
@@ -176,6 +186,12 @@ class dataDosenDao:
         result = { 'status': False }
 
         try:
+            params = self.connection.find_many(
+                db_dosen, 
+                {'nip': { '$in' : [item['nip'] for item in params] }}, 
+                sort=[("kode", 1)]
+            )
+            params = params['data']
             list_nip = [item["nip"] for item in params]
             for nip in list_nip:
                 data_dosen = self.connection.find_one(db_dosen, {'nip': nip})
@@ -214,8 +230,3 @@ class dataDosenDao:
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
-    
-    def get_matkul(self, prodi: str):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul (Prodi: {prodi})")
-        result = self.connection.find_many(db_matkul, {'prodi': prodi}, sort=[("kode", 1)])
-        return result['data'] if result and result.get('status') else None
