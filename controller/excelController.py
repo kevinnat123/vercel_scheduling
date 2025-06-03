@@ -193,7 +193,7 @@ def export_ruangan_to_excel(jadwal_list, matakuliah_list, dosen_list):
 
             nama_dosen = next((d['nama'] for d in dosen_list if d['nip'] == jadwal['kode_dosen']), None)if jadwal['kode_dosen'] != "AS" else "ASISTEN"
             
-            value = jadwal['kode_matkul'] #+ "\n" + nama_dosen
+            value = jadwal['kode_matkul'] + "\n" + (jadwal['kode_dosen'] if jadwal['kode_dosen'] != "AS" else "ASISTEN") #nama_dosen
             worksheet.merge_range(col + start_row + ":" + col + end_row, value, format_data)
 
     # Simpan workbook
