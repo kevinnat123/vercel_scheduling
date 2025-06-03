@@ -161,7 +161,7 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
         if sesi_dosen.kode_dosen != "AS":
             matkul = next((m for m in matakuliah_list if m['kode'] == sesi_dosen.kode_matkul[:-1]), None)
             dosen = next((d for d in dosen_list if d['nip'] == sesi_dosen.kode_dosen), None)
-            preferensi_hari_dosen = [d for d in pilihan_hari_dosen if d not in dosen['preferensi']['hindari_hari']]
+            preferensi_hari_dosen = [d for d in pilihan_hari_dosen if d not in dosen['preferensi']['hindari_hari']] if dosen.get('preferensi') and dosen['preferensi'].get('hindari_hari') else pilihan_hari_dosen
 
             if matkul:
                 conflict = False
@@ -170,8 +170,8 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                 if beban_dosen[dosen['nip']] > (12 - sesi_dosen.sks_akademik):
                     dosen_pakar = [
                         d for d in dosen_list 
-                            if (d["prodi"] == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
-                                len(set(d['pakar']) & set(matkul['bidang'])) > 0
+                            if (d.get("prodi") == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
+                                len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
                     ]
                     if len(dosen_pakar) > 1:
                         calon_dosen_pengganti = [d for d in dosen_pakar if beban_dosen[d['nip']] + sesi_dosen.sks_akademik <= 12]
@@ -185,7 +185,7 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                                         else beban_dosen[d['nip']] <= max(sks_dosen_pakar))
                             ]
                         bobot_calon_dosen_pengganti = [
-                            len(set(d['pakar']) & set(matkul['bidang'])) > 0
+                            len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
                             for d in calon_dosen_pengganti
                         ]
                         dosen = random.choices(
@@ -248,7 +248,7 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                                     r['kode'] not in excluded_room
                             ]
                             bobot_calon_ruang_pengganti = [
-                                (len(set(r['plot']) & set(matkul['bidang']))*10 or 1) * (10 if matkul['prodi'] in r['plot'] else 1)
+                                (len(set(r['plot']) & set(matkul.get('bidang') or []))*10 or 1) * (10 if matkul['prodi'] in r['plot'] else 1)
                                 for r in calon_ruang_pengganti
                             ]
                             ruang_pengganti = random.choices(
@@ -322,7 +322,7 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                             ]
                             if calon_ruang_pengganti:
                                 bobot_calon_ruang_pengganti = [
-                                    (len(set(r['plot']) & set(matkul['bidang']))*10 or 1) * (10 if matkul['prodi'] in r['plot'] else 1)
+                                    (len(set(r['plot']) & set(matkul.get('bidang') or []))*10 or 1) * (10 if matkul['prodi'] in r['plot'] else 1)
                                     for r in calon_ruang_pengganti
                                 ]
                                 ruang_pengganti = random.choices(
@@ -378,17 +378,17 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
     for matkul in matakuliah_list:
         dosen_pakar = [
             d for d in dosen_list 
-                if (d["prodi"] == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
-                    len(set(d['pakar']) & set(matkul['bidang'])) > 0
+                if (d.get("prodi") == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
+                    len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
         ]
         
         # RUANGAN
         ruangan_prodi = [r for r in ruang_list if (matkul['prodi'] in r['plot'] or 'GENERAL' in r['plot'])]
         ruangan_prodi_prioritas = [r for r in ruangan_prodi if r['kapasitas'] > 35 and (r['tipe_ruangan'] != 'RAPAT' if matkul.get('asistensi') else True)]
-        bobot_ruangan_prodi = [(len(set(r['plot']) & set(matkul['bidang']))*10 or 1) + int(r['kapasitas']) + (100 if r['tipe_ruangan'] == matkul['tipe_kelas'] else 1) for r in ruangan_prodi_prioritas or ruangan_prodi]
+        bobot_ruangan_prodi = [(len(set(r['plot']) & set(matkul.get('bidang') or []))*10 or 1) + int(r['kapasitas']) + (100 if r['tipe_ruangan'] == matkul['tipe_kelas'] else 1) for r in ruangan_prodi_prioritas or ruangan_prodi]
         
         ruangan_prodi_prioritas_praktikum = [r for r in ruangan_prodi if not (r['kapasitas'] > max([r['kapasitas'] for r in ruangan_prodi if r['tipe_ruangan'] == "PRAKTIKUM"])) and r['tipe_ruangan'] != 'RAPAT']
-        bobot_ruangan_prodi_prioritas_praktikum = [((len(set(r['plot']) & set(matkul['bidang']))*10 or 1) + int(r['kapasitas'])) * (100 if r['tipe_ruangan'] == matkul['tipe_kelas'] else 1) for r in ruangan_prodi_prioritas_praktikum if r['tipe_ruangan'] != 'RAPAT']
+        bobot_ruangan_prodi_prioritas_praktikum = [((len(set(r['plot']) & set(matkul.get('bidang') or []))*10 or 1) + int(r['kapasitas'])) * (100 if r['tipe_ruangan'] == matkul['tipe_kelas'] else 1) for r in ruangan_prodi_prioritas_praktikum if r['tipe_ruangan'] != 'RAPAT']
         
         jumlah_mahasiswa = matkul['jumlah_mahasiswa']
         index_kelas = 1
@@ -418,7 +418,7 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
                                 else beban_dosen[d['nip']] <= max(sks_dosen_pakar))
                     ]
                 bobot_calon_dosen = [
-                    len(set(d['pakar']) & set(matkul['bidang'])) > 0
+                    len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
                     for d in calon_dosen
                 ]
                 dosen = random.choices(
@@ -429,7 +429,7 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
                 dosen = dosen_pakar[0]
 
             if dosen['nip'] not in jadwal_dosen: jadwal_dosen[dosen['nip']] = []
-            preferensi_hari = [hari for hari in pilihan_hari_dosen if hari not in dosen['preferensi']['hindari_hari']]
+            preferensi_hari = [hari for hari in pilihan_hari_dosen if hari not in dosen['preferensi']['hindari_hari']] if dosen.get('preferensi') and dosen['preferensi'].get('hindari_hari') else pilihan_hari_dosen
             hari_dosen = random.choice(preferensi_hari)
 
             sukses = False
@@ -485,7 +485,7 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
                 # print(f"{matkul['nama']:<50} praktikum: {matkul.get('asistensi'):<10} integrated: {matkul.get('integrated_class')}")
                 # print(f"kapasitas ruangan dosen {ruang_dosen['kapasitas']}; {min(40, max(40, ruang_dosen['kapasitas']))}")
                 ruang_prodi_asistensi = [r for r in ruangan_prodi_prioritas or ruangan_prodi if r['tipe_ruangan'] == matkul.get('tipe_kelas_asistensi') and r['kapasitas'] >= ruang_dosen['kapasitas'] and r['tipe_ruangan'] != "RAPAT"]
-                bobot_ruang_asisten = [(len(set(r['plot']) & set(matkul['bidang']))*10 or 1) for r in ruang_prodi_asistensi]
+                bobot_ruang_asisten = [(len(set(r['plot']) & set(matkul.get('bidang') or []))*10 or 1) for r in ruang_prodi_asistensi]
 
                 # print(f"{ruang_dosen['kapasitas']} available asistance {ruang_prodi_asistensi}")
                 ruang_asisten = random.choices(
@@ -630,7 +630,7 @@ def hitung_fitness(jadwal, matakuliah_list, dosen_list, ruang_list, detail=False
                 penalti += BOBOT_PENALTI['dosen_overdosis']
 
             # CEK PELANGGARAN PREFERENSI DOSEN
-            preferensi_dosen = info_dosen.get("preferensi_dosen", None)
+            preferensi_dosen = info_dosen.get("preferensi", None)
             if preferensi_dosen:
                 hindari_hari = preferensi_dosen.get("hindari_hari", None)
                 hindari_jam = preferensi_dosen.get("hindari_jam", None)
@@ -786,7 +786,7 @@ def mutasi(individu, dosen_list, matakuliah_list, ruang_list, peluang_mutasi=0.1
                             r['tipe_ruangan'] == matkul['tipe_kelas_asistensi']
                     ]
                 bobot_calon_ruang_pengganti = [
-                    (len(set(r['plot']) & set(matkul['bidang']))*10 or 1)
+                    (len(set(r['plot']) & set(matkul.get('bidang') or []))*10 or 1)
                     for r in calon_ruang_pengganti
                 ]
                 ruang_pengganti = random.choices(

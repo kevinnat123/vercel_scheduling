@@ -19,8 +19,15 @@ class generateJadwalDao:
     
     def get_matkul(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get Matkul")
-        result = self.connection.find_many(db_matkul)
-        return result['data'] if result and result.get('status') else []
+        result = self.connection.find_many(db_matkul, {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }})
+        if result and result.get('status'):
+            resultData = [data for data in result['data']] # [ [{}], [{}] ]
+            list_matkul = []
+            for dt in resultData:
+                for matkul in dt['list_matkul']:
+                    matkul.update({'jumlah_mahasiswa': dt['jumlah_mahasiswa']})
+                    list_matkul.append(matkul)
+        return list_matkul if result and result.get('status') else []
     
     def get_kelas(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get kelas")
