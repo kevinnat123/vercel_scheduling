@@ -25,7 +25,7 @@ class Database:
     def get_collection(self, collection_name):
         return self.db[collection_name]
     
-    def find_one(self, collection_name, filter):
+    def find_one(self, collection_name, filter={}):
         try:
             collection = self.get_collection(collection_name)
             result = collection.find_one(filter)

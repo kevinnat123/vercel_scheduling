@@ -25,6 +25,11 @@ class loginDao:
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result if result and result.get('status') else None
     
+    def get_prodi(self):
+        print(f"{'':<7}{'[ DAO ]':<8} Get Prodi")
+        result = self.connection.find_one(db_users, {"role": "ADMIN"})
+        return result['data']['list_prodi'] if result and result.get('status') else None
+    
     def get_menu(self, role):
         print(f"{'':<7}{'[ DAO ]':<8} get menu: {role}")
         general_menu = self.connection.find_many(db_urls, {"role": "GENERAL"})

@@ -75,6 +75,11 @@ def login():
 
             session.permanent = True  # Aktifkan waktu hidup session
 
+            if session['user']['role'] != "ADMIN":
+                list_prodi = loginDao.get_prodi()
+                session['user']['list_prodi'] = list_prodi or [session['user']['prodi']]
+                session.modified = True
+
             print(f"{'':<15} {'Session Academic_Details':<30}: {session['academic_details']}")
             print(f"{'':<15} {'Session User':<30}: {session['user']}")
             print(f"{'':<15} {'Session Menu':<30}: {session['menu']}")
