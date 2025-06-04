@@ -35,14 +35,35 @@ class dataMataKuliahDao:
         return result
     
     def get_matkul(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul (Prodi: {session['user']['prodi']})")
+        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul")
+        if session['user']['role'] == "KEPALA PROGRAM STUDI":
+            result = self.connection.find_many(
+                db_matkul, 
+                {'prodi': { '$in' : [session['user']['prodi']] }}, 
+                sort=[("kode", 1)]
+            )
+        elif session['user']['role'] == "ADMIN":
+            result = self.connection.find_many(db_matkul, sort=[("prodi", 1), ("kode", 1)])
+        # { '$in' : ['GENERAL', session['user']['prodi']] }
+        if result and result.get('status'):
+            for matkul in result['data']:
+                matkul.setdefault('asistensi', None)
+                matkul.setdefault('prodi', None)
+        return result['data'] if result and result.get('status') else []
+    
+    def get_matkul_prodi(self, prodi):
+        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul Prodi (prodi: {prodi})")
         result = self.connection.find_many(
             db_matkul, 
-            {'prodi': { '$in' : [session['user']['prodi']] }}, 
+            {'prodi': prodi}, 
             sort=[("kode", 1)]
         )
         # { '$in' : ['GENERAL', session['user']['prodi']] }
-        return result['data'] if result and result.get('status') else None
+        if result and result.get('status'):
+            for matkul in result['data']:
+                matkul.setdefault('asistensi', None)
+                matkul.setdefault('prodi', None)
+        return result['data'] if result and result.get('status') else []
     
     def post_matkul(self, params: dict):
         print(f"{'':<7}{'[ DAO ]':<8} Post Matkul (Parameter: {params})")
@@ -206,37 +227,37 @@ class dataMataKuliahDao:
                 {'kode': { '$in' : [item['kode'] for item in params] }}, 
                 sort=[("kode", 1)]
             )
-            params = params['data']
-            prodi = list({item["prodi"] for item in params})
-            if 'GENERAL' in prodi:
-                raise CustomError({ 'message': 'Matkul ' + [item.get('kode') for item in params if item["prodi"] == "GENERAL"] + ' tidak bisa dihapus!' })
-                
-            list_kode = [item["kode"] for item in params]
+            if params and params.get('status'):
+                params = params['data']
+                list_kode = [item["kode"] for item in params]
+                list_prodi = [item["prodi"] for item in params]
+            else:
+                raise Exception
             
-            for kode in list_kode:
-                data_matkul = self.connection.find_one(db_matkul, {'kode': kode})
-                if data_matkul and data_matkul.get('status'):
-                    data_matkul = data_matkul['data']
-                    dosen_ajar_matkul = data_matkul.get('dosen_ajar') or []
-                    for dosen in dosen_ajar_matkul:
-                        data_dosen = self.connection.find_one(db_dosen, {'nama': dosen})
-                        if data_dosen and data_dosen.get('status'):
-                            data_dosen = data_dosen['data']
-                            data_dosen['matkul_ajar'].remove(data_matkul['nama'])
-                            if data_dosen['matkul_ajar']:
-                                self.connection.update_one(db_dosen, {'nama': dosen}, {'matkul_ajar': data_dosen['matkul_ajar']})
-                            else:
-                                self.connection.update_one(db_dosen, {'nama': dosen}, {}, {'matkul_ajar': ""})
+            if session['user']['role'] == "KAPRODI":
+                if any(prodi != session['user']['prodi'] for prodi in list_prodi):
+                    raise CustomError({ 'message': 'Anda mengubah program studi diluar program studi anda! (Input Anda: ' + str([prodi for prodi in list_prodi if prodi != session['user']['prodi']]) + ')' })
+                if 'GENERAL' in list_prodi:
+                    raise CustomError({ 'message': 'Matkul ' + [item.get('kode') for item in params if item["prodi"] == "GENERAL"] + ' tidak bisa dihapus!' })
+            
+            for matkul in params:
+                dosen_ajar_matkul = matkul.get('dosen_ajar') or []
+                for dosen in dosen_ajar_matkul:
+                    data_dosen = self.connection.find_one(db_dosen, {'nama': dosen})
+                    if data_dosen and data_dosen.get('status'):
+                        data_dosen = data_dosen['data']
+                        data_dosen['matkul_ajar'].remove(matkul['nama'])
+                        if data_dosen['matkul_ajar']:
+                            self.connection.update_one(db_dosen, {'nama': dosen}, {'matkul_ajar': data_dosen['matkul_ajar']})
                         else:
-                            raise Exception
-                else:
-                    raise Exception
+                            self.connection.update_one(db_dosen, {'nama': dosen}, {}, {'matkul_ajar': ""})
+                    else:
+                        raise Exception
             
             res = self.connection.delete_many(
                 db_matkul, 
                 { 
                     'kode' : { '$in': list_kode }, 
-                    'prodi': session['user']['prodi'] 
                 }
             )
             if res['status'] == False:

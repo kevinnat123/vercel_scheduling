@@ -82,12 +82,12 @@
           ></label
         >
         <div class="col">
-          <input
-            type="text"
-            class="form-control"
-            id="input_prodi"
-            autocomplete="off"
-          />
+          <select class="form-select" id="input_prodi">
+            <option value="">-- Pilih Program Studi --</option>
+            {% for prodi in list_prodi %}
+            <option value="{{ prodi }}">{{ prodi }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
       <!-- PROGRAM STUDI -->
@@ -322,6 +322,9 @@
           <th>SKS A</th>
           <th>SKS B</th>
           <th>Asistensi</th>
+          {% if not prodi %}
+          <th>Program Studi</th>
+          {% endif %}
           <th></th>
         </thead>
         <tbody></tbody>
@@ -471,8 +474,11 @@
       $("#btn-hapus_individu").prop("hidden", false);
       $("#btn-update").prop("hidden", false);
     }
-    $("#input_prodi").prop("disabled", true);
-    $("#input_prodi").val(prodi);
+
+    if (prodi) {
+      $("#input_prodi").prop("disabled", true);
+      $("#input_prodi").val(prodi);
+    }
 
     if (data) {
       $("#input_kode").val(data.kode);
@@ -818,6 +824,10 @@
       );
   }
 
+  $("#input_prodi").on("change", function () {
+    dosen_lov.ajax.reload();
+  });
+
   $("#input_bidang").on("keydown", function (event) {
     if (event.key === "Enter") {
       let user_input = $("#input_bidang").val();
@@ -926,6 +936,62 @@
   });
 
   // DATATABLE
+  let matkul_tab_column = [
+    {
+      data: null,
+      width: "10px",
+      className: "text-center",
+      render: function (data, type, row) {
+        return `
+              <input type="checkbox" name="cbMatkulTab"/>
+            `;
+      },
+    },
+    {
+      data: "kode",
+      width: "75px",
+      defaultContent: "",
+    },
+    {
+      data: "nama",
+      width: "300px",
+      defaultContent: "",
+    },
+    {
+      data: "sks_akademik",
+      width: "20px",
+      defaultContent: "",
+      className: "text-end",
+    },
+    {
+      data: "sks_bayar",
+      width: "20px",
+      defaultContent: "",
+      className: "text-end",
+    },
+    {
+      data: "asistensi",
+      width: "",
+      defaultContent: "",
+    },
+    {
+      data: null,
+      width: "10px",
+      render: function () {
+        return `<button class="btn btn-primary btn-sm" onclick="detail_matkul($(this))">Det</button>`;
+      },
+      // orderable: false,
+      className: "text-center",
+    },
+  ];
+  if (!prodi) {
+    matkul_tab_column.splice(6, 0, {
+      data: "prodi",
+      width: "300px",
+      defaultContent: "",
+    });
+  }
+
   let matkul_tab = $("#table_matkul").DataTable({
     scrollX: true,
     scrollY: "50vh",
@@ -945,49 +1011,7 @@
         hideLoading();
       },
     },
-    columns: [
-      {
-        data: null,
-        width: "10px",
-        className: "text-center",
-        render: function (data, type, row) {
-          return `
-              <input type="checkbox" name="cbMatkulTab"/>
-            `;
-        },
-      },
-      {
-        data: "kode",
-        width: "75px",
-      },
-      {
-        data: "nama",
-        width: "300px",
-      },
-      {
-        data: "sks_akademik",
-        width: "20px",
-        className: "text-end",
-      },
-      {
-        data: "sks_bayar",
-        width: "20px",
-        className: "text-end",
-      },
-      {
-        data: "asistensi",
-        width: "",
-      },
-      {
-        data: null,
-        width: "10px",
-        render: function () {
-          return `<button class="btn btn-primary btn-sm" onclick="detail_matkul($(this))">Det</button>`;
-        },
-        // orderable: false,
-        className: "text-center",
-      },
-    ],
+    columns: matkul_tab_column,
   });
 
   let dosen_lov = $("#table_lov_dosen").DataTable({
@@ -1000,7 +1024,7 @@
     info: false,
     ajax: {
       type: "GET",
-      url: "/data_dosen/get_dosen",
+      url: "/data_dosen/get_dosen_prodi",
       data: function (d) {
         return {
           prodi: prodi ? prodi : $("#input_prodi").val(),

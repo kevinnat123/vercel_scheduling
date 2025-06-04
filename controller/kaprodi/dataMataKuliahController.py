@@ -9,14 +9,17 @@ dao = dataMataKuliahDao()
 @login_required
 def mataKuliah_index():
     print(f"{'[ RENDER ]':<15} Data Mata Kuliah (Role: {session['user']['role']})")
-    if session['user']['role'] != 'KEPALA PROGRAM STUDI':
+    if session['user']['role'] not in ["KEPALA PROGRAM STUDI", "ADMIN"]:
         return redirect(url_for('signin.error403'))
     else:
         return render_template(
                 '/kaprodi/data_mataKuliah/index.html', 
                 menu = 'Data Mata Kuliah', 
                 title = 'Data Mata Kuliah', 
-                prodi = session['user']['prodi']
+                prodi = session['user']['prodi'] 
+                    if session['user']['role'] == "KEPALA PROGRAM STUDI"
+                    else "",
+                list_prodi = session['user']['list_prodi']
             )
     
 @mataKuliah.route("/data_mata_kuliah/post_kelompok", methods=["POST"])
@@ -37,9 +40,14 @@ def mataKuliah_tambah_kelompok():
 def mataKuliah_get_matkul():
     print(f"{'[ CONTROLLER ]':<15} Get Matkul")
     data = dao.get_matkul()
-    for matkul in data:
-        if not matkul.get('asistensi'):
-            matkul['asistensi'] = False
+    return jsonify({ 'data': data })
+
+@mataKuliah.route("/data_mata_kuliah/get_matkul_prodi", methods=['GET'])
+@login_required
+def mataKuliah_get_matkul_prodi():
+    print(f"{'[ CONTROLLER ]':<15} Get Matkul Prodi")
+    param = request.args.to_dict()
+    data = dao.get_matkul_prodi(param.get('prodi'))
     return jsonify({ 'data': data })
 
 @mataKuliah.route("/data_mata_kuliah/post_matkul", methods=['POST'])
