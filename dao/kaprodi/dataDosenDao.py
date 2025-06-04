@@ -12,17 +12,35 @@ class dataDosenDao:
         self.connection = Database(MONGO_DB)
 
     def get_dosen(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Dosen (Prodi: {session['user']['prodi']})")
+        print(f"{'':<7}{'[ DAO ]':<8} Get Dosen")
+        if session['user']['role'] == "KEPALA PROGRAM STUDI":
+            result = self.connection.find_many(db_dosen, {
+                '$or': [
+                    {'prodi': session['user']['prodi']}, 
+                    {'status': 'TIDAK_TETAP'}
+                ]}, sort=[("status", 1), ("nip", 1)])
+        elif session['user']['role'] == "ADMIN":
+            result = self.connection.find_many(db_dosen, sort=[("status", 1), ("nip", 1)])
+        if result and result.get('status'):
+            for dosen in result['data']:
+                dosen.setdefault('pakar', None)
+                dosen.setdefault('prodi', None)
+                # dosen.setdefault('matkul_ajar', None)
+        return result['data'] if result and result.get('status') else []
+    
+    def get_dosen_prodi(self, prodi):
+        print(f"{'':<7}{'[ DAO ]':<8} Get Dosen Prodi (Prodi: {prodi})")
         result = self.connection.find_many(db_dosen, {
             '$or': [
-                {'prodi': session['user']['prodi']}, 
+                {'prodi': prodi}, 
                 {'status': 'TIDAK_TETAP'}
             ]}, sort=[("status", 1), ("nip", 1)])
-        if result.get('status'):
-            for y in result['data']:
-                if not y.get('pakar'):
-                    y.update({ 'pakar': '' })
-        return result['data'] if result and result.get('status') else None
+        if result and result.get('status'):
+            for dosen in result['data']:
+                dosen.setdefault('pakar', None)
+                dosen.setdefault('prodi', None)
+                # dosen.setdefault('matkul_ajar', None)
+        return result['data'] if result and result.get('status') else []
     
     def post_dosen(self, params: dict):
         print(f"{'':<7}{'[ DAO ]':<8} Post Dosen (Parameter: {params})")
@@ -191,32 +209,35 @@ class dataDosenDao:
                 {'nip': { '$in' : [item['nip'] for item in params] }}, 
                 sort=[("kode", 1)]
             )
-            params = params['data']
-            list_nip = [item["nip"] for item in params]
-            for nip in list_nip:
-                data_dosen = self.connection.find_one(db_dosen, {'nip': nip})
-                if data_dosen and data_dosen.get('status'):
-                    data_dosen = data_dosen['data']
-                    matkul_ajar_dosen = data_dosen.get('matkul_ajar') or []
-                    for matkul in matkul_ajar_dosen:
-                        data_matkul = self.connection.find_one(db_matkul, {'nama': matkul})
-                        if data_matkul and data_matkul.get('status'):
-                            data_matkul = data_matkul['data']
-                            data_matkul['dosen_ajar'].remove(data_dosen['nama'])
-                            if data_matkul['dosen_ajar']:
-                                self.connection.update_one(db_matkul, {'nama': matkul}, {'dosen_ajar': data_matkul['dosen_ajar']})
-                            else:
-                                self.connection.update_one(db_matkul, {'nama': matkul}, {}, {'dosen_ajar': ""})
+            if params and params.get('status'):
+                params = params['data']
+                list_nip = [d['nip'] for d in params]
+                list_prodi = [d['prodi'] for d in params]
+            else:
+                raise Exception
+
+            if session['user']['role'] == "KEPALA PROGRAM STUDI":
+                if any(prodi != session['user']['prodi'] for prodi in list_prodi):
+                    raise CustomError({ 'message': 'Anda mengubah program studi diluar program studi anda! (Input Anda: ' + str([prodi for prodi in list_prodi if prodi != session['user']['prodi']]) + ')' })
+
+            for data_dosen in params:
+                matkul_ajar_dosen = data_dosen.get('matkul_ajar') or []
+                for matkul in matkul_ajar_dosen:
+                    data_matkul = self.connection.find_one(db_matkul, {'nama': matkul})
+                    if data_matkul and data_matkul.get('status'):
+                        data_matkul = data_matkul['data']
+                        data_matkul['dosen_ajar'].remove(data_dosen['nama'])
+                        if data_matkul['dosen_ajar']:
+                            self.connection.update_one(db_matkul, {'nama': matkul}, {'dosen_ajar': data_matkul['dosen_ajar']})
                         else:
-                            raise Exception
-                else:
-                    raise Exception
+                            self.connection.update_one(db_matkul, {'nama': matkul}, {}, {'dosen_ajar': ""})
+                    else:
+                        raise Exception
                 
             res = self.connection.delete_many(
                 db_dosen, 
                 { 
                     'nip' : { '$in': list_nip }, 
-                    'prodi': session['user']['prodi'] 
                 }
             )
             if res['status'] == False:

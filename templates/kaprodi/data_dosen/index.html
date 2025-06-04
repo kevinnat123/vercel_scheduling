@@ -67,12 +67,12 @@
           ></label
         >
         <div class="col">
-          <input
-            type="text"
-            class="form-control"
-            id="input_prodi"
-            autocomplete="off"
-          />
+          <select class="form-select" id="input_prodi">
+            <option value="">-- Pilih Program Studi --</option>
+            {% for prodi in list_prodi %}
+            <option value="{{ prodi }}">{{ prodi }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
       <!-- PROGRAM STUDI END -->
@@ -253,6 +253,9 @@
           <th>NIP</th>
           <th>Nama</th>
           <th>Pakar</th>
+          {% if not prodi %}
+          <th>Program Studi</th>
+          {% endif %}
           <th></th>
         </thead>
         <tbody></tbody>
@@ -338,8 +341,11 @@
       $("#btn-hapus_individu").prop("hidden", false);
       $("#btn-update").attr("hidden", false);
     }
-    $("#input_prodi").prop("disabled", true);
-    $("#input_prodi").val(prodi);
+
+    if (prodi) {
+      $("#input_prodi").prop("disabled", true);
+      $("#input_prodi").val(prodi);
+    }
 
     if (data) {
       $("#input_nip").val(data.nip);
@@ -582,11 +588,8 @@
     form_dosen(true, false, data);
   }
 
-  $("#input_prodi").on("keydown", function () {
-    if (event.key === "F9") {
-    } else if (event.key === "Enter") {
-      matkul_lov.ajax.reload();
-    }
+  $("#input_prodi").on("change", function () {
+    matkul_lov.ajax.reload();
   });
 
   $("#input_pakar").on("keydown", function (event) {
@@ -637,11 +640,11 @@
             text: "Hasil pencarian jamak. Mata kuliah apa yang anda maksud?",
             icon: "question",
             html: `
-              <select id="swal-select" class="form-select">
-                <option value="">-- Pilih --</option>
-                ${selectOptions}
-              </select>
-            `,
+                <select id="swal-select" class="form-select">
+                  <option value="">-- Pilih --</option>
+                  ${selectOptions}
+                </select>
+              `,
             showCancelButton: true,
             confirmButtonText: "OK",
             preConfirm: () => {
@@ -692,6 +695,49 @@
   });
 
   // DATATABLE
+  let dosen_tab_column = [
+    {
+      data: null,
+      width: "10px",
+      render: function (data, type, row) {
+        return `
+          <input type="checkbox" name="cbDosenTab"/>
+        `;
+      },
+    },
+    {
+      data: "nip",
+      width: "75px",
+      defaultContent: "",
+    },
+    {
+      data: "nama",
+      width: "300px",
+      defaultContent: "",
+    },
+    {
+      data: "pakar",
+      width: "",
+      defaultContent: "",
+    },
+    {
+      data: null,
+      width: "10px",
+      render: function () {
+        return `<button class="btn btn-primary btn-sm" onclick="detail_dosen($(this))">Det</button>`;
+      },
+      // orderable: false,
+      className: "text-center",
+    },
+  ];
+  if (!prodi) {
+    dosen_tab_column.splice(4, 0, {
+      data: "prodi",
+      width: "300px",
+      defaultContent: "",
+    });
+  }
+
   let dosen_tab = $("#table_dosen").DataTable({
     scrollX: true,
     scrollY: "50vh",
@@ -711,38 +757,7 @@
         hideLoading();
       },
     },
-    columns: [
-      {
-        data: null,
-        width: "10px",
-        render: function (data, type, row) {
-          return `
-                <input type="checkbox" name="cbDosenTab"/>
-              `;
-        },
-      },
-      {
-        data: "nip",
-        width: "75px",
-      },
-      {
-        data: "nama",
-        width: "300px",
-      },
-      {
-        data: "pakar", // reminder: ubah jadi status
-        width: "",
-      },
-      {
-        data: null,
-        width: "10px",
-        render: function () {
-          return `<button class="btn btn-primary btn-sm" onclick="detail_dosen($(this))">Det</button>`;
-        },
-        // orderable: false,
-        className: "text-center",
-      },
-    ],
+    columns: dosen_tab_column,
   });
 
   let matkul_lov = $("#table_lov_matkul").DataTable({
@@ -755,7 +770,7 @@
     info: false,
     ajax: {
       type: "GET",
-      url: "/data_mata_kuliah/get_matkul",
+      url: "/data_mata_kuliah/get_matkul_prodi",
       data: function (d) {
         return {
           prodi: prodi ? prodi : $("#input_prodi").val(),
@@ -773,10 +788,12 @@
       {
         data: "kode",
         width: "75px",
+        defaultContent: "",
       },
       {
         data: "nama",
         width: "300px",
+        defaultContent: "",
       },
     ],
   });
