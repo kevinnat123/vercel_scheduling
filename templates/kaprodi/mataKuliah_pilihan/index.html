@@ -15,6 +15,7 @@
       <div class="row">
         <h4 id="formTitle"></h4>
       </div>
+      <!-- ANGKATAN + JUMLAH MAHASISWA -->
       <div class="form-group row">
         <label for="input_angkatan" class="col-2 col-form-label text-end"
           >Angkatan</label
@@ -44,6 +45,25 @@
           />
         </div>
       </div>
+      <!-- ANGKATAN + JUMLAH MAHASISWA END -->
+      <!-- PROGRAM STUDI -->
+      <div class="form-group row">
+        <label for="input_prodi" class="col-2 col-form-label text-end"
+          >Program Studi<span class="text-danger" aria-hidden="true"
+            >*</span
+          ></label
+        >
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input_prodi"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <!-- PROGRAM STUDI END -->
+      <!-- BIDANG MINAT -->
       <div class="form-group row">
         <label for="input_bidangMinat" class="col-2 col-form-label text-end"
           >Bidang Minat</label
@@ -57,6 +77,8 @@
           </select>
         </div>
       </div>
+      <!-- BIDANG MINAT END -->
+      <!-- LIST MATKUL -->
       <div class="form-group row">
         <label for="input_listMatkul" class="col-2 col-form-label text-end"
           >List Matkul</label
@@ -75,6 +97,8 @@
           </div>
         </div>
       </div>
+      <!-- LIST MATKUL END -->
+      <!-- TABLE MATKUL -->
       <div class="form-group row">
         <div class="table-responsive">
           <table
@@ -100,6 +124,8 @@
           </table>
         </div>
       </div>
+      <!-- TABLE MATKUL END -->
+      <!-- FORM ACTION -->
       <div class="col text-end">
         <button type="button" class="btn btn-primary" id="btn-simpan">
           Simpan
@@ -124,6 +150,7 @@
           Batal
         </button>
       </div>
+      <!-- FORM ACTION END -->
     </form>
   </div>
 </div>
@@ -312,6 +339,10 @@
       $("#input_angkatan").prop("disabled", true);
       $("#input_bidang_minat").prop("disabled", true);
     }
+
+    $("#input_prodi").prop("disabled", true);
+    $("#input_prodi").val(prodi);
+
     if (data) {
       $("#input_angkatan").val(data.angkatan);
       $("#input_jumlah_mahasiswa").val(data.jumlah_mahasiswa);
@@ -581,6 +612,7 @@
     params = {
       angkatan: $("#input_angkatan").val(),
       jumlah_mahasiswa: Number($("#input_jumlah_mahasiswa").val()),
+      prodi: $("#input_prodi").val(),
       bidang_minat: $("#input_bidang_minat").val(),
       list_matkul: matkul_tab.data().toArray(),
     };
@@ -645,6 +677,7 @@
     params = {
       angkatan: $("#input_angkatan").val(),
       jumlah_mahasiswa: Number($("#input_jumlah_mahasiswa").val()),
+      prodi: $("#input_prodi").val(),
       bidang_minat: $("#input_bidang_minat").val(),
       list_matkul: matkul_tab.data().toArray(),
     };
@@ -804,6 +837,8 @@
                 $(".btn-edit").css("display", "none");
                 $(".btn-hapus").css("display", "none");
               }
+
+              $("#btn-batal").click();
             }
           },
         });

@@ -45,8 +45,22 @@ class mataKuliahPilihanDao:
 
             params = {k: v for k, v in params.items() if v}
 
-            u_id = (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper()
-            u_id = u_id + ("_" + params['bidang_minat'].replace(" ", "_") if params.get('bidang_minat') else '') + "_" + str(params['angkatan'])
+            if session['user']['role'] == "KEPALA PROGRAM STUDI":
+                if params['prodi'] != session['user']['prodi']:
+                    raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
+
+            prodi_words = params['prodi'].split(' ')
+            prodi = prodi_words[0]
+            for w in prodi_words[1:]:
+                prodi += w[0]
+            if params['bidang_minat']:
+                bidang_minat_words = params['bidang_minat'].split(' ')
+                bidang_minat = ''
+                for bm in bidang_minat_words:
+                    bidang_minat += bm[0]
+            
+            u_id = (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan'] + "_" + prodi).upper()
+            u_id = u_id + ("_" + bidang_minat if params.get('bidang_minat') else '') + "_" + str(params['angkatan'])
             params.update({
                 'u_id': u_id,
                 'prodi': session['user']['prodi']
