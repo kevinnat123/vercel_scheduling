@@ -62,7 +62,7 @@ class dataMataKuliahDao:
             elif params.get('asistensi') and not params.get('integrated_class') and not params.get('tipe_kelas_asistensi'):
                 raise CustomError({ 'message': 'Tipe Kelas Asistensi belum diisi!' })
 
-            if session['user']['role'] == "KAPRODI":
+            if session['user']['role'] == "KEPALA PROGRAM STUDI":
                 if params['prodi'] != session['user']['prodi']:
                     raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
 
@@ -126,7 +126,7 @@ class dataMataKuliahDao:
             elif params.get('asistensi') and not params.get('integrated_class') and not params.get('tipe_kelas_asistensi'):
                 raise CustomError({ 'message': 'Tipe Kelas Asistensi belum diisi!' })
                 
-            if session['user']['role'] == "KAPRODI":
+            if session['user']['role'] == "KEPALA PROGRAM STUDI":
                 if params['prodi'] != session['user']['prodi']:
                     raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
                 

@@ -42,7 +42,7 @@ class dataDosenDao:
             res = self.connection.find_one(db_dosen, {'nip': params['nip']})
             if (res['status'] == True):
                 raise CustomError({ 'message': 'Data dengan NIP ' + params['nip'] + ' sudah ada!' })
-            if session['user']['role'] == "KAPRODI":
+            if session['user']['role'] == "KEPALA PROGRAM STUDI":
                 if params['prodi'] != session['user']['prodi']:
                     raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
                 
@@ -104,7 +104,7 @@ class dataDosenDao:
             if (dosen_exist['status'] == False and dosen_exist['data'] == None):
                 raise CustomError({ 'message': 'Data dengan NIP ' + params['nip'] + ' tidak ditemukan!' })
 
-            if session['user']['role'] == "KAPRODI":    
+            if session['user']['role'] == "KEPALA PROGRAM STUDI":    
                 if params['prodi'] != session['user']['prodi']:
                     raise CustomError({ 'message': 'Anda mengubah program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
             
