@@ -6,9 +6,12 @@ class dashboardDao:
     def __init__(self):
         self.connection = Database(MONGO_DB)
 
-    def get_user(self, u_id):
+    def get_user(self, u_id=None, prodi=None):
         print(f"{'':<7}{'[ DAO ]':<8} Get User (u_id: {u_id})")
-        result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
+        if u_id:
+            result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
+        elif prodi:
+            result = self.connection.find_one(db_users, {'prodi': prodi})
         return result if result and result.get('status') else None
 
     def update_general(self, params):
@@ -102,6 +105,24 @@ class dashboardDao:
         
         if updateData and updateData['status']:
             session['user']['list_processor'] = newGroup
+            session.modified = True
+
+        return {'status': updateData.get('status'), 'message': updateData.get('message')}
+    
+    def update_prodi(self, data):
+        print(f"{'':<7}{'[ DAO ]':<8} Update Prodi (Parameter: {data})")
+        
+        if data:
+            newGroup = [item["prodi"] for item in data]
+        elif data == []:
+            newGroup = data
+        else:
+            return {'status': False, 'message': 'Data tidak valid'}
+
+        updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'list_prodi': newGroup})
+        
+        if updateData and updateData['status']:
+            session['user']['list_prodi'] = newGroup
             session.modified = True
 
         return {'status': updateData.get('status'), 'message': updateData.get('message')}

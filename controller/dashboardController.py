@@ -31,6 +31,7 @@ def dashboard_index():
                 '/admin/dashboard.html', 
                 menu = 'Dashboard', 
                 title = 'Dashboard', 
+                list_prodi = session['user']['list_prodi']
             )
     else:
         return redirect(url_for('signin.error403'))
@@ -89,5 +90,16 @@ def dashboardLaboran_updateProcessor():
     req = request.get_json('data')
 
     result = dashboardDao.update_processor(req)
+
+    return jsonify( result )
+
+@dashboard.route("/update_prodi", methods=['POST'])
+@login_required
+def dashboardLaboran_updateProdi():
+    print(f"{'[ CONTROLLER ]':<15} Update Prodi")
+    
+    req = request.get_json('data')
+
+    result = dashboardDao.update_prodi(req)
 
     return jsonify( result )
