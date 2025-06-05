@@ -47,6 +47,7 @@ class dataMataKuliahDao:
         # { '$in' : ['GENERAL', session['user']['prodi']] }
         if result and result.get('status'):
             for matkul in result['data']:
+                matkul.setdefault('kelompok', None)
                 matkul.setdefault('asistensi', None)
                 matkul.setdefault('prodi', None)
         return result['data'] if result and result.get('status') else []
@@ -61,6 +62,7 @@ class dataMataKuliahDao:
         # { '$in' : ['GENERAL', session['user']['prodi']] }
         if result and result.get('status'):
             for matkul in result['data']:
+                matkul.setdefault('kelompok', None)
                 matkul.setdefault('asistensi', None)
                 matkul.setdefault('prodi', None)
         return result['data'] if result and result.get('status') else []
