@@ -2,6 +2,7 @@ from flask import render_template, Blueprint, request, jsonify, session, redirec
 from dao.admin.generateJadwalDao import generateJadwalDao
 from dao import genetic_algorithm as ga
 from flask_login import login_required
+from global_func import CustomError
 
 generateJadwal = Blueprint('generateJadwal', __name__)
 dao = generateJadwalDao()
@@ -26,27 +27,32 @@ def generate_jadwal():
     print(f"{'[ CONTROLLER ]':<15} Generate Jadwal")
 
     try:
-        param = request.args.to_dict()
-        regenerate = True if param['regenerate'] == 'true' else False
-        
-        jadwal = dao.get_jadwal()
-        if jadwal and jadwal.get('jadwal') and not regenerate:
-            return jsonify({ 'status': False, 'reason': 'exist'})
-        
-        data_dosen = dao.get_dosen()
-        data_ruang = dao.get_kelas()
-        data_matkul = dao.get_open_matkul()
+        if session['user']['role'] == "ADMIN":
+            param = request.args.to_dict()
+            regenerate = True if param['regenerate'] == 'true' else False
+            
+            jadwal = dao.get_jadwal()
+            if jadwal and jadwal.get('jadwal') and not regenerate:
+                return jsonify({ 'status': False, 'reason': 'exist'})
+            
+            data_dosen = dao.get_dosen()
+            data_ruang = dao.get_kelas()
+            data_matkul = dao.get_open_matkul()
 
-        best_schedule = ga.genetic_algorithm(
-            data_matkul, data_dosen, data_ruang, 
-            ukuran_populasi=75, jumlah_generasi=1, peluang_mutasi=0.05
-        )
+            best_schedule = ga.genetic_algorithm(
+                data_matkul, data_dosen, data_ruang, 
+                ukuran_populasi=75, jumlah_generasi=1, peluang_mutasi=0.05
+            )
 
-        if best_schedule and best_schedule.get('status') == False:
-            raise Exception(best_schedule.get('message'))
+            if best_schedule and best_schedule.get('status') == False:
+                raise CustomError({ 'message': best_schedule.get('message') })
 
-        # print([schedule for schedule in best_schedule['data'] if schedule['program_studi'] == 'S1 SISTEM INFORMASI'])
-        dao.upload_jadwal(best_schedule['data'])
+            # print([schedule for schedule in best_schedule['data'] if schedule['program_studi'] == 'S1 SISTEM INFORMASI'])
+            dao.upload_jadwal(best_schedule['data'])
+        else:
+            raise CustomError({ 'message': 'Anda tidak berhak generate jadwal!\nSilahkan hubungi Admin! '})
+    except CustomError as e:
+        return jsonify({ 'status': False, 'message': f"{e.error_dict.get('message')}" })
     except Exception as e:
         print(f"{'[ CONTRO ERROR ]':<15} Error: {e}")
         return jsonify({ 'status': False, 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
@@ -62,3 +68,24 @@ def upload_jadwal():
         data = dao.upload_jadwal(req['jadwal'])
 
     return jsonify( data )
+
+@generateJadwal.route("/generate_jadwal/tampilkan_jadwal", methods=["GET"])
+@login_required
+def tampilkan_jadwal():
+    print(f"{'[ CONTROLLER ]':<15} Tampilkan Jadwal")
+
+    params = request.args.to_dict()
+    print(params.get('prodi'))
+
+    if session['user']['role'] == "ADMIN":
+        data = [
+            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
+            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'AS', 'nama_dosen': 'ASISTEN', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
+            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
+            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
+            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'AS', 'nama_dosen': 'ASISTEN', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
+            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
+            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
+        ]
+        
+    return jsonify({ 'data': data })
