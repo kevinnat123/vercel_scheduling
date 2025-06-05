@@ -170,22 +170,31 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                 if beban_dosen[dosen['nip']] > (12 - sesi_dosen.sks_akademik):
                     dosen_pakar = [
                         d for d in dosen_list 
-                            if (d.get("prodi") == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
+                        if (d.get("prodi") == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
+                            ((
+                                (d.get('nama') or '') in (matkul.get('dosen_ajar') or []) or 
                                 len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
+                            ) if matkul.get('bidang') or matkul.get('dosen_ajar') 
+                            else True)
                     ]
                     if len(dosen_pakar) > 1:
-                        calon_dosen_pengganti = [d for d in dosen_pakar if beban_dosen[d['nip']] + sesi_dosen.sks_akademik <= 12]
-                        if not calon_dosen_pengganti:
-                            sks_dosen_pakar = [value for key, value in beban_dosen.items() if key in [d['nip'] for d in dosen_pakar]]
-                            calon_dosen_pengganti = [
-                                d for d in dosen_pakar
-                                    if (
-                                        beban_dosen[d['nip']] < max(sks_dosen_pakar) 
-                                        if any(sks < max(sks_dosen_pakar) for sks in sks_dosen_pakar) 
-                                        else beban_dosen[d['nip']] <= max(sks_dosen_pakar))
-                            ]
+                        # calon_dosen_pengganti = [d for d in dosen_pakar if beban_dosen[d['nip']] + sesi_dosen.sks_akademik <= 12]
+                        # if not calon_dosen_pengganti: # info: kalau tidak pakai if, sks diratakan tiap bidangnya
+                        sks_dosen_pakar = [value for key, value in beban_dosen.items() if key in [d['nip'] for d in dosen_pakar]]
+                        calon_dosen_pengganti = [
+                            d for d in dosen_pakar
+                            if (
+                                beban_dosen[d['nip']] < max(sks_dosen_pakar) 
+                                if any(sks < max(sks_dosen_pakar) for sks in sks_dosen_pakar) 
+                                else beban_dosen[d['nip']] <= max(sks_dosen_pakar))
+                        ]
+                        # end if
                         bobot_calon_dosen_pengganti = [
-                            len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
+                            ((
+                                (d.get('nama') or '') in (matkul.get('dosen_ajar') or []) or 
+                                len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
+                            ) if matkul.get('bidang') or matkul.get('dosen_ajar') 
+                            else True)
                             for d in calon_dosen_pengganti
                         ]
                         dosen = random.choices(
@@ -361,6 +370,7 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
     return jadwal
 
 def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
+    # print(f"{'':<8}{'[ GA ]':<7} Generate Jadwal")
     jadwal = []
     pilihan_hari_dosen = ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT"]
     pilihan_hari_asisten: list[str] = copy.deepcopy(pilihan_hari_dosen)
@@ -374,12 +384,16 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
         beban_dosen[dt['nip']] = 0
 
     max_attempt = 10
-
+    
     for matkul in matakuliah_list:
         dosen_pakar = [
             d for d in dosen_list 
-                if (d.get("prodi") == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
+            if (d.get("prodi") == matkul['prodi'] or d['status'] == "TIDAK_TETAP") and 
+                ((
+                    (d.get('nama') or '') in (matkul.get('dosen_ajar') or []) or 
                     len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
+                ) if matkul.get('bidang') or matkul.get('dosen_ajar') 
+                else True)
         ]
         
         # RUANGAN
@@ -407,26 +421,34 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
             
             # PEMILIHAN DOSEN
             if len(dosen_pakar) > 1:
-                calon_dosen = [d for d in dosen_pakar if beban_dosen[d['nip']] + matkul['sks_akademik'] <= 12]
-                if not calon_dosen:
-                    sks_dosen_pakar = [value for key, value in beban_dosen.items() if key in [d['nip'] for d in dosen_pakar]]
-                    calon_dosen = [
-                        d for d in dosen_pakar
-                            if (
-                                beban_dosen[d['nip']] < max(sks_dosen_pakar) 
-                                if any(sks < max(sks_dosen_pakar) for sks in sks_dosen_pakar) 
-                                else beban_dosen[d['nip']] <= max(sks_dosen_pakar))
-                    ]
+                # calon_dosen = [d for d in dosen_pakar if beban_dosen[d['nip']] + matkul['sks_akademik'] <= 12]
+                # if not calon_dosen: # info: kalau tidak pakai if, sks diratakan tiap bidangnya
+                sks_dosen_pakar = [value for key, value in beban_dosen.items() if key in [d['nip'] for d in dosen_pakar]]
+                calon_dosen = [
+                    d for d in dosen_pakar
+                        if (
+                            beban_dosen[d['nip']] < max(sks_dosen_pakar) 
+                            if any(sks < max(sks_dosen_pakar) for sks in sks_dosen_pakar) 
+                            else beban_dosen[d['nip']] <= max(sks_dosen_pakar))
+                ]
+                # end if
                 bobot_calon_dosen = [
-                    len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
+                    ((
+                        (d.get('nama') or '') in (matkul.get('dosen_ajar') or []) or 
+                        len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
+                    ) if matkul.get('bidang') or matkul.get('dosen_ajar') 
+                    else True)
                     for d in calon_dosen
                 ]
                 dosen = random.choices(
                     population=calon_dosen, 
                     weights=bobot_calon_dosen, 
                     k=1)[0]
-            else:
+            elif len(dosen_pakar) == 1:
                 dosen = dosen_pakar[0]
+            # else:
+            #     # REMINDER: KALO DOSEN PAKAR = [] PERLU DICEK
+            #     dosen = random.choice(dosen_list)
 
             if dosen['nip'] not in jadwal_dosen: jadwal_dosen[dosen['nip']] = []
             preferensi_hari = [hari for hari in pilihan_hari_dosen if hari not in dosen['preferensi']['hindari_hari']] if dosen.get('preferensi') and dosen['preferensi'].get('hindari_hari') else pilihan_hari_dosen
@@ -549,12 +571,10 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
             
             index_kelas += 1
 
-    # print(f"{beban_dosen}")
-    # 🛠️ REPAIR sebelum return
-    # jadwal = repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list)
     return jadwal
 
 def generate_populasi(matakuliah_list, dosen_list, ruang_list, ukuran_populasi):
+    print(f"{'':<8}{'[ GA ]':<7} Generate Generasi Pertama")
     return [generate_jadwal(matakuliah_list, dosen_list, ruang_list) for _ in range(ukuran_populasi)]
 
 def hitung_fitness(jadwal, matakuliah_list, dosen_list, ruang_list, detail=False):
@@ -814,57 +834,63 @@ def genetic_algorithm(matakuliah_list, dosen_list, ruang_list, ukuran_populasi=7
     Returns:
         dict: Jadwal hasil algoritma genetika dalam bentuk dictionary.
     """
+    print(f"{'':<8}{'[ GA ]':<7} Genetic Algorithm")
 
-    populasi = generate_populasi(matakuliah_list, dosen_list, ruang_list, ukuran_populasi)
-    populasi = [repair_jadwal(j, matakuliah_list, dosen_list, ruang_list) for j in populasi]
+    try:
+        populasi = generate_populasi(matakuliah_list, dosen_list, ruang_list, ukuran_populasi)
+        populasi = [repair_jadwal(j, matakuliah_list, dosen_list, ruang_list) for j in populasi]
+        
+        best_fitness_global = float('-inf')
+        best_individual_global = None
+
+        jumlah_elite = max(1, int(ukuran_populasi * proporsi_elite))
+
+        for gen in range(jumlah_generasi):
+            fitness_scores = [hitung_fitness(individu, matakuliah_list, dosen_list, ruang_list) for individu in populasi]
+            next_gen = []
+
+            # Simpan individu terbaik
+            individu_elite = [individu for _, individu in sorted(zip(fitness_scores, populasi), key=lambda x: x[0], reverse=True)][:jumlah_elite]
+            next_gen = individu_elite.copy()
+
+            # Generate anak baru
+            while len(next_gen) < ukuran_populasi:
+                parent1 = roulette_selection(populasi, fitness_scores)
+                parent2 = roulette_selection(populasi, fitness_scores)
+
+                child1, child2 = crossover(parent1, parent2)
+
+                child1 = mutasi(child1, dosen_list, matakuliah_list, ruang_list, peluang_mutasi)
+                child2 = mutasi(child2, dosen_list, matakuliah_list, ruang_list, peluang_mutasi)
+
+                child1 = repair_jadwal(child1, matakuliah_list, dosen_list, ruang_list)
+                child2 = repair_jadwal(child2, matakuliah_list, dosen_list, ruang_list)
+
+                next_gen.append(child1)
+                if len(next_gen) < ukuran_populasi:
+                    next_gen.append(child2)
+                
+            populasi = next_gen
+
+            fitness_scores = [hitung_fitness(individu, matakuliah_list, dosen_list, ruang_list) for individu in populasi]
+            gen_best_fitness = max(fitness_scores)
+            gen_best_individual = populasi[fitness_scores.index(gen_best_fitness)]
+
+            if gen_best_fitness > best_fitness_global:
+                best_fitness_global = gen_best_fitness
+                best_individual_global = copy.deepcopy(gen_best_individual)
+
+            avg = sum(fitness_scores) / len(fitness_scores)
+            print(f"[Gen {gen}] [({len(populasi)} population)] AVG : {round(avg, 2):<10} BEST ALLTIME: {best_fitness_global}")
+            print(f"{'':<5}Min: {min(fitness_scores):<5}Max: {max(fitness_scores):<5}Best Gen: {gen_best_fitness}")
+            print(f"gen best fitness {gen_best_fitness} {hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True)}")
+            # hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True)
+            print(f"{'':<5}Missing: {find_missing_course(best_individual_global, matakuliah_list)}\n") if find_missing_course(best_individual_global, matakuliah_list) else print("\n")
+
+        print(f"GLOBAL BEST FITNESS {best_fitness_global}")
+        hitung_fitness(best_individual_global, matakuliah_list, dosen_list, ruang_list, True)
+    except Exception as e:
+        print(f"{'[ GA ]':<15} Error: {e}")
+        return { 'status': False, 'message': e }
     
-    best_fitness_global = float('-inf')
-    best_individual_global = None
-
-    jumlah_elite = max(1, int(ukuran_populasi * proporsi_elite))
-
-    for gen in range(jumlah_generasi):
-        fitness_scores = [hitung_fitness(individu, matakuliah_list, dosen_list, ruang_list) for individu in populasi]
-        next_gen = []
-
-        # Simpan individu terbaik
-        individu_elite = [individu for _, individu in sorted(zip(fitness_scores, populasi), key=lambda x: x[0], reverse=True)][:jumlah_elite]
-        next_gen = individu_elite.copy()
-
-        # Generate anak baru
-        while len(next_gen) < ukuran_populasi:
-            parent1 = roulette_selection(populasi, fitness_scores)
-            parent2 = roulette_selection(populasi, fitness_scores)
-
-            child1, child2 = crossover(parent1, parent2)
-
-            child1 = mutasi(child1, dosen_list, matakuliah_list, ruang_list, peluang_mutasi)
-            child2 = mutasi(child2, dosen_list, matakuliah_list, ruang_list, peluang_mutasi)
-
-            child1 = repair_jadwal(child1, matakuliah_list, dosen_list, ruang_list)
-            child2 = repair_jadwal(child2, matakuliah_list, dosen_list, ruang_list)
-
-            next_gen.append(child1)
-            if len(next_gen) < ukuran_populasi:
-                next_gen.append(child2)
-            
-        populasi = next_gen
-
-        fitness_scores = [hitung_fitness(individu, matakuliah_list, dosen_list, ruang_list) for individu in populasi]
-        gen_best_fitness = max(fitness_scores)
-        gen_best_individual = populasi[fitness_scores.index(gen_best_fitness)]
-
-        if gen_best_fitness > best_fitness_global:
-            best_fitness_global = gen_best_fitness
-            best_individual_global = copy.deepcopy(gen_best_individual)
-
-        avg = sum(fitness_scores) / len(fitness_scores)
-        print(f"[Gen {gen}] [({len(populasi)} population)] AVG : {round(avg, 2):<10} BEST ALLTIME: {best_fitness_global}")
-        print(f"{'':<5}Min: {min(fitness_scores):<5}Max: {max(fitness_scores):<5}Best Gen: {gen_best_fitness}")
-        print(f"gen best fitness {gen_best_fitness} {hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True)}")
-        # hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True)
-        print(f"{'':<5}Missing: {find_missing_course(best_individual_global, matakuliah_list)}\n") if find_missing_course(best_individual_global, matakuliah_list) else print("\n")
-
-    print(f"GLOBAL BEST FITNESS {best_fitness_global}")
-    hitung_fitness(best_individual_global, matakuliah_list, dosen_list, ruang_list, True)
-    return convertOutputToDict(best_individual_global)
+    return { 'status': True, 'data': convertOutputToDict(best_individual_global) }
