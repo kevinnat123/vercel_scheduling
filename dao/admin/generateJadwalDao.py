@@ -2,6 +2,9 @@ from dao import Database
 from config import MONGO_DB, MONGO_LECTURERS_COLLECTION as db_dosen, MONGO_OPEN_COURSES_COLLECTION as db_matkul, MONGO_CLASSES_COLLECTION as db_kelas
 from config import MONGO_SCHEDULE_COLLECTION as db_jadwal
 from flask import session
+from dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
+
+dao_matkul = dataMataKuliahDao()
 
 class CustomError(Exception):
     def __init__(self, error_dict):
@@ -20,14 +23,15 @@ class generateJadwalDao:
     def get_open_matkul(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get Matkul")
         result = self.connection.find_many(db_matkul, {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }})
+        list_matkul = []
         if result and result.get('status'):
             resultData = [data for data in result['data']] # [ [{}], [{}] ]
-            list_matkul = []
             for dt in resultData:
+                dt['list_matkul'] = dao_matkul.get_matkul_by_kode(dt['list_matkul']) 
                 for matkul in dt['list_matkul']:
-                    matkul.update({'jumlah_mahasiswa': dt['jumlah_mahasiswa']})
-                    list_matkul.append(matkul)
-        return list_matkul if result and result.get('status') else []
+                    matkul['jumlah_mahasiswa'] = dt['jumlah_mahasiswa']
+                list_matkul.extend(dt['list_matkul'])
+        return list_matkul
     
     def get_kelas(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get kelas")
