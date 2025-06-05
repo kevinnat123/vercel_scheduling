@@ -11,23 +11,21 @@ class mataKuliahPilihanDao:
     def __init__(self):
         self.connection = Database(MONGO_DB)
 
-    def get_lovMatkul(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get LOV Matkul (Prodi: {session['user']['prodi']})")
-        result = self.connection.find_many(db_courses, {'prodi': { '$in' : ['GENERAL', session['user']['prodi']] }}, sort=[("kode", 1)])
-        return result['data'] if result and result.get('status') else None
-
-    def get_listMatkulTersimpan(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get List Matkul Tersimpan (Prodi: {session['user']['prodi']})")
-        result = self.connection.find_many(
-            db_open_courses, 
-            {
-                '$and': [
-                    {'prodi': session['user']['prodi']}, 
-                    {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }}
-                ]
-            }, 
-            sort=[("angkatan", 1)] 
-        )
+    def get_listMatkulTersimpan(self, prodi=None):
+        print(f"{'':<7}{'[ DAO ]':<8} Get List Matkul Tersimpan (Prodi: {prodi})")
+        if prodi:
+            result = self.connection.find_many(
+                db_open_courses, 
+                {
+                    '$and': [
+                        {'prodi': session['user']['prodi']}, 
+                        {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }}
+                    ]
+                }, 
+                sort=[("angkatan", 1)] 
+            )
+        else:
+            result = self.connection.find_many(db_open_courses, sort=[("prodi", 1), ("angkatan", 1)] )
         print('result', result)
         return result['data'] if result and result.get('status') else []
 
@@ -53,7 +51,7 @@ class mataKuliahPilihanDao:
             prodi = prodi_words[0]
             for w in prodi_words[1:]:
                 prodi += w[0]
-            if params['bidang_minat']:
+            if params.get('bidang_minat'):
                 bidang_minat_words = params['bidang_minat'].split(' ')
                 bidang_minat = ''
                 for bm in bidang_minat_words:
@@ -63,7 +61,7 @@ class mataKuliahPilihanDao:
             u_id = u_id + ("_" + bidang_minat if params.get('bidang_minat') else '') + "_" + str(params['angkatan'])
             params.update({
                 'u_id': u_id,
-                'prodi': session['user']['prodi']
+                'prodi': params['prodi']
             })
 
             res = self.connection.find_one(db_open_courses, {'u_id': params['u_id']})
@@ -104,11 +102,21 @@ class mataKuliahPilihanDao:
 
             params = {k: v for k, v in params.items() if v}
 
-            u_id = (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper()
-            u_id = u_id + ("_" + params['bidang_minat'].replace(" ", "_") if params.get('bidang_minat') else '') + "_" + str(params['angkatan'])
+            prodi_words = params['prodi'].split(' ')
+            prodi = prodi_words[0]
+            for w in prodi_words[1:]:
+                prodi += w[0]
+            if params.get('bidang_minat'):
+                bidang_minat_words = params['bidang_minat'].split(' ')
+                bidang_minat = ''
+                for bm in bidang_minat_words:
+                    bidang_minat += bm[0]
+            
+            u_id = (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan'] + "_" + prodi).upper()
+            u_id = u_id + ("_" + bidang_minat if params.get('bidang_minat') else '') + "_" + str(params['angkatan'])
             params.update({
                 'u_id': u_id,
-                'prodi': session['user']['prodi']
+                'prodi': params['prodi']
             })
 
             res = self.connection.find_one(db_open_courses, {'u_id': params['u_id']})

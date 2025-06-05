@@ -54,12 +54,12 @@
           ></label
         >
         <div class="col">
-          <input
-            type="text"
-            class="form-control"
-            id="input_prodi"
-            autocomplete="off"
-          />
+          <select class="form-select" id="input_prodi">
+            <option value="">-- Pilih Program Studi --</option>
+            {% for prodi in list_prodi %}
+            <option value="{{ prodi }}">{{ prodi }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
       <!-- PROGRAM STUDI END -->
@@ -340,13 +340,16 @@
       $("#input_bidang_minat").prop("disabled", true);
     }
 
-    $("#input_prodi").prop("disabled", true);
-    $("#input_prodi").val(prodi);
+    if (prodi) {
+      $("#input_prodi").prop("disabled", true);
+      $("#input_prodi").val(prodi);
+    }
 
     if (data) {
       $("#input_angkatan").val(data.angkatan);
       $("#input_jumlah_mahasiswa").val(data.jumlah_mahasiswa);
       $("#input_bidang_minat").val(data.bidang_minat);
+      $("#input_prodi").val(data.prodi).trigger("change");
       matkul_tab.clear().rows.add(data.list_matkul).draw();
     }
     $("#card-form").prop("hidden", hidden ? true : false);
@@ -463,9 +466,9 @@
                           }" autocomplete="off" disabled />
                   </div>
               </div>
-              
+
               ${bidang}
-              
+
               <div class="table-responsive">
                   <table class="table table-bordered table-striped w-100" id="${tableId}">
                   <thead>
@@ -786,6 +789,7 @@
         return acc;
       }, {}); // hapus tahun dari key data
       console.log("[ cleanedData ]", cleanedData);
+      cleanedData["prodi"] = cleanedData["list_matkul"][0]["prodi"];
 
       form_matkul(true, false, cleanedData);
     }
@@ -892,6 +896,10 @@
     return jmlSks;
   }
 
+  $("#input_prodi").on("change", function () {
+    matkul_lov.ajax.reload();
+  });
+
   // CHECKBOX
   // Event ketika cbMatkulTabAll di-click
 
@@ -990,7 +998,12 @@
     info: false,
     ajax: {
       type: "GET",
-      url: "/mata_kuliah_pilihan/get_lovMatkul",
+      url: "/data_mata_kuliah/get_matkul_prodi",
+      data: function (d) {
+        return {
+          prodi: prodi ? prodi : $("#input_prodi").val(),
+        };
+      },
       cache: false,
       beforeSend: () => {
         showLoading();

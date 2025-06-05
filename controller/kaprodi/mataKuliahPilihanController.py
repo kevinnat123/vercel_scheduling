@@ -1,34 +1,33 @@
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for
+from dao.dashboardDao import dashboardDao
 from dao.kaprodi.mataKuliahPilihanDao import mataKuliahPilihanDao
 from flask_login import login_required
 
 mataKuliahPilihan = Blueprint('mataKuliahPilihan', __name__)
+dash = dashboardDao()
 dao = mataKuliahPilihanDao()
 
 @mataKuliahPilihan.route("/mata_kuliah_pilihan")
 @login_required
 def mataKuliahPilihan_index():
     print(f"{'[ RENDER ]':<15} Mata Kuliah Pilihan (Role: {session['user']['role']})")
-    if session['user']['role'] != 'KEPALA PROGRAM STUDI':
+    if session['user']['role'] != 'KEPALA PROGRAM STUDI' and session['user']['role'] != "ADMIN":
         return redirect(url_for('signin.error403'))
     else:
         return render_template(
                 '/kaprodi/mataKuliah_pilihan/index.html', 
                 menu = 'Mata Kuliah Pilihan', 
                 title = 'Mata Kuliah Pilihan', 
-                prodi = session['user']['prodi'],
-                maks_sks = int(session['user']['maks_sks_prodi']),
-                # bidang_minat = [d['kelompok'] for d in dao.get_lovMatkul()]
-                data_sebelum = dao.get_listMatkulTersimpan() or []
+                prodi = session['user']['prodi'] 
+                    if session['user']['role'] == "KEPALA PROGRAM STUDI"
+                    else "",
+                list_prodi = session['user']['list_prodi'],
+                maks_sks = int(session['user']['maks_sks_prodi'])
+                    if session['user']['role'] == "KEPALA PROGRAM STUDI"
+                    else 0,
+                data_sebelum = dao.get_listMatkulTersimpan(session['user'].get('prodi')) or []
             )
     
-@mataKuliahPilihan.route("/mata_kuliah_pilihan/get_lovMatkul", methods=['GET'])
-@login_required
-def mataKuliahPilihan_get_lovMatkul():
-    print(f"{'[ CONTROLLER ]':<15} Get LOV Matkul")
-    data = dao.get_lovMatkul()
-    return jsonify({ 'data': data })
-
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/post_matkul", methods=['POST'])
 @login_required
 def mataKuliahPilihan_post_matkul():
