@@ -25,8 +25,17 @@ def mataKuliahPilihan_index():
                 maks_sks = int(session['user']['maks_sks_prodi'])
                     if session['user']['role'] == "KEPALA PROGRAM STUDI"
                     else 0,
-                data_sebelum = dao.get_listMatkulTersimpan(session['user'].get('prodi')) or []
+                data_sebelum = dao.get_listMatkulTersimpan(session['user'].get('prodi'))
             )
+    
+@mataKuliahPilihan.route("/mata_kuliah_pilihan/get_bidang_minat", methods=['GET'])
+@login_required
+def mataKuliahPilihan_get_bidang_minat():
+    print(f"{'[ CONTROLLER ]':<15} Get Bidang Minat")
+    req = request.args.to_dict()
+    print('req', req)
+    data = dao.get_bidang_minat(req['prodi'])
+    return jsonify({ 'data': data })
     
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/post_matkul", methods=['POST'])
 @login_required

@@ -1,6 +1,9 @@
 from dao import Database
-from config import MONGO_DB, MONGO_COURSES_COLLECTION as db_courses, MONGO_OPEN_COURSES_COLLECTION as db_open_courses
+from config import MONGO_DB, MONGO_COURSES_COLLECTION as db_courses, MONGO_OPEN_COURSES_COLLECTION as db_open_courses, MONGO_USERS_COLLECTION as db_users
 from flask import session
+
+from dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
+dao_matkul = dataMataKuliahDao()
 
 class CustomError(Exception):
     def __init__(self, error_dict):
@@ -26,8 +29,20 @@ class mataKuliahPilihanDao:
             )
         else:
             result = self.connection.find_many(db_open_courses, sort=[("prodi", 1), ("angkatan", 1)] )
-        print('result', result)
+
+        if result and result.get('status'):
+            for data in result['data']:
+                data['list_matkul'] = dao_matkul.get_matkul_by_kode(data['list_matkul'])
+
         return result['data'] if result and result.get('status') else []
+
+    def get_bidang_minat(self, prodi):
+        print(f"{'':<7}{'[ DAO ]':<8} Get Bidang Minat (Prodi: {prodi})")
+        result = self.connection.find_one(
+            db_users, {'prodi': prodi}, 
+        )
+        print('result', result)
+        return result['data']['bidang_minat'] if result and result.get('status') and result['data'].get('bidang_minat') else []
 
     def post_matkul(self, params):
         print(f"{'':<7}{'[ DAO ]':<8} Post Matkul (Parameter: {params})")
@@ -41,6 +56,8 @@ class mataKuliahPilihanDao:
             if not params.get('list_matkul'):
                 raise CustomError({ 'message': 'Belum ada matkul yang dibuka untuk semester ini!', 'target': 'input_matkul' })
 
+            list_matkul = params.pop('list_matkul', [])
+            params['list_matkul'] = [matkul['kode'] for matkul in list_matkul]
             params = {k: v for k, v in params.items() if v}
 
             if session['user']['role'] == "KEPALA PROGRAM STUDI":
@@ -100,6 +117,8 @@ class mataKuliahPilihanDao:
             if not params.get('list_matkul'):
                 raise CustomError({ 'message': 'Belum ada matkul yang dibuka untuk semester ini!', 'target': 'input_matkul' })
 
+            list_matkul = params.pop('list_matkul', [])
+            params['list_matkul'] = [matkul['kode'] for matkul in list_matkul]
             params = {k: v for k, v in params.items() if v}
 
             prodi_words = params['prodi'].split(' ')
