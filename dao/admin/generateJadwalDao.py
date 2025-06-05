@@ -3,10 +3,9 @@ from config import MONGO_DB, MONGO_LECTURERS_COLLECTION as db_dosen, MONGO_OPEN_
 from config import MONGO_SCHEDULE_COLLECTION as db_jadwal
 from flask import session
 from dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
+from global_func import CustomError
 
 dao_matkul = dataMataKuliahDao()
-
-from global_func import CustomError
 
 class generateJadwalDao:
     def __init__(self):
