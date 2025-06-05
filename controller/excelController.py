@@ -168,6 +168,8 @@ def export_ruangan_to_excel(jadwal_list, matakuliah_list, dosen_list):
     for ruangan in sorted(grouped.keys()):
         sheet_name = ruangan[:31]  # Sheet name max 31 chars
         worksheet = workbook.add_worksheet(sheet_name)
+        worksheet.set_default_row(30)
+        worksheet.hide_gridlines()
 
         row_idx = 0
 
