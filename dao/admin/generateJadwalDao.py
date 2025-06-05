@@ -6,10 +6,7 @@ from dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
 
 dao_matkul = dataMataKuliahDao()
 
-class CustomError(Exception):
-    def __init__(self, error_dict):
-        self.error_dict = error_dict
-        super().__init__(str(error_dict))
+from global_func import CustomError
 
 class generateJadwalDao:
     def __init__(self):

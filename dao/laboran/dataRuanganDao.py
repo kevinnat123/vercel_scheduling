@@ -7,10 +7,7 @@ from flask import session
 #         if not y.get('konsentrasi'):
 #             y.update({ 'konsentrasi': '' })
 
-class CustomError(Exception):
-    def __init__(self, error_dict):
-        self.error_dict = error_dict
-        super().__init__(str(error_dict))
+from global_func import CustomError
 
 class dataRuanganDao:
     def __init__(self):

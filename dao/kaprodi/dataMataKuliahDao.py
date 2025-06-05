@@ -2,10 +2,7 @@ from dao import Database
 from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_COURSES_COLLECTION as db_matkul, MONGO_LECTURERS_COLLECTION as db_dosen
 from flask import session
 
-class CustomError(Exception):
-    def __init__(self, error_dict):
-        self.error_dict = error_dict
-        super().__init__(str(error_dict))
+from global_func import CustomError
 
 class dataMataKuliahDao:
     def __init__(self):
