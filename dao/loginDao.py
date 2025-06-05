@@ -32,17 +32,21 @@ class loginDao:
     
     def get_menu(self, role):
         print(f"{'':<7}{'[ DAO ]':<8} get menu: {role}")
-        general_menu = self.connection.find_many(db_urls, {"role": "GENERAL"})
         user_menu = self.connection.find_many(db_urls, {"role": role})
-        if general_menu and general_menu.get('status'):
-            if user_menu and user_menu.get('status'):
-                for x in user_menu['data']:
-                    general_menu['data'].append(x)
-            for x in general_menu['data']:
-                print(f"{'':<15} General Menu {x}")
-                del x['role']
-            return general_menu['data'] if general_menu['data'] else None
-        return None
+        final_menu = []
+        secondary = []
+        if user_menu and user_menu.get('status') and user_menu.get('data'):
+            print(f"{'':<30} {user_menu['data']}")
+            for x in user_menu['data']:
+                if x['main'] == role: 
+                    del x['role'], x['main']
+                    final_menu.append(x)
+                else: 
+                    del x['role'], x['main']
+                    secondary.append(x)
+            secondary = sorted(secondary, key=lambda x: x['title'])
+            final_menu.extend(secondary)
+        return final_menu
 
     def verify_user(self, u_id, password):
         print(f"{'':<7}{'[ DAO ]':<8} Verify User: {u_id}, {password}")
