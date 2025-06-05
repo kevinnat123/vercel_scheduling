@@ -42,12 +42,12 @@ def mataKuliah_get_matkul():
     data = dao.get_matkul()
     return jsonify({ 'data': data })
 
-@mataKuliah.route("/data_mata_kuliah/get_matkul_prodi", methods=['GET'])
+@mataKuliah.route("/data_mata_kuliah/get_matkul_by_prodi", methods=['GET'])
 @login_required
-def mataKuliah_get_matkul_prodi():
+def mataKuliah_get_matkul_by_prodi():
     print(f"{'[ CONTROLLER ]':<15} Get Matkul Prodi")
     param = request.args.to_dict()
-    data = dao.get_matkul_prodi(param.get('prodi'))
+    data = dao.get_matkul_by_prodi(param.get('prodi'))
     return jsonify({ 'data': data })
 
 @mataKuliah.route("/data_mata_kuliah/post_matkul", methods=['POST'])
