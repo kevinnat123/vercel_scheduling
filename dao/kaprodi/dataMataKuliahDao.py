@@ -40,11 +40,11 @@ class dataMataKuliahDao:
             result = self.connection.find_many(
                 db_matkul, 
                 {'prodi': { '$in' : [session['user']['prodi']] }}, 
+                # { '$in' : ['GENERAL', session['user']['prodi']] }
                 sort=[("kode", 1)]
             )
         elif session['user']['role'] == "ADMIN":
             result = self.connection.find_many(db_matkul, sort=[("prodi", 1), ("kode", 1)])
-        # { '$in' : ['GENERAL', session['user']['prodi']] }
         if result and result.get('status'):
             for matkul in result['data']:
                 matkul.setdefault('kelompok', None)
@@ -52,14 +52,27 @@ class dataMataKuliahDao:
                 matkul.setdefault('prodi', None)
         return result['data'] if result and result.get('status') else []
     
-    def get_matkul_prodi(self, prodi):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul Prodi (prodi: {prodi})")
+    def get_matkul_by_prodi(self, prodi=""):
+        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul By Prodi (prodi: {prodi})")
         result = self.connection.find_many(
             db_matkul, 
             {'prodi': prodi}, 
             sort=[("kode", 1)]
         )
-        # { '$in' : ['GENERAL', session['user']['prodi']] }
+        if result and result.get('status'):
+            for matkul in result['data']:
+                matkul.setdefault('kelompok', None)
+                matkul.setdefault('asistensi', None)
+                matkul.setdefault('prodi', None)
+        return result['data'] if result and result.get('status') else []
+    
+    def get_matkul_by_kode(self, list_kode=[]):
+        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul By Kode (list_kode: {str(list_kode)})")
+        result = self.connection.find_many(
+            db_matkul, 
+            { 'kode': {'$in': list_kode} }, 
+            sort=[("kode", 1)]
+        )
         if result and result.get('status'):
             for matkul in result['data']:
                 matkul.setdefault('kelompok', None)
