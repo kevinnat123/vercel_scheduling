@@ -7,8 +7,12 @@ import xlsxwriter
 import random
 
 from dao.admin.generateJadwalDao import generateJadwalDao
+from dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
+from dao.kaprodi.dataDosenDao import dataDosenDao
 export = Blueprint('export', __name__)
 dao = generateJadwalDao()
+matkul = dataMataKuliahDao()
+dosen = dataDosenDao()
 
 @export.route("/export/export_to_excel", methods=['POST'])
 @login_required
@@ -20,8 +24,8 @@ def export_to_excel():
     data_jadwal = dao.get_jadwal()
     jadwal = data_jadwal['jadwal']
 
-    data_dosen = dao.get_dosen()
-    data_matkul = dao.get_matkul()
+    data_dosen = dosen.get_dosen()
+    data_matkul = matkul.get_matkul()
 
     if downloadBy == "jadwal_kuliah":
         excel = export_jadwal_to_excel(jadwal, data_matkul, data_dosen)
