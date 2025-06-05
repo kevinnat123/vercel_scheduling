@@ -17,7 +17,7 @@ class generateJadwalDao:
         result = self.connection.find_many(db_dosen)
         return result['data'] if result and result.get('status') else []
     
-    def get_matkul(self):
+    def get_open_matkul(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get Matkul")
         result = self.connection.find_many(db_matkul, {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }})
         if result and result.get('status'):
@@ -53,7 +53,7 @@ class generateJadwalDao:
             }
             if (res['status'] == True):
                 if session['user']['role'] == "ADMIN":
-                    res = self.connection.update_one(db_jadwal, data)
+                    res = self.connection.update_one(db_jadwal, {'u_id': data['u_id']}, data)
 
                     if res['status'] == True:
                         result.update({ 'message': 'Jadwal untuk semester ' + session['academic_details']['semester_depan'] + ' tahun ajaran ' + session['academic_details']['tahun_ajaran_berikutnya'] + ' berhasil diperbaharui!' })

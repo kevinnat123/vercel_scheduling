@@ -35,14 +35,18 @@ def generate_jadwal():
         
         data_dosen = dao.get_dosen()
         data_ruang = dao.get_kelas()
-        data_matkul = dao.get_matkul()
+        data_matkul = dao.get_open_matkul()
 
         best_schedule = ga.genetic_algorithm(
             data_matkul, data_dosen, data_ruang, 
             ukuran_populasi=75, jumlah_generasi=1, peluang_mutasi=0.05
         )
 
-        dao.upload_jadwal(best_schedule)
+        if best_schedule and best_schedule.get('status') == False:
+            raise Exception(best_schedule.get('message'))
+
+        # print([schedule for schedule in best_schedule['data'] if schedule['program_studi'] == 'S1 SISTEM INFORMASI'])
+        dao.upload_jadwal(best_schedule['data'])
     except Exception as e:
         print(f"{'[ CONTRO ERROR ]':<15} Error: {e}")
         return jsonify({ 'status': False, 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
