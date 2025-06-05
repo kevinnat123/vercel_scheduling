@@ -187,18 +187,30 @@ def export_ruangan_to_excel(jadwal_list, matakuliah_list, dosen_list):
         for jadwal in sorted_group:
             format_data = workbook.add_format({
                 'align': 'center',
-                'bg_color': random.choice(['#fce9b3', '#b5fcb3', '#fadcb9', '#b9e3fa', '#b9e3fa', '#fab9df', '#b9fae6']),
                 'valign': 'vcenter',
+                'text_wrap': True,
+                'bg_color': random.choice(['#fce9b3', '#b5fcb3', '#fadcb9', '#b9e3fa', '#b9e3fa', '#fab9df', '#b9fae6']),
             })
 
             col = chr(64 + mapping_hari[jadwal['hari']])
             start_row = str(mapping_jam[jadwal['jam_mulai']])
             end_row = str(mapping_jam[jadwal['jam_selesai'] - 1])
 
-            nama_dosen = next((d['nama'] for d in dosen_list if d['nip'] == jadwal['kode_dosen']), None)if jadwal['kode_dosen'] != "AS" else "ASISTEN"
+            kode_matkul = jadwal['kode_matkul'][:-1] if jadwal['kode_dosen'] != "AS" else jadwal['kode_matkul'][:-4]
+            index = jadwal['kode_matkul'][-1:] if jadwal['kode_dosen'] != "AS" else jadwal['kode_matkul'][-4:-3]
+            nama_matkul = next((m['nama'] for m in matakuliah_list if m['kode'] == kode_matkul), '')
+            nama_dosen = next((d['nama'] for d in dosen_list if d['nip'] == jadwal['kode_dosen']), '') if jadwal['kode_dosen'] != "AS" else "ASISTEN"
             
-            value = jadwal['kode_matkul'] + "\n" + (jadwal['kode_dosen'] if jadwal['kode_dosen'] != "AS" else "ASISTEN") #nama_dosen
-            worksheet.merge_range(col + start_row + ":" + col + end_row, value, format_data)
+            full = f"{nama_matkul} {index} - {nama_dosen}".split(' ')
+            full = [value.capitalize() for value in full]
+            value = ''
+            for text in full:
+                value += (" " + text)
+            worksheet.merge_range(
+                col + start_row + ":" + col + end_row, 
+                value, 
+                format_data
+            )
 
     # Simpan workbook
     workbook.close()
