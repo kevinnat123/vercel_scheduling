@@ -1,26 +1,26 @@
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for
-from dao.laboran.ruangKelasDao import ruangKelasDao
+from dao.laboran.dataRuanganDao import dataRuanganDao
 from flask_login import login_required
 
-ruangKelas = Blueprint('ruangKelas', __name__)
-dao = ruangKelasDao()
+dataRuangan = Blueprint('dataRuangan', __name__)
+dao = dataRuanganDao()
 
-@ruangKelas.route("/ruang_kelas")
+@dataRuangan.route("/data_ruangan")
 @login_required
-def ruangKelas_index():
+def dataRuangan_index():
     print(f"{'[ RENDER ]':<15} Ruang Kelas (Role: {session['user']['role']})")
     if session['user']['role'] != 'LABORAN':
         return redirect(url_for('signin.error403'))
     else:
         return render_template(
-            '/laboran/ruang_kelas/index.html', 
+            '/laboran/data_ruangan/index.html', 
             menu = 'Ruang Kelas', 
             title = 'Ruang Kelas', 
         )
     
-@ruangKelas.route("/ruang_kelas/post_kelas", methods=['POST'])
+@dataRuangan.route("/data_ruangan/post_kelas", methods=['POST'])
 @login_required
-def mataKuliah_post_kelas():
+def dataRuangan_post_kelas():
     print(f"{'[ CONTROLLER ]':<15} Post Kelas")
     req = request.get_json('data')
     data = dao.post_kelas(req)

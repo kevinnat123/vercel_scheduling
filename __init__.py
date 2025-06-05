@@ -13,7 +13,7 @@ from controller.excelController import export
 from controller.admin.generateJadwalController import generateJadwal
 
 # LABORAN
-from controller.laboran.ruangKelasController import ruangKelas
+from controller.laboran.dataRuanganController import dataRuangan
 
 # KAPRODI
 from controller.kaprodi.dataDosenController import dosen
@@ -48,7 +48,7 @@ def create_app():
     app.register_blueprint(generateJadwal)
 
     # LABORAN
-    app.register_blueprint(ruangKelas)
+    app.register_blueprint(dataRuangan)
 
     # KAPRODI
     app.register_blueprint(dosen)

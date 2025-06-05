@@ -12,7 +12,7 @@ class CustomError(Exception):
         self.error_dict = error_dict
         super().__init__(str(error_dict))
 
-class ruangKelasDao:
+class dataRuanganDao:
     def __init__(self):
         self.connection = Database(MONGO_DB)
 
