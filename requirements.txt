@@ -1,3 +1,15 @@
-Flask==2.0.3
-Werkzeug==2.0.3
-Flask-Login==0.5.0
+# # Python 3.7
+# Flask==2.2.5 # Core dependencies
+# Werkzeug==2.2.3 # Core dependencies # metode hash = 'pbkdf2:sha256'
+# Flask-Login==0.6.3 # Authentication
+# pymongo==4.6.3 # Database
+# requests==2.31.0 # HTTP
+# XlsxWriter==3.2.0 # Excel export
+
+# Python 3.12
+Flask==3.0.3 # Core dependencies
+Werkzeug>=3.0.1,<4.0.0 # Core dependencies # metode hash = 'pbkdf2:sha256' || 'scrypt'
+Flask-Login>=0.6.3,<1.0.0 # Authentication
+pymongo>=4.6.3,<5.0.0 # Database
+requests>=2.31.0,<3.0.0 # HTTP
+XlsxWriter>=3.2.0,<4.0.0 # Excel export
