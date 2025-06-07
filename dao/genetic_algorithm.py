@@ -104,7 +104,7 @@ def angka_ke_huruf(n: int):
         return chr(64 + n)  # Karena ord('A') = 65
     else:
         return None  # Diluar jangkauan 1-26
-    
+
 def find_missing_course(jadwal, matakuliah_list):
     kode_matkul = []
     for matkul in matakuliah_list:
