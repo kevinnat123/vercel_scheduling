@@ -605,7 +605,7 @@ def hitung_fitness(jadwal, matakuliah_list, dosen_list, ruang_list, detail=False
     # (5)   Tidak Sesuai dengan permintaan / request dosen              >> melanggar_preferensi      (DONE)
 
     for sesi in jadwal:
-        kode_matkul = sesi.kode_matkul[:-1] if sesi.kode_dosen != "AS" else sesi.kode_dosen[:-4]
+        kode_matkul = sesi.kode_matkul[:-1] if sesi.kode_dosen != "AS" else sesi.kode_matkul[:-4]
         info_matkul = next((m for m in matakuliah_list if m['kode'] == kode_matkul), None)
         info_ruangan = next((r for r in ruang_list if r["kode"] == sesi.kode_ruangan), None)
         info_dosen = next((d for d in dosen_list if d['nip'] == sesi.kode_dosen), None)
