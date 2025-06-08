@@ -2,14 +2,18 @@
 
 ### Cara Menjalankan
 
-1. Aktifkan virtual environment:
+1. Buat virtual environment
+   
+   ```python -m venv myenv```
 
-   ```bash
-   source venv/bin/activate
-   ```
+2. Install package
 
-2. Jalankan aplikasi Flask:
+   ```pip install -r requirements.txt```
+   
+3. Aktifkan virtual environment
 
-   ```
-   python app.py
-   ```
+   ```bash source venv/bin/activate```
+
+4. Jalankan aplikasi Flask
+
+   ```python app.py```
