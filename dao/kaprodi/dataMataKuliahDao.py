@@ -168,19 +168,18 @@ class dataMataKuliahDao:
                 raise CustomError({ 'message': 'Data dengan Kode Matkul ' + params['kode'] + ' tidak ditemukan!' })
             
             # Hapus key yang memiliki value kosong
+            unset = {k: "" for k, v in params.items() if not v}
             if not params.get('asistensi'):
                 if 'asistensi' in params: params.pop('asistensi')
                 if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
                 if 'integrated_class' in params: params.pop('integrated_class')
-            unset = {k: "" for k, v in params.items() if not v}
-            if params.get('integrated_class'):
-                if 'tipe_kelas_asistensi' in params: 
-                    unset['tipe_kelas_asistensi'] = ""
-                    params.pop('tipe_kelas_asistensi')
+            else:
+                if params.get('integrated_class'):
+                    if 'tipe_kelas_asistensi' in params: 
+                        unset['tipe_kelas_asistensi'] = ""
+                        params.pop('tipe_kelas_asistensi')
             params = {k: v for k, v in params.items() if v}
             
-            print('unset', unset)
-            print(params)
             res = self.connection.update_one(db_matkul, {'kode': params['kode']}, params, unset)
 
             # Update Dosen
