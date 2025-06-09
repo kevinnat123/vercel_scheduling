@@ -285,6 +285,7 @@
     });
 
     if (data_sebelum) generateDataContainers(data_sebelum);
+    if (prodi) changedProdi(prodi);
 
     $("#modal-matkul tbody").on("click", "tr", async function () {
       let row = matkul_lov.row(this).data();
@@ -350,9 +351,6 @@
     if (prodi) {
       $("#input_prodi").prop("disabled", true);
       $("#input_prodi").val(prodi);
-      if (!data) {
-        changedProdi(prodi);
-      }
     }
 
     if (data) {
@@ -363,6 +361,9 @@
       $("#input_bidang_minat").val(data.bidang_minat);
       matkul_tab.clear().rows.add(data.list_matkul).draw();
     }
+
+    if (!prodi && $("#input_prodi").val())
+      changedProdi($("#input_prodi").val());
 
     $("#card-form").prop("hidden", hidden ? true : false);
     window.scrollTo({ top: 0, behavior: "smooth" });
