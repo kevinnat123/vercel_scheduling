@@ -271,6 +271,53 @@
         </div>
       </div>
       <!-- ASISTENSI END -->
+      <!-- TEAM TEACHING -->
+      <div class="form-group row">
+        <label for="cbTeamTeaching" class="col-2 col-form-label text-end"
+          >Team Teaching&ensp;</label
+        >
+        <div class="col d-flex align-items-center">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            name="cbTeamTeaching"
+          />
+        </div>
+
+        <!-- <label
+          for="cbIntegratedClass"
+          class="col-3 col-form-label text-end asistensi_detail"
+          hidden
+          >Kelas Gabungan</label
+        >
+        <div class="col d-flex align-items-center">
+          <input
+            type="checkbox"
+            class="form-check-input asistensi_detail"
+            name="cbIntegratedClass"
+            hidden
+          />
+        </div> -->
+      </div>
+
+      <div class="form-group row team_teaching_detail" hidden>
+        <label for="input_jumlah_dosen" class="col-2 col-form-label text-end"
+          >Jumlah Dosen<span class="text-danger" aria-hidden="true"
+            >*</span
+          ></label
+        >
+        <div class="col-2">
+          <input
+            type="text"
+            class="form-control numberOnly"
+            id="input_jumlah_dosen"
+            autocomplete="off"
+            maxlength="1"
+            placeholder="Input jumlah dosen pengajar tiap kelas"
+          />
+        </div>
+      </div>
+      <!-- TEAM TEACHING END -->
       <!-- FORM ACTION -->
       <div class="col text-end">
         <button type="button" class="btn btn-primary" id="btn-simpan">
@@ -452,6 +499,7 @@
     $("#field_bidang").attr("hidden", true);
     $("#field_dosen_ajar").attr("hidden", true);
     $(".asistensi_detail").attr("hidden", true);
+    $(".team_teaching_detail").attr("hidden", true);
   }
 
   async function form_matkul(
@@ -496,18 +544,27 @@
         data.dosen_ajar.forEach((element) => {
           addBadge("field_dosen_ajar", "list_dosen_ajar", element);
         });
-      $(".asistensi_detail").attr("hidden", data.asistensi ? false : true);
       $("input[name='cbAsistensi']").prop("checked", data.asistensi);
-      $("input[name='cbIntegratedClass']").prop(
-        "checked",
-        data.integrated_class
-      );
-      if (data.asistensi)
+      $(".asistensi_detail").attr("hidden", data.asistensi ? false : true);
+      if (data.asistensi) {
         $(".tipe_kelas_asisten").attr(
           "hidden",
           data.integrated_class ? true : false
         );
-      $("#ASISTEN_" + data.tipe_kelas_asistensi).prop("checked", true);
+        $("input[name='cbIntegratedClass']").prop(
+          "checked",
+          data.integrated_class
+        );
+        $("#ASISTEN_" + data.tipe_kelas_asistensi).prop("checked", true);
+      }
+      $("input[name='cbTeamTeaching']").prop("checked", data.team_teaching);
+      $(".team_teaching_detail").attr(
+        "hidden",
+        data.team_teaching ? false : true
+      );
+      if (data.team_teaching) {
+        $("#input_jumlah_dosen").val(data.jumlah_dosen);
+      }
     }
     $("#card-form").prop("hidden", hidden ? true : false);
   }
@@ -567,6 +624,15 @@
         $("#rbTipeKelas").focus();
       }, 1500);
       return;
+    } else if (
+      getCheckedItemValue("cbTeamTeaching")[0] &&
+      !$("#input_jumlah_dosen").val()
+    ) {
+      popUpTimer("error", "Jumlah Dosen Pengajar belum diisi!");
+      setTimeout(() => {
+        $("#input_jumlah_dosen").focus();
+      }, 1500);
+      return;
     }
 
     let params = {
@@ -584,6 +650,8 @@
       integrated_class: getCheckedItemValue("cbIntegratedClass")[0]
         ? true
         : false,
+      team_teaching: getCheckedItemValue("cbTeamTeaching")[0] ? true : false,
+      jumlah_dosen: Number($("#input_jumlah_dosen").val()),
     };
 
     $.ajax({
@@ -671,6 +739,15 @@
         $("#rbTipeKelas").focus();
       }, 1500);
       return;
+    } else if (
+      getCheckedItemValue("cbTeamTeaching")[0] &&
+      !$("#input_jumlah_dosen").val()
+    ) {
+      popUpTimer("error", "Jumlah Dosen Pengajar belum diisi!");
+      setTimeout(() => {
+        $("#input_jumlah_dosen").focus();
+      }, 1500);
+      return;
     }
 
     let params = {
@@ -688,6 +765,8 @@
       integrated_class: getCheckedItemValue("cbIntegratedClass")[0]
         ? true
         : false,
+      team_teaching: getCheckedItemValue("cbTeamTeaching")[0] ? true : false,
+      jumlah_dosen: Number($("#input_jumlah_dosen").val()),
     };
 
     $.ajax({
@@ -914,6 +993,11 @@
   $('input[name="cbAsistensi"]').on("change", function () {
     let isChecked = $(this).prop("checked");
     $(".asistensi_detail").attr("hidden", isChecked ? false : true);
+  });
+
+  $('input[name="cbTeamTeaching"]').on("change", function () {
+    let isChecked = $(this).prop("checked");
+    $(".team_teaching_detail").attr("hidden", isChecked ? false : true);
   });
 
   $('input[name="cbIntegratedClass"]').on("change", function () {

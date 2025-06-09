@@ -94,6 +94,8 @@ class dataMataKuliahDao:
                 raise CustomError({ 'message': 'Tipe Kelas belum diisi!' })
             elif params.get('asistensi') and not params.get('integrated_class') and not params.get('tipe_kelas_asistensi'):
                 raise CustomError({ 'message': 'Tipe Kelas Asistensi belum diisi!' })
+            elif params.get('team_teaching') and not params.get('jumlah_dosen'):
+                raise CustomError({ 'message': 'Jumlah Dosen Pengajar belum diisi!' })
 
             if session['user']['role'] == "KEPALA PROGRAM STUDI":
                 if params['prodi'] != session['user']['prodi']:
@@ -104,8 +106,12 @@ class dataMataKuliahDao:
                 if 'asistensi' in params: params.pop('asistensi')
                 if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
                 if 'integrated_class' in params: params.pop('integrated_class')
-            if params.get('integrated_class'):
-                if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
+            else:
+                if params.get('integrated_class'):
+                    if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
+            if not params.get('team_teaching'):
+                if 'team_teaching' in params: params.pop('team_teaching')
+                if 'jumlah_dosen' in params: params.pop('jumlah_dosen')
             params = {k: v for k, v in params.items() if v}
 
             # Check exist
@@ -158,6 +164,8 @@ class dataMataKuliahDao:
                 raise CustomError({ 'message': 'Tipe Kelas belum diisi!' })
             elif params.get('asistensi') and not params.get('integrated_class') and not params.get('tipe_kelas_asistensi'):
                 raise CustomError({ 'message': 'Tipe Kelas Asistensi belum diisi!' })
+            elif params.get('team_teaching') and not params.get('jumlah_dosen'):
+                raise CustomError({ 'message': 'Jumlah Dosen Pengajar belum diisi!' })
                 
             if session['user']['role'] == "KEPALA PROGRAM STUDI":
                 if params['prodi'] != session['user']['prodi']:
@@ -173,11 +181,21 @@ class dataMataKuliahDao:
                 if 'asistensi' in params: params.pop('asistensi')
                 if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
                 if 'integrated_class' in params: params.pop('integrated_class')
+
+                if 'asistensi' not in unset: unset['asistensi'] = ''
+                if 'tipe_kelas_asistensi' not in unset: unset['tipe_kelas_asistensi'] = ''
+                if 'integrated_class' not in unset: unset['integrated_class'] = ''
             else:
                 if params.get('integrated_class'):
                     if 'tipe_kelas_asistensi' in params: 
                         unset['tipe_kelas_asistensi'] = ""
                         params.pop('tipe_kelas_asistensi')
+            if not params.get('team_teaching'):
+                if 'team_teaching' in params: params.pop('team_teaching')
+                if 'jumlah_dosen' in params: params.pop('jumlah_dosen')
+                
+                if 'team_teaching' not in unset: unset['team_teaching'] = ''
+                if 'jumlah_dosen' not in unset: unset['jumlah_dosen'] = ''
             params = {k: v for k, v in params.items() if v}
             
             res = self.connection.update_one(db_matkul, {'kode': params['kode']}, params, unset)
