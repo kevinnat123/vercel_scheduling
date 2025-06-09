@@ -93,7 +93,7 @@
       <!-- PROGRAM STUDI -->
       <!-- TIPE KELAS -->
       <div class="form-group row">
-        <label for="cbTipeKelas" class="col-2 col-form-label text-end"
+        <label for="rbTipeKelas" class="col-2 col-form-label text-end"
           >Tipe Kelas<span class="text-danger" aria-hidden="true"
             >*</span
           ></label
@@ -421,6 +421,15 @@
 <script>
   const prodi = "{{ prodi | safe }}";
   $(document).ready(function () {
+    setTimeout(() => {
+      $.fn.dataTable
+        .tables({
+          visible: true,
+          api: true,
+        })
+        .columns.adjust();
+    }, 3000);
+
     $("#modal-dosen tbody").on("click", "tr", async function () {
       let row = dosen_lov.row(this).data();
       $("#modal-dosen").modal("hide");
@@ -566,6 +575,9 @@
         $("#input_jumlah_dosen").val(data.jumlah_dosen);
       }
     }
+
+    if (!prodi && $("#input_prodi").val()) dosen_lov.ajax.reload();
+
     $("#card-form").prop("hidden", hidden ? true : false);
   }
 

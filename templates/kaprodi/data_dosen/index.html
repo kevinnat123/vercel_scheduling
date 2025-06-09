@@ -368,6 +368,9 @@
         });
       }
     }
+
+    if (!prodi && $("#input_prodi").val()) matkul_lov.ajax.reload();
+
     $("#card-form").prop("hidden", hidden ? true : false);
   }
 
