@@ -208,8 +208,8 @@ class dataMataKuliahDao:
                     else:
                         raise Exception
 
-            if len(params.get('dosen_ajar') or []) < len(matkul_exist['data'].get('dosen_ajar') or []):
-                dosen_ajar_lama = matkul_exist['data'].get('dosen_ajar') or []
+            if len(params.get('dosen_ajar') or []) < len(isExist['data'].get('dosen_ajar') or []):
+                dosen_ajar_lama = isExist['data'].get('dosen_ajar') or []
                 dosen_ajar_baru = params.get('dosen_ajar') or []
                 data_dihapus = [dt for dt in dosen_ajar_lama if dt not in dosen_ajar_baru]
 
