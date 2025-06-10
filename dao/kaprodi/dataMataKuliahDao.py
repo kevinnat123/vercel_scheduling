@@ -4,6 +4,9 @@ from flask import session
 
 from global_func import CustomError
 
+ASISTENSI_RELATED = ['asistensi', 'tipe_kelas_asistensi', 'integrated_class']
+TEAM_TEACHING_RELATED = ['team_teaching', 'jumlah_dosen']
+
 class dataMataKuliahDao:
     def __init__(self):
         self.connection = Database(MONGO_DB)
@@ -101,23 +104,22 @@ class dataMataKuliahDao:
                 if params['prodi'] != session['user']['prodi']:
                     raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
 
+            # Check exist
+            isExist = self.connection.find_one(db_matkul, {'kode': params['kode']})
+            if (isExist['status'] == True):
+                raise CustomError({ 'message': 'Data dengan Kode Matkul ' + params['kode'] + ' sudah ada!' })
+
             # Hapus key yang memiliki value kosong
             if not params.get('asistensi'):
-                params.pop('asistensi', None)
-                params.pop('tipe_kelas_asistensi', None)
-                params.pop('integrated_class', None)
+                for x in ASISTENSI_RELATED:
+                    params.pop(x, None)
             else:
                 if params.get('integrated_class'):
                     params.pop('tipe_kelas_asistensi', None)
             if not params.get('team_teaching'):
-                params.pop('team_teaching', None)
-                params.pop('jumlah_dosen', None)
+                for x in TEAM_TEACHING_RELATED:
+                    params.pop(x, None)
             params = {k: v for k, v in params.items() if v}
-
-            # Check exist
-            res = self.connection.find_one(db_matkul, {'kode': params['kode']})
-            if (res['status'] == True):
-                raise CustomError({ 'message': 'Data dengan Kode Matkul ' + params['kode'] + ' sudah ada!' })
 
             # Update Dosen
             if params.get('dosen_ajar'):
@@ -171,31 +173,25 @@ class dataMataKuliahDao:
                 if params['prodi'] != session['user']['prodi']:
                     raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
                 
-            matkul_exist = self.connection.find_one(db_matkul, {'kode': params['kode']})
-            if (matkul_exist['status'] == False and matkul_exist['data'] == None):
+            isExist = self.connection.find_one(db_matkul, {'kode': params['kode']})
+            if isExist['status'] == False:
                 raise CustomError({ 'message': 'Data dengan Kode Matkul ' + params['kode'] + ' tidak ditemukan!' })
             
             # Hapus key yang memiliki value kosong
             unset = {k: "" for k, v in params.items() if not v}
             if not params.get('asistensi'):
-                params.pop('asistensi', None)
-                params.pop('tipe_kelas_asistensi', None)
-                params.pop('integrated_class', None)
-
-                if 'asistensi' not in unset: unset['asistensi'] = ''
-                if 'tipe_kelas_asistensi' not in unset: unset['tipe_kelas_asistensi'] = ''
-                if 'integrated_class' not in unset: unset['integrated_class'] = ''
+                for x in ASISTENSI_RELATED:
+                    params.pop(x, None)
+                    if x not in unset: unset[x] = ""
             else:
                 if params.get('integrated_class'):
                     if 'tipe_kelas_asistensi' in params: 
                         unset['tipe_kelas_asistensi'] = ""
                         params.pop('tipe_kelas_asistensi', None)
             if not params.get('team_teaching'):
-                params.pop('team_teaching', None)
-                params.pop('jumlah_dosen', None)
-                
-                if 'team_teaching' not in unset: unset['team_teaching'] = ''
-                if 'jumlah_dosen' not in unset: unset['jumlah_dosen'] = ''
+                for x in TEAM_TEACHING_RELATED:
+                    params.pop(x, None)
+                    if x not in unset: unset[x] = ""
             params = {k: v for k, v in params.items() if v}
             
             res = self.connection.update_one(db_matkul, {'kode': params['kode']}, params, unset)
