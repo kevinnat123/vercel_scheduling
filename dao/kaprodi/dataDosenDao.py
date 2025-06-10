@@ -65,11 +65,11 @@ class dataDosenDao:
             if params.get('preferensi'):
                 if params['preferensi'].get('value'):
                     params['preferensi'] = {k: v for k, v in params['preferensi'].items() if v}
-                    params['preferensi'].pop('value')
+                    params['preferensi'].pop('value', None)
                 else:
-                    params.pop('preferensi')
+                    params.pop('preferensi', None)
             if params.get('status') and str(params.get('status')) == "TIDAK_TETAP":
-                if 'prodi' in params: params.pop('prodi')
+                params.pop('prodi', None)
             params = {k: v for k, v in params.items() if v}
                 
             res = self.connection.insert_one(db_dosen, params)
@@ -127,7 +127,7 @@ class dataDosenDao:
 
             if params.get('preferensi'):
                 if params['preferensi'].get('value'):
-                    params['preferensi'].pop('value')
+                    params['preferensi'].pop('value', None)
 
                     # params['preferensi'] = {k: v for k, v in params['preferensi'].items() if v}
                     for k, v in dict(params['preferensi']).items():
@@ -135,19 +135,19 @@ class dataDosenDao:
                             continue
                         else:
                             unset[f'preferensi.{k}'] = ""
-                            params['preferensi'].pop(k)
+                            params['preferensi'].pop(k, None)
 
                     if not params['preferensi']:
-                        params.pop('preferensi')
+                        params.pop('preferensi', None)
                         unset = {k: v for k, v in unset.items() if not k.startswith('preferensi.')}
                         unset['preferensi'] = ""
                 else:
-                    params.pop('preferensi')
+                    params.pop('preferensi', None)
                     unset['preferensi'] = ""
             if params.get('status') and str(params.get('status')) == "TIDAK_TETAP":
                 if 'prodi' in params: 
                     unset['prodi'] = ""
-                    params.pop('prodi')
+                    params.pop('prodi', None)
 
             params = {k: v for k, v in params.items() if v}
                 

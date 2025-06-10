@@ -103,15 +103,15 @@ class dataMataKuliahDao:
 
             # Hapus key yang memiliki value kosong
             if not params.get('asistensi'):
-                if 'asistensi' in params: params.pop('asistensi')
-                if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
-                if 'integrated_class' in params: params.pop('integrated_class')
+                params.pop('asistensi', None)
+                params.pop('tipe_kelas_asistensi', None)
+                params.pop('integrated_class', None)
             else:
                 if params.get('integrated_class'):
-                    if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
+                    params.pop('tipe_kelas_asistensi', None)
             if not params.get('team_teaching'):
-                if 'team_teaching' in params: params.pop('team_teaching')
-                if 'jumlah_dosen' in params: params.pop('jumlah_dosen')
+                params.pop('team_teaching', None)
+                params.pop('jumlah_dosen', None)
             params = {k: v for k, v in params.items() if v}
 
             # Check exist
@@ -178,9 +178,9 @@ class dataMataKuliahDao:
             # Hapus key yang memiliki value kosong
             unset = {k: "" for k, v in params.items() if not v}
             if not params.get('asistensi'):
-                if 'asistensi' in params: params.pop('asistensi')
-                if 'tipe_kelas_asistensi' in params: params.pop('tipe_kelas_asistensi')
-                if 'integrated_class' in params: params.pop('integrated_class')
+                params.pop('asistensi', None)
+                params.pop('tipe_kelas_asistensi', None)
+                params.pop('integrated_class', None)
 
                 if 'asistensi' not in unset: unset['asistensi'] = ''
                 if 'tipe_kelas_asistensi' not in unset: unset['tipe_kelas_asistensi'] = ''
@@ -189,10 +189,10 @@ class dataMataKuliahDao:
                 if params.get('integrated_class'):
                     if 'tipe_kelas_asistensi' in params: 
                         unset['tipe_kelas_asistensi'] = ""
-                        params.pop('tipe_kelas_asistensi')
+                        params.pop('tipe_kelas_asistensi', None)
             if not params.get('team_teaching'):
-                if 'team_teaching' in params: params.pop('team_teaching')
-                if 'jumlah_dosen' in params: params.pop('jumlah_dosen')
+                params.pop('team_teaching', None)
+                params.pop('jumlah_dosen', None)
                 
                 if 'team_teaching' not in unset: unset['team_teaching'] = ''
                 if 'jumlah_dosen' not in unset: unset['jumlah_dosen'] = ''
