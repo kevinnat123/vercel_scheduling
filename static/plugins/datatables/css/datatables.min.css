@@ -298,6 +298,7 @@ table.dataTable.nowrap td {
 table.dataTable th,
 table.dataTable td {
   box-sizing: border-box;
+  vertical-align: middle; /* Modified By User on 12 June */
 }
 table.dataTable th.dt-type-numeric,
 table.dataTable th.dt-type-date,
