@@ -22,11 +22,15 @@ class generateJadwalDao:
         list_matkul = []
         if result and result.get('status'):
             resultData = [data for data in result['data']] # [ [{}], [{}] ]
+            list_kode_matkul = []
             for dt in resultData:
-                dt['list_matkul'] = dao_matkul.get_matkul_by_kode(dt['list_matkul']) 
-                for matkul in dt['list_matkul']:
-                    matkul['jumlah_mahasiswa'] = dt['jumlah_mahasiswa']
-                list_matkul.extend(dt['list_matkul'])
+                list_kode_matkul.extend([matkul['kode'] for matkul in dt['list_matkul']])
+            list_matkul = dao_matkul.get_matkul_by_kode(list_kode_matkul)
+            for matkul in list_matkul:
+                jumlah_kelas = next((dt['jumlah_kelas'] for dt in dt['list_matkul'] if dt['kode'] == matkul['kode']), None)
+                matkul['jumlah_kelas'] = int(jumlah_kelas or 0)
+                matkul['jumlah_mahasiswa'] = dt['jumlah_mahasiswa']
+            dt['list_matkul'] = [matkul for matkul in list_matkul]
         return list_matkul
     
     def get_kelas(self):
