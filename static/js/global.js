@@ -154,6 +154,51 @@ async function clearBadge(container_id, div_list_id) {
     });
 }
 
+function getDatatableData(dataTable, index = undefined) {
+  let tableId = dataTable.table().node().id; // ambil id table yang digunakan pada dataTable
+  let tableData = dataTable.data().toArray(); // Ambil semua data dari dataTable
+  let columnNames = dataTable
+    .settings()
+    .init()
+    .columns.map((col) => col.data); // Ambil nama kolom dari DataTable
+
+  if (index >= 0) {
+    let row = $("#" + tableId + " tbody tr:eq(" + index + ")");
+    let temp = tableData[index];
+    tableData = [];
+
+    if (row.length) {
+      row.find("td").each(function (colIndex) {
+        let inputField = $(this).find("input");
+        if (inputField.length > 0 && columnNames[colIndex]) {
+          temp[columnNames[colIndex]] = inputField.val();
+        }
+
+        // let value =
+        //   inputField.length > 0 ? inputField.val() : $(this).text().trim();
+
+        // if (columnNames[colIndex]) {
+        //   temp[columnNames[colIndex]] = value;
+        // }
+      });
+    }
+    tableData.push(temp);
+  } else {
+    $("#" + tableId + " tbody tr").each(function (rowIndex) {
+      $(this)
+        .find("td")
+        .each(function (colIndex) {
+          let inputField = $(this).find("input");
+          if (inputField.length > 0 && columnNames[colIndex]) {
+            tableData[rowIndex][columnNames[colIndex]] = inputField.val(); // Update berdasarkan nama kolom
+          }
+        });
+    });
+  }
+
+  return index >= 0 ? tableData[0] : tableData;
+}
+
 /**
  * @param {string} [icon] - The icon type (e.g., "success", "error", "warning", "info"). Leave as `undefined` to skip.
  * @param {string} [title] - The title text. Leave as `undefined` to skip.
