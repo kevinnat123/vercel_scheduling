@@ -376,7 +376,7 @@
       if (b.angkatan === "ALL") return 1;
 
       // Pastikan 'angkatan' adalah string sebelum dibandingkan
-      return String(a.angkatan).localeCompare(String(b.angkatan));
+      return String(a.program_studi).localeCompare(String(b.program_studi));
     }); // sorting berdasarkan angkatan
 
     $(".data_angkatan").remove(); // hapus card dengan class 'data_angkatan' agar tidak terjadi double data
@@ -393,7 +393,7 @@
 
   function generateNewDataContainer(data) {
     let tableId = data.u_id + "_tab"; // data.u_id + data.bidang_minat?data.bidang_minat:'' + "_tab"
-    console.log("[ tableId ]", tableId);
+    console.log("u_id:", data.u_id);
 
     bidang = data.bidang_minat
       ? `
@@ -412,6 +412,15 @@
           </div>
       `
       : ``;
+
+    // PASTIKAN BERSIH BIAR GA REINITIALIZE
+    $("#card_" + data.u_id).remove();
+    if ($.fn.DataTable.isDataTable("#" + tableId)) {
+      $("#" + tableId)
+        .DataTable()
+        .clear()
+        .destroy();
+    }
 
     // Struktur tabel baru
     let tableHtml = `
@@ -508,7 +517,9 @@
         `;
 
     // Tambahkan tabel baru ke dalam container
-    $("#tableContainer").append(tableHtml);
+    if (!document.getElementById("card_" + data.u_id)) {
+      $("#tableContainer").append(tableHtml);
+    }
 
     // Inisialisasi DataTable
     $("#" + tableId).DataTable({
@@ -749,6 +760,7 @@
         hideLoading();
       },
       success: async function (res) {
+        console.clear();
         console.log("[ put_matkul ] ", res);
         if (res.status === false) {
           await popUpTimer("error", res.message);
@@ -763,7 +775,9 @@
 
           // Mencari indeks elemen dengan angkatan '2021'
           let index = data_angkatan.findIndex(
-            (item) => item.angkatan === params["angkatan"]
+            (item) =>
+              item.angkatan === params.angkatan &&
+              item.bidang_minat === params.bidang_minat
           );
 
           // Jika ditemukan, ganti elemen tersebut, jika tidak, tambahkan data baru
