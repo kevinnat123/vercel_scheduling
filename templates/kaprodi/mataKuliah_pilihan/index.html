@@ -75,7 +75,7 @@
         <div class="col">
           <select class="form-select" id="input_bidang_minat">
             <option class="default" value="">
-              -- Pilih Bidang Minat (Jika diperlukan) --
+              -- Pilih Bidang Minat (Jika setting penjurusan / konsentrasi) --
             </option>
           </select>
         </div>
@@ -112,14 +112,15 @@
               <th><input type="checkbox" name="cbMatkulTabAll" /></th>
               <th>Kode</th>
               <th>Nama</th>
-              <th>Kelompok</th>
               <th>SKS A</th>
               <th>SKS B</th>
+              <th>Jumlah Kelas</th>
             </thead>
             <tbody></tbody>
             <tfoot>
               <tr>
-                <th colspan="4">Jumlah SKS :</th>
+                <th colspan="3">Jumlah SKS :</th>
+                <th></th>
                 <th></th>
                 <th></th>
               </tr>
@@ -325,6 +326,8 @@
     matkul_tab.clear().draw();
     document.getElementById("btn-hapusMatkul").style.display = "none";
 
+    // $("#input_bidang_minat").prop("disabled", true);
+
     if (update === false) {
       document.getElementById("formTitle").innerText = "Tambah Data";
       $("#btn-simpan").attr("hidden", false);
@@ -345,9 +348,6 @@
       $("#input_bidang_minat").prop("disabled", true);
     }
 
-    $("#input_bidang_minat").children().filter(":not(.default)").remove();
-    $("#input_bidang_minat").prop("disabled", true);
-
     if (prodi) {
       $("#input_prodi").prop("disabled", true);
       $("#input_prodi").val(prodi);
@@ -357,6 +357,7 @@
       $("#input_angkatan").val(data.angkatan);
       $("#input_jumlah_mahasiswa").val(data.jumlah_mahasiswa);
       $("#input_prodi").val(data.prodi);
+      $("#input_bidang_minat").children().filter(":not(.default)").remove(); // hapus semua list bidang_minat
       await changedProdi(data.prodi);
       $("#input_bidang_minat").val(data.bidang_minat);
       matkul_tab.clear().rows.add(data.list_matkul).draw();
@@ -467,7 +468,7 @@
 
                     <label for="${
                       "jumlah_mahasiswa" + data.angkatan
-                    }" class="col-3 col-form-label text-end">
+                    }" class="col-4 col-form-label text-end">
                         Jumlah Mahasiswa Aktif
                     </label>
                     <div class="col-2">
@@ -489,10 +490,17 @@
                         <th>Nama</th>
                         <th>SKS A</th>
                         <th>SKS B</th>
-                        <th>Kelompok</th>
-                        <!-- <th>Praktikum</th> -->
+                        <th>Jumlah Kelas</th>
                     </thead>
                     <tbody></tbody>
+                      <tfoot>
+                        <tr>
+                          <th colspan="2">Jumlah SKS :</th>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                        </tr>
+                      </tfoot>
                     </table>
                 </div>
                 </div>
@@ -514,13 +522,44 @@
       info: false,
       data: data.list_matkul, // Pastikan data dikirim ke DataTable
       columns: [
-        { data: "kode", width: "75px" },
-        { data: "nama", width: "300px" },
-        { data: "sks_akademik", width: "50px", className: "text-end" },
-        { data: "sks_bayar", width: "50px", className: "text-end" },
-        { data: "kelompok", width: "" },
-        // { data: "praktikum", width: "50px", className: "text-center" },
+        { data: "kode", width: "75px", defaultContent: "" },
+        { data: "nama", width: "300px", defaultContent: "" },
+        {
+          data: "sks_akademik",
+          width: "50px",
+          className: "text-end",
+          defaultContent: "",
+        },
+        {
+          data: "sks_bayar",
+          width: "50px",
+          className: "text-end",
+          defaultContent: "",
+        },
+        {
+          data: "jumlah_kelas",
+          width: "50px",
+          className: "text-end",
+          defaultContent: "",
+        },
       ],
+      footerCallback: function (row, data, start, end, display) {
+        let api = this.api();
+
+        // Total over all pages
+        total_sks_akademik = api
+          .column(2)
+          .data()
+          .reduce((a, b) => Number(a) + Number(b), 0);
+        total_sks_bayar = api
+          .column(3)
+          .data()
+          .reduce((a, b) => Number(a) + Number(b), 0);
+
+        // Update footer
+        api.column(2).footer().innerHTML = total_sks_akademik;
+        api.column(3).footer().innerHTML = total_sks_bayar;
+      },
     });
   }
 
@@ -630,7 +669,7 @@
       jumlah_mahasiswa: Number($("#input_jumlah_mahasiswa").val()),
       prodi: $("#input_prodi").val(),
       bidang_minat: $("#input_bidang_minat").val(),
-      list_matkul: matkul_tab.data().toArray(),
+      list_matkul: getDatatableData(matkul_tab),
     };
 
     $.ajax({
@@ -695,7 +734,7 @@
       jumlah_mahasiswa: Number($("#input_jumlah_mahasiswa").val()),
       prodi: $("#input_prodi").val(),
       bidang_minat: $("#input_bidang_minat").val(),
-      list_matkul: matkul_tab.data().toArray(),
+      list_matkul: getDatatableData(matkul_tab),
     };
 
     $.ajax({
@@ -991,24 +1030,29 @@
       {
         data: "kode",
         width: "75px",
+        defaultContent: "",
       },
       {
         data: "nama",
         width: "300px",
-      },
-      {
-        data: "kelompok",
-        width: "",
+        defaultContent: "",
       },
       {
         data: "sks_akademik",
         width: "50px",
         className: "text-end",
+        defaultContent: "",
       },
       {
         data: "sks_bayar",
         width: "50px",
         className: "text-end",
+        defaultContent: "",
+      },
+      {
+        data: "jumlah_kelas",
+        width: "50px",
+        defaultContent: "",
       },
     ],
     footerCallback: function (row, data, start, end, display) {
@@ -1016,17 +1060,34 @@
 
       // Total over all pages
       total_sks_akademik = api
-        .column(4)
+        .column(3)
         .data()
         .reduce((a, b) => Number(a) + Number(b), 0);
       total_sks_bayar = api
-        .column(5)
+        .column(4)
         .data()
         .reduce((a, b) => Number(a) + Number(b), 0);
 
       // Update footer
-      api.column(4).footer().innerHTML = total_sks_akademik;
-      api.column(5).footer().innerHTML = total_sks_bayar;
+      api.column(3).footer().innerHTML = total_sks_akademik;
+      api.column(4).footer().innerHTML = total_sks_bayar;
+    },
+    createdRow: function (row, data) {
+      // Convert all text columns into input fields dynamically
+      $(row)
+        // .find("td:not(:first-child)")
+        .find("td")
+        .each(function (index) {
+          let columnData = matkul_tab.column(index).dataSrc();
+          if (columnData === null) return;
+
+          if (columnData == "jumlah_kelas")
+            $(this).html(
+              `<input type="text" class="form-control text-end numberOnly"value="${
+                data[columnData] || ""
+              }"/>`
+            );
+        });
     },
   });
 

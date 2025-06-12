@@ -29,7 +29,12 @@ class mataKuliahPilihanDao:
 
         if result and result.get('status'):
             for data in result['data']:
-                data['list_matkul'] = dao_matkul.get_matkul_by_kode(data['list_matkul'])
+                list_kode_matkul = [matkul['kode'] for matkul in data['list_matkul']]
+                list_matkul = dao_matkul.get_matkul_by_kode(list_kode_matkul)
+                for matkul in list_matkul:
+                    jumlah_kelas = next((data['jumlah_kelas'] for data in data['list_matkul'] if data['kode'] == matkul['kode']), None)
+                    matkul['jumlah_kelas'] = jumlah_kelas
+                data['list_matkul'] = [matkul for matkul in list_matkul]
 
         return result['data'] if result and result.get('status') else []
 
@@ -54,7 +59,7 @@ class mataKuliahPilihanDao:
                 raise CustomError({ 'message': 'Belum ada matkul yang dibuka untuk semester ini!', 'target': 'input_matkul' })
 
             list_matkul = params.pop('list_matkul', [])
-            params['list_matkul'] = [matkul['kode'] for matkul in list_matkul]
+            params['list_matkul'] = [{"kode": matkul["kode"], "jumlah_kelas": matkul["jumlah_kelas"]} for matkul in list_matkul]
             params = {k: v for k, v in params.items() if v}
 
             if session['user']['role'] == "KEPALA PROGRAM STUDI":
@@ -115,7 +120,7 @@ class mataKuliahPilihanDao:
                 raise CustomError({ 'message': 'Belum ada matkul yang dibuka untuk semester ini!', 'target': 'input_matkul' })
 
             list_matkul = params.pop('list_matkul', [])
-            params['list_matkul'] = [matkul['kode'] for matkul in list_matkul]
+            params['list_matkul'] = [{"kode": matkul["kode"], "jumlah_kelas": matkul["jumlah_kelas"]} for matkul in list_matkul]
             params = {k: v for k, v in params.items() if v}
 
             prodi_words = params['prodi'].split(' ')
