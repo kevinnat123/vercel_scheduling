@@ -41,7 +41,7 @@ def generate_jadwal():
 
             best_schedule = ga.genetic_algorithm(
                 data_matkul, data_dosen, data_ruang, 
-                ukuran_populasi=75, jumlah_generasi=1, peluang_mutasi=0.05
+                ukuran_populasi=75, jumlah_generasi=100, peluang_mutasi=0.05
             )
 
             if best_schedule and best_schedule.get('status') == False:
