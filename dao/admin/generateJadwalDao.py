@@ -25,11 +25,14 @@ class generateJadwalDao:
             list_kode_matkul = []
             for dt in resultData:
                 list_kode_matkul.extend([matkul['kode'] for matkul in dt['list_matkul']])
+
             list_matkul = dao_matkul.get_matkul_by_kode(list_kode_matkul)
             for matkul in list_matkul:
-                jumlah_kelas = next((dt['jumlah_kelas'] for dt in dt['list_matkul'] if dt['kode'] == matkul['kode']), None)
-                matkul['jumlah_kelas'] = int(jumlah_kelas or 0)
-                matkul['jumlah_mahasiswa'] = dt['jumlah_mahasiswa']
+                for data in resultData:
+                    jumlah_kelas = next((data['jumlah_kelas'] for data in data['list_matkul'] if data['kode'] == matkul['kode']), None)
+                    if jumlah_kelas:
+                        matkul['jumlah_kelas'] = int(jumlah_kelas)
+                    matkul['jumlah_mahasiswa'] = data['jumlah_mahasiswa']
             dt['list_matkul'] = [matkul for matkul in list_matkul]
         return list_matkul
     
