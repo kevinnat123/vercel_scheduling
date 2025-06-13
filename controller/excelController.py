@@ -67,6 +67,9 @@ def export_jadwal_to_excel(jadwal_list, matakuliah_list, dosen_list):
         'align': 'center',
         'bg_color': '#b9ebc6',
     })
+    format_error = workbook.add_format({
+        'bg_color': '#ff0000'
+    })
 
     # Loop setiap group dan tulis ke sheet terpisah
     for program_studi in sorted(grouped.keys()):
@@ -81,17 +84,32 @@ def export_jadwal_to_excel(jadwal_list, matakuliah_list, dosen_list):
             worksheet.write(row_idx, col_idx, header.replace('_', ' '), format_header)
         row_idx += 1
 
+        # Control Area
+        control_solo_teaching = {}
+        control_preferensi = {}
+        old_kode_dosen, old_nama_dosen = None, None
+
         # Sort dan tulis data
         # sorted_group = sorted(grouped[program_studi], key=lambda x: (x.kode_ruangan, x.hari, x.jam_mulai))
         sorted_group = sorted(grouped[program_studi], key=lambda x: x['kode_matkul'])
         for jadwal in sorted_group:
             for col_idx, attr in enumerate(fixed_headers):
+                status = True
                 if attr == "nama_matkul":
-                    value = jadwal['kode_matkul']
-                    value = next((m['nama'] for m in matakuliah_list if m['kode'] == value[:-1] or m['kode'] == value[:-4]), None)
+                    kode_matkul = jadwal['kode_matkul']
+                    data_matkul = next((m for m in matakuliah_list if m['kode'] == kode_matkul[:-1] or m['kode'] == kode_matkul[:-4]), {})
+                    value = data_matkul.get("nama")
                 elif attr == "nama_dosen":
-                    value = jadwal['kode_dosen']
-                    value = next((d['nama'] for d in dosen_list if d['nip'] == value), None)
+                    kode_dosen = jadwal['kode_dosen']
+                    data_dosen = next((d for d in dosen_list if d['nip'] == kode_dosen), {})
+                    value = data_dosen.get("nama") if kode_dosen != "AS" else "ASISTEN"
+
+                    if data_matkul.get("team_teaching"):
+                        if kode_matkul not in control_solo_teaching: control_solo_teaching[kode_matkul] = []
+                        if kode_dosen in control_solo_teaching[kode_matkul]: status = False
+                        else: control_solo_teaching[kode_matkul].append(kode_dosen)
+
+                        if not status: worksheet.write(row_idx - 1, col_idx, old_nama_dosen, format_error)
                 elif attr == "kapasitas":
                     value = jadwal['kode_matkul']
                     if value[-2:] == "AS":
@@ -102,7 +120,19 @@ def export_jadwal_to_excel(jadwal_list, matakuliah_list, dosen_list):
                 else:
                     value = jadwal[attr]
 
-                worksheet.write(row_idx, col_idx, value, format_as if jadwal['kode_dosen'] == "AS" else None)
+                if (
+                    (attr == "jam_mulai" and int(value) < 7) or 
+                    (attr == "jam_selesai" and int(value) > 19) or 
+                    not status
+                ):
+                    worksheet.write(row_idx, col_idx, value, format_error)
+                else:
+                    worksheet.write(row_idx, col_idx, value, format_as if jadwal['kode_dosen'] == "AS" else None)
+
+                # Control
+                if attr == "nama_dosen":
+                    old_kode_dosen = kode_dosen
+                    old_nama_dosen = data_dosen.get("nama") if kode_dosen != "AS" else "ASISTEN"
 
                 val_len = len(str(value))
                 if val_len > col_widths[col_idx]:
