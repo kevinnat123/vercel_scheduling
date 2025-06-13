@@ -46,7 +46,7 @@ def generate_jadwal():
 
             if best_schedule and best_schedule.get('status') == False:
                 raise CustomError({ 'message': best_schedule.get('message') })
-
+            
             # print([schedule for schedule in best_schedule['data'] if schedule['program_studi'] == 'S1 SISTEM INFORMASI'])
             dao.upload_jadwal(best_schedule['data'])
         else:
