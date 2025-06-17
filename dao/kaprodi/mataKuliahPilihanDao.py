@@ -66,10 +66,11 @@ class mataKuliahPilihanDao:
                 if params['prodi'] != session['user']['prodi']:
                     raise CustomError({ 'message': 'Anda input program studi diluar program studi anda! (Input Anda: ' + params['prodi'] + ')' })
 
-            prodi_words = params['prodi'].split(' ')
-            prodi = prodi_words[0]
-            for w in prodi_words[1:]:
-                prodi += w[0]
+            prodi = params['prodi'].split()[0] + ''.join(hrf[0] for hrf in params['prodi'].split()[1:])
+            # prodi_words = params['prodi'].split(' ')
+            # prodi = prodi_words[0]
+            # for w in prodi_words[1:]:
+            #     prodi += w[0]
             if params.get('bidang_minat'):
                 bidang_minat_words = params['bidang_minat'].split(' ')
                 bidang_minat = ''
@@ -123,10 +124,11 @@ class mataKuliahPilihanDao:
             params['list_matkul'] = [{"kode": matkul["kode"], "jumlah_kelas": matkul["jumlah_kelas"]} for matkul in list_matkul]
             params = {k: v for k, v in params.items() if v}
 
-            prodi_words = params['prodi'].split(' ')
-            prodi = prodi_words[0]
-            for w in prodi_words[1:]:
-                prodi += w[0]
+            prodi = params['prodi'].split()[0] + ''.join(hrf[0] for hrf in params['prodi'].split()[1:])
+            # prodi_words = params['prodi'].split(' ')
+            # prodi = prodi_words[0]
+            # for w in prodi_words[1:]:
+            #     prodi += w[0]
             if params.get('bidang_minat'):
                 bidang_minat_words = params['bidang_minat'].split(' ')
                 bidang_minat = ''
