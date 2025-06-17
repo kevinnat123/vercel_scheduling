@@ -1,0 +1,133 @@
+{% extends "layout.html" %} {% block content %}
+<div class="card" id="card-form" hidden>
+  <div class="card-body">
+    <form role="form" class="form-horizontal row" id="frm">
+      <div class="row">
+        <h4 id="formTitle"></h4>
+      </div>
+      <!-- PROGRAM STUDI + STATUS -->
+      <div class="form-group row">
+        <label for="input_prodi" class="col-2 col-form-label text-end"
+          >Program Studi<span class="text-danger" aria-hidden="true"
+            >*</span
+          ></label
+        >
+        <div class="col-2">
+          <input
+            type="text"
+            class="form-control numberOnly"
+            id="input_prodi"
+            autocomplete="off"
+            placeholder="Input Program Studi"
+          />
+        </div>
+        <div class="col d-flex justify-content-end align-items-center">
+          <label for="rbStatus" class="col-form-label text-end"
+            >Status<span class="text-danger" aria-hidden="true">*</span></label
+          >
+          <input
+            type="radio"
+            name="rbStatus"
+            id="AKTIF"
+            value="AKTIF"
+            class="ms-5 me-2"
+          /><label class="form-check-label ms-2" for="AKTIF"> Aktif </label>
+          <input
+            type="radio"
+            name="rbStatus"
+            id="TIDAK_AKTIF"
+            value="TIDAK_AKTIF"
+            class="ms-5 me-2"
+          /><label class="form-check-label ms-2" for="TIDAK_AKTIF">
+            Tidak Aktif
+          </label>
+        </div>
+      </div>
+      <!-- PROGRAM STUDI + STATUS END -->
+      <!-- FAKULTAS -->
+      <!-- <div class="form-group row">
+        <label for="input_fakultas" class="col-2 col-form-label text-end"
+          >Fakultas<span class="text-danger" aria-hidden="true">*</span></label
+        >
+        <div class="col">
+          <input
+            type="text"
+            class="form-control"
+            id="input_fakultas"
+            autocomplete="off"
+            placeholder="Input Fakultas"
+          />
+        </div>
+      </div> -->
+      <!-- FAKULTAS END -->
+      <!-- KEPALA PROGRAM STUDI -->
+      <div class="form-group row">
+        <label for="input_kaprodi" class="col-2 col-form-label text-end"
+          >Kepala Program Studi&ensp;</label
+        >
+        <div class="col input-group">
+          <input
+            type="text"
+            class="form-control"
+            id="input_kaprodi"
+            autocomplete="off"
+            placeholder="Tekan 'F9' untuk lihat list dosen | Input kata kunci"
+          />
+        </div>
+      </div>
+      <!-- KEPALA PROGRAM STUDI END -->
+      <!-- FORM ACTION -->
+      <div class="col text-end">
+        <button type="button" class="btn btn-primary" id="btn-simpan">
+          Simpan
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-update">
+          Simpan
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          id="btn-batal"
+          onclick="form_dosen(undefined, true)"
+        >
+          Batal
+        </button>
+      </div>
+      <!-- FORM ACTION END -->
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <button
+      type="button"
+      class="btn btn-primary"
+      id="btn-tambah"
+      onclick="form_prodi(false)"
+    >
+      <i class="fas fa-plus fa-fw"></i><span> Tambah Data</span>
+    </button>
+
+    <div class="table-responsive">
+      <table
+        class="table table-bordered table-stripped table-hover w-100"
+        id="table_prodi"
+      >
+        <thead>
+          <th>Program Studi</th>
+          <th>Fakultas</th>
+          <th>Status</th>
+          <th>Kaprodi</th>
+          <th></th>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block script %}
+<script>
+  $(document).ready(function () {});
+</script>
+{% endblock %}
