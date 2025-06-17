@@ -1,5 +1,5 @@
 from dao import Database
-from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_URLS_COLLECTION as db_urls
+from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_URLS_COLLECTION as db_urls, MONGO_MAJOR_COLLECTION as db_prodi
 from flask import session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -27,8 +27,13 @@ class loginDao:
     
     def get_prodi(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get Prodi")
-        result = self.connection.find_one(db_users, {"role": "ADMIN"})
-        return result['data']['list_prodi'] if result and result.get('status') else None
+        result = self.connection.find_many(db_prodi, {"status_aktif": True})
+        if result and result.get('status'):
+            list_prodi = [data["nama"] for data in result["data"] if data["status_aktif"] == True]
+            print(result)
+            print(list_prodi)
+            return list_prodi
+        return None
     
     def get_menu(self, role):
         print(f"{'':<7}{'[ DAO ]':<8} get menu: {role}")
