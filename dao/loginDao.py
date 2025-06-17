@@ -30,8 +30,6 @@ class loginDao:
         result = self.connection.find_many(db_prodi, {"status_aktif": True})
         if result and result.get('status'):
             list_prodi = [data["nama"] for data in result["data"] if data["status_aktif"] == True]
-            print(result)
-            print(list_prodi)
             return list_prodi
         return None
     
