@@ -14,11 +14,15 @@ def generateJadwal_index():
     if session['user']['role'] != 'ADMIN':
         return redirect(url_for('signin.error403'))
     else:
+        jadwal = dao.get_jadwal()
+        jadwal = True if jadwal and jadwal.get('jadwal') else False
+        
         return render_template(
             '/admin/generate_jadwal/index.html', 
             menu = 'Generate Jadwal', 
             title = 'Generate Jadwal', 
-            semester_ajaran_depan = session['academic_details']['semester_depan'] + "_" + session['academic_details']['tahun_ajaran_berikutnya'].replace("/", "-")
+            semester_ajaran_depan = session['academic_details']['semester_depan'] + "_" + session['academic_details']['tahun_ajaran_berikutnya'].replace("/", "-"),
+            jadwal = jadwal
         )
         
 @generateJadwal.route("/generate_jadwal/generate", methods=['GET'])
@@ -69,23 +73,12 @@ def upload_jadwal():
 
     return jsonify( data )
 
-@generateJadwal.route("/generate_jadwal/tampilkan_jadwal", methods=["GET"])
+@generateJadwal.route("/generate_jadwal/get_simpanan_prodi", methods=["GET"])
 @login_required
-def tampilkan_jadwal():
-    print(f"{'[ CONTROLLER ]':<15} Tampilkan Jadwal")
-
-    params = request.args.to_dict()
-    print(params.get('prodi'))
+def get_simpanan_prodi():
+    print(f"{'[ CONTROLLER ]':<15} Get Simpanan Prodi")
 
     if session['user']['role'] == "ADMIN":
-        data = [
-            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
-            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'AS', 'nama_dosen': 'ASISTEN', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
-            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
-            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
-            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'AS', 'nama_dosen': 'ASISTEN', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
-            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
-            {'kode_matkul': 'ASD', 'nama_matkul': 'ASD AADS ASDwq', 'kode_dosen': 'ASD', 'nama_dosen': 'ASD', 'sks_akademik': 2, 'kode_ruangan': 'ASD', 'kapasitas': 30, 'hari': 'SENIN', 'jam_mulai': '19:99', 'jam_selesai': '10:39'},
-        ]
-        
+        data = dao.get_simpanan_prodi(session['user']['list_prodi'])
+
     return jsonify({ 'data': data })

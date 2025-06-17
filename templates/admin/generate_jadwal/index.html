@@ -1,59 +1,64 @@
 {% extends "layout.html" %} {% block content %}
 <div class="container-fluid mt-4" id="main-window">
   <div class="card">
-    <div class="card-body">
-      <button type="button" class="btn btn-primary" onclick="generate_jadwal()">
-        Generate
-      </button>
-      <button
-        type="button"
-        class="btn btn-success"
-        onclick="download_excel_by()"
-      >
-        Download Excel
-      </button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-body">
-      <div class="table-responsive">
-        <table
-          class="table table-bordered table-stripped table-hover w-100"
-          id="table_jadwal"
+    <div class="card-body d-flex justify-content-between align-items-center">
+      <div class="text-label">
+        <label for=""
+          >Jadwal Semester {{' '.join(semester_ajaran_depan.split('_'))}}</label
         >
-          <thead class="text-center align-middle text-nowrap">
-            <tr>
-              <td colspan="2">Mata Kuliah</td>
-              <td colspan="2">Dosen</td>
-              <td rowspan="2">SKS Akademik</td>
-              <td colspan="2">Ruangan</td>
-              <td colspan="3">Jadwal</td>
-            </tr>
-            <tr>
-              <td>Kode</td>
-              <td>Nama</td>
-              <td>Kode</td>
-              <td>Nama</td>
-              <td>Kode</td>
-              <td>Kapasitas</td>
-              <td>Hari</td>
-              <td>Jam Mulai</td>
-              <td>Jam Selesai</td>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      </div>
+      <div class="button-group">
+        <button
+          type="button"
+          class="btn btn-primary me-2"
+          onclick="generate_jadwal()"
+        >
+          Generate
+        </button>
+        <button
+          type="button"
+          class="btn btn-success"
+          onclick="download_excel_by()"
+        >
+          Download Excel
+        </button>
       </div>
     </div>
   </div>
+
+  <div class="card-wrapper" id="setting_prodi_done"></div>
 </div>
 {% endblock %} {% block script %}
 <script>
   const semester_ajaran_depan = "{{ semester_ajaran_depan | safe }}";
   const prodi = "{{ prodi | safe }}";
+  var jadwal = "{{ jadwal | safe }}";
 
   $(document).ready(function () {});
+
+  var data;
+  function setting_prodi_done() {
+    $.ajax({
+      type: "GET",
+      url: "/generate_jadwal/get_simpanan_prodi",
+      cache: false,
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        let list_prodi = Object.keys(res.data);
+        list_prodi.forEach((data) => {
+          console.warn(data);
+          $("#setting_prodi_done").append(
+            `<div class="card-responsive">${data}</div>`
+          );
+        });
+      },
+    });
+  }
 
   function generate_jadwal(generate_ulang = false) {
     param = {
@@ -172,128 +177,5 @@
       popUpTimer("error", error.status, error.statusText);
     }
   }
-
-  let jadwal_tab = $("#table_jadwal").DataTable({
-    scrollX: true,
-    scrollY: "100vh",
-    scrollCollapse: true,
-    paging: false,
-    responsive: true,
-    ordering: false,
-    info: false,
-    ajax: {
-      type: "GET",
-      url: "/generate_jadwal/tampilkan_jadwal",
-      data: function (d) {
-        return {
-          prodi: prodi ? prodi : null,
-        };
-      },
-      cache: false,
-      beforeSend: () => {
-        console.log("before");
-        showLoading();
-      },
-      complete: () => {
-        hideLoading();
-      },
-    },
-    columns: [
-      {
-        data: "kode_matkul",
-        width: "75px",
-        className: "text-start align-middle",
-        defaultContent: "",
-      },
-      {
-        data: "nama_matkul",
-        width: "300px",
-        className: "text-start align-middle",
-        defaultContent: "",
-      },
-      {
-        data: "kode_dosen",
-        width: "75px",
-        className: "text-start align-middle",
-        defaultContent: "",
-      },
-      {
-        data: "nama_dosen",
-        width: "300px",
-        className: "text-start align-middle",
-        defaultContent: "",
-      },
-      {
-        data: "sks_akademik",
-        width: "50px",
-        className: "text-end align-middle",
-        defaultContent: "",
-      },
-      {
-        data: "kode_ruangan",
-        width: "75px",
-        className: "text-start align-middle",
-        defaultContent: "",
-      },
-      {
-        data: "kapasitas",
-        width: "50px",
-        className: "text-end align-middle",
-        defaultContent: "",
-      },
-      {
-        data: "hari",
-        width: "100px",
-        className: "text-center align-middle",
-        defaultContent: "",
-      },
-      {
-        data: "jam_mulai",
-        width: "75px",
-        className: "text-center align-middle",
-        defaultContent: "",
-      },
-      {
-        data: "jam_selesai",
-        width: "75px",
-        className: "text-center align-middle",
-        defaultContent: "",
-      },
-    ],
-    createdRow: function (row, data) {
-      $(row)
-        .find("td")
-        .each(function (index) {
-          let columnData = jadwal_tab.column(index).dataSrc();
-          if (columnData === null) return;
-
-          if (columnData === "kode_dosen" && data[columnData] != "AS") {
-            $(this).html(
-              `<input type="text" class="form-control bg-warning" value="${
-                data[columnData] || ""
-              }" onclick="function($(this))" onkeydown="function(event, $(this))" />`
-            );
-          } else if (columnData === "kode_ruangan") {
-            $(this).html(
-              `<input type="text" class="form-control bg-warning" value="${
-                data[columnData] || ""
-              }" onclick="function($(this))" onkeydown="function(event, $(this))" />`
-            );
-          } else if (columnData === "hari") {
-            $(this).html(
-              `<input type="text" class="form-control" value="${
-                data[columnData] || ""
-              }" onclick="function($(this))" onkeydown="function(event, $(this))" />`
-            );
-          } else if (columnData === "jam_mulai") {
-            $(this).html(
-              `<input type="text" class="form-control" value="${
-                data[columnData] || ""
-              }" onclick="function($(this))" onkeydown="function(event, $(this))" />`
-            );
-          }
-        });
-    },
-  });
 </script>
 {% endblock %}
