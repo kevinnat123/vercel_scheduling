@@ -194,9 +194,11 @@ def rand_dosen_pakar(list_dosen_pakar: list, dict_beban_sks_dosen: dict = {}, ex
         return list_dosen_pakar[0]
     
 def rand_ruangan(list_ruangan: list, data_matkul: dict, excluded_room: list = [], forAsisten: bool = False, kapasitas_ruangan_dosen: int = 0):
+    toChecked = [data_matkul["prodi"], "GENERAL"]
+    toChecked.extend(data_matkul.get("bidang", []))
     ruangan_prodi = [
         ruangan for ruangan in list_ruangan
-        if any(plot in ruangan["plot"] for plot in [data_matkul["prodi"], "GENERAL"]) and
+        if any(plot in ruangan["plot"] for plot in toChecked) and
             ruangan["kode"] not in excluded_room
     ]
     
