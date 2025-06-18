@@ -103,29 +103,31 @@
   }
 
   async function generate_jadwal(generate_ulang = false) {
-    let unready = [];
-    await $('input[name="prodi_ready"]').each(function () {
-      if (!this.checked) {
-        unready.push(this.id);
-      }
-    });
-
-    if (unready.length > 0) {
-      let lanjut = await Swal.fire({
-        icon: "warning",
-        title: "Prodi belum mengatur prodi yang akan dibuka!",
-        text: unready,
-        showDenyButton: true,
-        showCancelButton: false,
-        confirmButtonText: "Hiraukan dan Cetak!",
-        denyButtonText: "Batal Cetak",
-      }).then((result) => {
-        if (result.isConfirmed) return true;
-        else if (result.isDenied) return false;
+    if (!generate_ulang) {
+      let unready = [];
+      await $('input[name="prodi_ready"]').each(function () {
+        if (!this.checked) {
+          unready.push(this.id);
+        }
       });
-      console.log(lanjut);
 
-      if (!lanjut) return;
+      if (unready.length > 0) {
+        let lanjut = await Swal.fire({
+          icon: "warning",
+          title: "Prodi belum mengatur prodi yang akan dibuka!",
+          text: unready,
+          showDenyButton: true,
+          showCancelButton: false,
+          confirmButtonText: "Hiraukan dan Cetak!",
+          denyButtonText: "Batal Cetak",
+        }).then((result) => {
+          if (result.isConfirmed) return true;
+          else if (result.isDenied) return false;
+        });
+        console.log(lanjut);
+
+        if (!lanjut) return;
+      }
     }
 
     param = {
