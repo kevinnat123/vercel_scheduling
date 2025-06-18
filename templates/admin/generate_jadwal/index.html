@@ -1,9 +1,45 @@
 {% extends "layout.html" %} {% block content %}
+<style>
+  .circle-checkbox {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+  }
+
+  .circle-checkbox input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background-color: #dc3545; /* merah default */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18.3 5.7L12 12l6.3 6.3-1.4 1.4L12 13.4l-6.3 6.3-1.4-1.4L10.6 12 4.3 5.7 5.7 4.3 12 10.6 18.3 4.3z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 60%;
+    transition: all 0.2s;
+  }
+
+  .circle-checkbox input:checked + .checkmark {
+    background-color: #28a745; /* hijau */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 16.2l-3.5-3.5-1.4 1.4L9 19 20.3 7.7l-1.4-1.4z'/%3E%3C/svg%3E");
+  }
+</style>
+
 <div class="container-fluid mt-4" id="main-window">
   <div class="card">
     <div class="card-body d-flex justify-content-between align-items-center">
       <div class="text-label">
-        <label for=""
+        <label
           >Jadwal Semester {{' '.join(semester_ajaran_depan.split('_'))}}</label
         >
       </div>
@@ -34,9 +70,10 @@
   const prodi = "{{ prodi | safe }}";
   var jadwal = "{{ jadwal | safe }}";
 
-  $(document).ready(function () {});
+  $(document).ready(async function () {
+    await setting_prodi_done();
+  });
 
-  var data;
   function setting_prodi_done() {
     $.ajax({
       type: "GET",
@@ -49,18 +86,48 @@
         hideLoading();
       },
       success: async function (res) {
-        let list_prodi = Object.keys(res.data);
-        list_prodi.forEach((data) => {
-          console.warn(data);
+        await res.data.forEach((prodi) => {
+          isChecked = prodi.status ? "checked" : "";
           $("#setting_prodi_done").append(
-            `<div class="card-responsive">${data}</div>`
+            `<div class="card-responsive d-flex justify-content-between align-items-center">
+              <div class="text-label"><label for="${prodi.prodi}">${prodi.prodi}</label></div>
+                <div class="button-group"><label class="circle-checkbox">
+                  <input type="checkbox" name="prodi_ready" id="${prodi.prodi}" ${isChecked}/>
+                  <span class="checkmark"></span>
+                </label></div>
+              </div>`
           );
         });
       },
     });
   }
 
-  function generate_jadwal(generate_ulang = false) {
+  async function generate_jadwal(generate_ulang = false) {
+    let unready = [];
+    await $('input[name="prodi_ready"]').each(function () {
+      if (!this.checked) {
+        unready.push(this.id);
+      }
+    });
+
+    if (unready.length > 0) {
+      let lanjut = await Swal.fire({
+        icon: "warning",
+        title: "Prodi belum mengatur prodi yang akan dibuka!",
+        text: unready,
+        showDenyButton: true,
+        showCancelButton: false,
+        confirmButtonText: "Hiraukan dan Cetak!",
+        denyButtonText: "Batal Cetak",
+      }).then((result) => {
+        if (result.isConfirmed) return true;
+        else if (result.isDenied) return false;
+      });
+      console.log(lanjut);
+
+      if (!lanjut) return;
+    }
+
     param = {
       regenerate: generate_ulang,
     };
@@ -81,18 +148,23 @@
         if (res.status) export_to_excel("Jadwal_Kuliah");
         else {
           if (res.reason === "exist") {
-            Swal.fire({
+            await Swal.fire({
               icon: "info",
               title: "Jadwal sudah pernah dibuat!",
               text: "Apakah mau buat ulang?",
               showDenyButton: true,
-              showCancelButton: false,
+              showCancelButton: true,
               confirmButtonText: "Buat Ulang",
-              denyButtonText: "Batal",
+              denyButtonText: "Cetak ?",
+              cancelButtonText: "Batal",
+              confirmButtonColor: "#007bff",
+              denyButtonColor: "#28a745",
             }).then((result) => {
               if (result.isConfirmed) {
                 return generate_jadwal(true);
               } else if (result.isDenied) {
+                return download_excel_by();
+              } else {
                 return;
               }
             });

@@ -20,7 +20,14 @@ class generateJadwalDao:
         print(f"{'':<7}{'[ DAO ]':<8} Get Simpanan Prodi")
         data_simpanan = self.connection.find_many(db_matkul_simpanan, {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }})
         prodi_done = [data["u_id"].split('_')[2] for data in data_simpanan["data"]] if data_simpanan and data_simpanan.get('status') else []
-        return {k: True if (k.split()[0] + ''.join(hrf[0] for hrf in k.split()[1:])) in prodi_done else False for k in list_prodi}
+        final_data = []
+        for prodi in list_prodi:
+            final_data.append({
+                "prodi": prodi, 
+                "status": True if (prodi.split()[0] + ''.join(hrf[0] for hrf in prodi.split()[1:])) in prodi_done else False
+            })
+        return sorted(final_data, key=lambda x: x["status"], reverse=True)
+        # return {k: True if (k.split()[0] + ''.join(hrf[0] for hrf in k.split()[1:])) in prodi_done else False for k in list_prodi}
     
     def get_open_matkul(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get Matkul")
