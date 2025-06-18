@@ -1,15 +1,26 @@
 from dao import Database
 from config import MONGO_DB, MONGO_CLASSES_COLLECTION as db_kelas
 from flask import session
+import copy
 
 from global_func import CustomError
 
-PRAKTIKUM_RELATED = ['os', 'processor', 'ram', 'storage']
+# PRAKTIKUM_RELATED = ['os', 'processor', 'ram', 'storage']
 
 class dataRuanganDao:
     def __init__(self):
         self.connection = Database(MONGO_DB)
 
+    def get_kelas(self):
+        print(f"{'':<7}{'[ DAO ]':<8} Get Kelas")
+        if session['user']['role'] in ["ADMIN", "LABORAN"]:
+            result = self.connection.find_many(db_kelas, {}, sort=[("kode", 1)])
+            for kelas in result['data']:
+                toCheck = copy.deepcopy(session['user']['list_prodi'])
+                toCheck.extend(["GENERAL"])
+                if kelas.get("plot") and kelas["plot"][0] in toCheck:
+                    kelas["prodi"] = kelas["plot"].pop(0) # pop index ke 0
+        return result['data'] if result and result.get('status') else []
 
     def post_kelas(self, params):
         print(f"{'':<7}{'[ DAO ]':<8} Post Kelas (Parameter: {params})")
@@ -27,9 +38,15 @@ class dataRuanganDao:
             if isExist['status'] == True:
                 raise CustomError({ 'message': f"Data dengan Kode Ruangan {params['kode']} sudah ada!" })
 
-            if params['tipe_ruangan'] != "PRAKTIKUM":
-                for x in PRAKTIKUM_RELATED:
-                    params.pop(x, None)
+            if params["prodi"] != "default":
+                plot = [params["prodi"]]
+                plot.extend(params["plot"])
+                params["plot"] = plot
+            params.pop("prodi", None)
+
+            # if params['tipe_ruangan'] != "PRAKTIKUM":
+            #     for x in PRAKTIKUM_RELATED:
+            #         params.pop(x, None)
             params = {k: v for k, v in params.items() if v}
 
             res = self.connection.insert_one(db_kelas, params)
@@ -58,14 +75,20 @@ class dataRuanganDao:
                 raise CustomError({ 'message': 'Kapasitas Ruangan belum diisi!' })
             
             isExist = self.connection.find_one(db_kelas, {'kode': params['kode']})
-            if isExist['status'] == True:
-                raise CustomError({ 'message': f"Data dengan Kode Ruangan {params['kode']} sudah ada!" })
+            if isExist['status'] == False:
+                raise CustomError({ 'message': f"Data dengan Kode Ruangan {params['kode']} tidak ada!" })
+
+            if params["prodi"] != "default":
+                plot = [params["prodi"]]
+                plot.extend(params["plot"])
+                params["plot"] = plot
+            params.pop("prodi", None)
 
             unset = {k: "" for k, v in params.items() if not v}
-            if params['tipe_ruangan'] != "PRAKTIKUM":
-                for x in PRAKTIKUM_RELATED:
-                    params.pop(x, None)
-                    if x not in unset: unset[x] = ""
+            # if params['tipe_ruangan'] != "PRAKTIKUM":
+            #     for x in PRAKTIKUM_RELATED:
+            #         params.pop(x, None)
+            #         if x not in unset: unset[x] = ""
             params = {k: v for k, v in params.items() if v}
 
             res = self.connection.update_one(db_kelas, {'kode': params['kode']}, params, unset)
@@ -81,11 +104,13 @@ class dataRuanganDao:
 
         return result
     
-    def delete_kelas(self, list_kode):
-        print(f"{'':<7}{'[ DAO ]':<8} Delete Kelas (List Kode: {list_kode})")
+    def delete_kelas(self, params):
+        print(f"{'':<7}{'[ DAO ]':<8} Delete Kelas (Params: {params})")
         result = { 'status': False }
 
         try:
+            list_kode = [data["kode"] for data in params]
+            
             res = self.connection.delete_many(
                 db_kelas, 
                 {'kode': { '$in': list_kode }}

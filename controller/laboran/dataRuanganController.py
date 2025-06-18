@@ -18,6 +18,14 @@ def dataRuangan_index():
             title = 'Ruang Kelas', 
         )
     
+@dataRuangan.route("/data_ruangan/get_kelas", methods=['GET'])
+@login_required
+def dataRuangan_get_kelas():
+    print(f"{'[ CONTROLLER ]':<15} Get Kelas")
+    print(session['user']['list_prodi'])
+    data = dao.get_kelas()
+    return jsonify({ "data": data })
+    
 @dataRuangan.route("/data_ruangan/post_kelas", methods=['POST'])
 @login_required
 def dataRuangan_post_kelas():
