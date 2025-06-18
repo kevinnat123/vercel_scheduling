@@ -43,10 +43,15 @@ def generate_jadwal():
             data_ruang = dao.get_kelas()
             data_matkul = dao.get_open_matkul()
 
-            best_schedule = ga.genetic_algorithm(
-                data_matkul, data_dosen, data_ruang, 
-                ukuran_populasi=75, jumlah_generasi=100, peluang_mutasi=0.05
-            )
+            attempt = 1
+            while attempt <= 3:
+                best_schedule = ga.genetic_algorithm(
+                    data_matkul, data_dosen, data_ruang, 
+                    ukuran_populasi=75, jumlah_generasi=100, peluang_mutasi=0.05
+                )
+                if best_schedule and best_schedule.get('status') == True:
+                    break
+                attempt += 1
 
             if best_schedule and best_schedule.get('status') == False:
                 raise CustomError({ 'message': best_schedule.get('message') })
