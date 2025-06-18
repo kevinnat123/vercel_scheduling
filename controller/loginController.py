@@ -78,9 +78,9 @@ def login():
             if session['user']['role'] == "ADMIN":
                 list_prodi = loginDao.get_prodi()
                 session['user']['list_prodi'] = list_prodi or [session['user']['prodi']]
-                session.modified = True
             else:
                 session['user']['list_prodi'] = [session['user']['prodi']]
+            session.modified = True
 
             print(f"{'':<15} {'Session Academic_Details':<30}: {session['academic_details']}")
             print(f"{'':<15} {'Session User':<30}: {session['user']}")
