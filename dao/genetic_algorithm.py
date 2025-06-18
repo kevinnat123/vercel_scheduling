@@ -81,12 +81,12 @@ def find_available_schedule(jadwal:list, kode:str, hari:str):
         list: List jadwal yang bisa digunakan (jam).
     """
     
-    pilihan_jam = list(range(7, 19 + 1)) if hari != "SABTU" else list(range(7, 13))
+    pilihan_jam = list(range(7, 19 + 1)) if hari != "SABTU" else list(range(7, 13 + 1))
     
     jadwal_sesuai_hari = [sesi for sesi in jadwal[kode] if sesi['hari'] == hari] if jadwal[kode] else []
     used_jam = []
     for sesi in jadwal_sesuai_hari:
-        used_jam.extend(range(sesi['jam_mulai'], sesi['jam_selesai'] + 1))
+        used_jam.extend(range(sesi['jam_mulai'], sesi['jam_selesai']))
 
     return [h for h in pilihan_jam if h not in used_jam]
 
@@ -198,9 +198,15 @@ def rand_ruangan(list_ruangan: list, data_matkul: dict, excluded_room: list = []
     toChecked.extend(data_matkul.get("bidang", []))
     ruangan_prodi = [
         ruangan for ruangan in list_ruangan
-        if any(plot in ruangan["plot"] for plot in toChecked) and
+        if any(plot in ruangan["plot"] for plot in data_matkul.get('bidang', [])) and
             ruangan["kode"] not in excluded_room
     ]
+    if not ruangan_prodi:
+        ruangan_prodi = [
+            ruangan for ruangan in list_ruangan
+            if any(plot in ruangan["plot"] for plot in toChecked) and
+                ruangan["kode"] not in excluded_room
+        ]
     
     if not forAsisten:
         kandidat_ruangan = [
