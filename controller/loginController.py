@@ -75,9 +75,9 @@ def login():
 
             session.permanent = True  # Aktifkan waktu hidup session
 
-            if session['user']['role'] == "ADMIN":
+            if session['user']['role'] in ["ADMIN", "LABORAN"]:
                 list_prodi = loginDao.get_prodi()
-                session['user']['list_prodi'] = list_prodi or [session['user']['prodi']]
+                session['user']['list_prodi'] = list_prodi
             else:
                 session['user']['list_prodi'] = [session['user']['prodi']]
             session.modified = True
