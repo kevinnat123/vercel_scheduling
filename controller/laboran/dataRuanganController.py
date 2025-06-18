@@ -22,7 +22,6 @@ def dataRuangan_index():
 @login_required
 def dataRuangan_get_kelas():
     print(f"{'[ CONTROLLER ]':<15} Get Kelas")
-    print(session['user']['list_prodi'])
     data = dao.get_kelas()
     return jsonify({ "data": data })
     
