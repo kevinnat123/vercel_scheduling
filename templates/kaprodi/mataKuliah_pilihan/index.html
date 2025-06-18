@@ -393,25 +393,49 @@
 
   function generateNewDataContainer(data) {
     let tableId = data.u_id + "_tab"; // data.u_id + data.bidang_minat?data.bidang_minat:'' + "_tab"
-    console.log("u_id:", data.u_id);
+
+    let bidang_minat = data.bidang_minat
+      ? data.bidang_minat
+          .split(" ")
+          .map((word) => word[0])
+          .join("")
+      : "";
 
     bidang = data.bidang_minat
       ? `
           <div class="form-group row align-items-center">
             <label for=${
-              "bidang_minat" + data.angkatan
+              "bidang_minat" + bidang_minat + data.angkatan
             } class="col-2 col-form-label text-end fw-bold">
                 Bidang Minat
             </label>
             <div class="col">
                 <input type="text" class="form-control" id=${
-                  "bidang_minat" + data.angkatan
+                  "bidang_minat" + bidang_minat + data.angkatan
                 }
                     value="${data.bidang_minat}" autocomplete="off" disabled />
             </div>
           </div>
       `
       : ``;
+
+    program_studi = prodi
+      ? ""
+      : `
+          <div class="form-group row align-items-center">
+            <label for=${
+              "prodi" + bidang_minat + data.angkatan
+            } class="col-2 col-form-label text-end fw-bold">
+                Bidang Minat
+            </label>
+            <div class="col">
+                <input type="text" class="form-control" id=${
+                  "prodi" + bidang_minat + data.angkatan
+                }
+                    value="${data.prodi}" autocomplete="off" disabled />
+            </div>
+          </div>
+      `;
 
     // PASTIKAN BERSIH BIAR GA REINITIALIZE
     $("#card_" + data.u_id).remove();
@@ -460,13 +484,13 @@
                     </div>
 
                     <label for="${
-                      "angkatan" + data.angkatan
+                      "angkatan" + bidang_minat + data.angkatan
                     }" class="col-2 col-form-label text-end fw-bold">
                         Angkatan
                     </label>
                     <div class="col-2">
                         <input type="text" class="form-control text-center" id="${
-                          "angkatan" + data.angkatan
+                          "angkatan" + bidang_minat + data.angkatan
                         }"
                             value="${
                               data.angkatan
@@ -476,13 +500,13 @@
                     <div class="col"></div>
 
                     <label for="${
-                      "jumlah_mahasiswa" + data.angkatan
+                      "jumlah_mahasiswa" + bidang_minat + data.angkatan
                     }" class="col-4 col-form-label text-end">
                         Jumlah Mahasiswa Aktif
                     </label>
                     <div class="col-2">
                         <input type="text" class="form-control numberOnly" id="${
-                          "jumlah_mahasiswa" + data.angkatan
+                          "jumlah_mahasiswa" + bidang_minat + data.angkatan
                         }"
                             value="${
                               data.jumlah_mahasiswa
@@ -490,6 +514,7 @@
                     </div>
                 </div>
 
+                ${program_studi}
                 ${bidang}
 
                 <div class="table-responsive">
