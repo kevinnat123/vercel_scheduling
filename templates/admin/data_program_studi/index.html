@@ -1,4 +1,40 @@
 {% extends "layout.html" %} {% block content %}
+<style>
+  .circle-checkbox {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+  }
+
+  .circle-checkbox input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background-color: #dc3545; /* merah default */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18.3 5.7L12 12l6.3 6.3-1.4 1.4L12 13.4l-6.3 6.3-1.4-1.4L10.6 12 4.3 5.7 5.7 4.3 12 10.6 18.3 4.3z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 60%;
+    transition: all 0.2s;
+  }
+
+  .circle-checkbox input:checked + .checkmark {
+    background-color: #28a745; /* hijau */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 16.2l-3.5-3.5-1.4 1.4L9 19 20.3 7.7l-1.4-1.4z'/%3E%3C/svg%3E");
+  }
+</style>
+
 <div class="card" id="card-form" hidden>
   <div class="card-body">
     <form role="form" class="form-horizontal row" id="frm">
@@ -12,35 +48,41 @@
             >*</span
           ></label
         >
-        <div class="col-2">
+        <div class="col">
           <input
             type="text"
-            class="form-control numberOnly"
+            class="form-control"
             id="input_prodi"
             autocomplete="off"
             placeholder="Input Program Studi"
           />
         </div>
-        <div class="col d-flex justify-content-end align-items-center">
-          <label for="rbStatus" class="col-form-label text-end"
-            >Status<span class="text-danger" aria-hidden="true">*</span></label
-          >
-          <input
-            type="radio"
-            name="rbStatus"
-            id="AKTIF"
-            value="AKTIF"
-            class="ms-5 me-2"
-          /><label class="form-check-label ms-2" for="AKTIF"> Aktif </label>
-          <input
-            type="radio"
-            name="rbStatus"
-            id="TIDAK_AKTIF"
-            value="TIDAK_AKTIF"
-            class="ms-5 me-2"
-          /><label class="form-check-label ms-2" for="TIDAK_AKTIF">
-            Tidak Aktif
-          </label>
+      </div>
+      <div class="form-group row align-items-center">
+        <label for="rbStatus" class="col-2 col-form-label text-end">
+          Status<span class="text-danger" aria-hidden="true">*</span>
+        </label>
+        <div class="col d-flex align-items-center">
+          <div class="form-check form-check-inline ms-2">
+            <input
+              type="radio"
+              name="rbStatus"
+              id="AKTIF"
+              value="AKTIF"
+              class="form-check-input"
+            />
+            <label class="form-check-label" for="AKTIF">Aktif</label>
+          </div>
+          <div class="form-check form-check-inline ms-4">
+            <input
+              type="radio"
+              name="rbStatus"
+              id="NONAKTIF"
+              value="NONAKTIF"
+              class="form-check-input"
+            />
+            <label class="form-check-label" for="NONAKTIF">Tidak Aktif</label>
+          </div>
         </div>
       </div>
       <!-- PROGRAM STUDI + STATUS END -->
@@ -65,7 +107,7 @@
         <label for="input_kaprodi" class="col-2 col-form-label text-end"
           >Kepala Program Studi&ensp;</label
         >
-        <div class="col input-group">
+        <div class="col">
           <input
             type="text"
             class="form-control"
@@ -115,8 +157,8 @@
         id="table_prodi"
       >
         <thead>
+          <!-- <th>Fakultas</th> -->
           <th>Program Studi</th>
-          <th>Fakultas</th>
           <th>Status</th>
           <th>Kaprodi</th>
           <th></th>
@@ -126,8 +168,301 @@
     </div>
   </div>
 </div>
+
+<!-- MODAL LOV DOSEN -->
+<div class="modal fade" id="modal-dosen">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">List Mata Kuliah</h4>
+        <button type="button" class="close" data-bs-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table
+          class="table table-hover table-bordered w-100"
+          style="overflow: auto"
+          id="table_lov_dosen"
+        >
+          <thead>
+            <th>NIP</th>
+            <th>Nama</th>
+          </thead>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-default pull-left"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- MODAL LOV DOSEN END -->
 {% endblock %} {% block script %}
 <script>
-  $(document).ready(function () {});
+  $(document).ready(function () {
+    $("#modal-dosen tbody").on("click", "tr", async function () {
+      let row = dosen_lov.row(this).data();
+      $("#modal-dosen").modal("hide");
+      $("#input_kepala_program_studi").val(row["nama"]);
+    });
+  });
+
+  function clear_form() {
+    $("#frm")[0].reset();
+  }
+
+  async function form_prodi(
+    update = undefined,
+    hidden = false,
+    data = undefined
+  ) {
+    await clear_form();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (update === false) {
+      document.getElementById("formTitle").innerText = "Tambah Data";
+      $("#card-form input").prop("disabled", false);
+      $("#btn-simpan").attr("hidden", false);
+      $("#btn-update").attr("hidden", true);
+    } else {
+      document.getElementById("formTitle").innerText = "Update Data";
+      $("#input_nip").prop("disabled", true);
+      $("#btn-simpan").attr("hidden", true);
+      $("#btn-update").attr("hidden", false);
+    }
+
+    if (data) {
+      // $("#input_fakultas").val(data.fakultas);
+      $("#input_prodi").val(data.program_studi);
+      $("#" + data.status_aktif).prop("checked", true);
+      if (data.kepala_program_studi)
+        $("#input_kaprodi").val(data.kepala_program_studi);
+    }
+
+    $("#card-form").prop("hidden", hidden ? true : false);
+  }
+
+  $("#btn-simpan").on("click", function () {
+    if (!$("#input_prodi").val()) {
+      popUpTimer("error", "Nama Program Studi belum diisi!");
+      setTimeout(() => {
+        $("#input_prodi").focus();
+      }, 1500);
+      return;
+    } else if (!getCheckedItemValue("rbStatus")[0]) {
+      popUpTimer("error", "Status Program Studi belum diisi!");
+      setTimeout(() => {
+        $("input[name='rbStatus']").focus();
+      }, 1500);
+      return;
+    }
+
+    let params = {
+      program_studi: $("#input_prodi").val(),
+      status_aktif: getCheckedItemValue("rbStatus")[0],
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/data_program_studi/post_program_studi",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        console.log("[ post_dosen ] ", res);
+        if (res.status === false) {
+          await popUpTimer("error", res.message);
+          if (res.target)
+            setTimeout(() => {
+              $("#" + res.target).focus();
+            }, 1500);
+        } else {
+          $("#btn-batal").click();
+          popUpTimer("success", res.message);
+          dosen_tab.ajax.reload(null, false);
+        }
+      },
+    });
+  });
+
+  $("#btn-update").on("click", function () {});
+
+  $("#input_kaprodi").on("keydown", function (event) {
+    if (event.key == "Backspace") $(this).val("");
+    else if (event.key === "F9") {
+      event.preventDefault();
+      $("#modal-dosen").modal("show");
+      $("#table_lov_dosen_filter input").focus(); // focus ke field search saat modal matkul dibuka
+    } else if (event.key === "Enter" && this.value.length >= 3) {
+      event.preventDefault();
+      $(this).blur();
+    } else if (event.key === "Enter")
+      popUpTimer("info", "Input minimal 3 karakter!");
+  });
+
+  $("#input_kaprodi").on("change", async function () {
+    let resultKode = dosen_lov
+      .data()
+      .toArray()
+      .filter(
+        (dosen) =>
+          dosen.nip.includes(this.value) || dosen.nama.includes(this.value)
+      );
+
+    if (resultKode.length === 1) $(this).val(resultKode[0].nama);
+    else if (resultKode.length > 1) {
+      let infoData = [];
+      resultKode.forEach((element) => {
+        infoData.push(element);
+      });
+
+      let selectOptions = resultKode
+        .map((data) => `<option value="${data.nama}">${data.nama}</option>`)
+        .join("");
+
+      Swal.fire({
+        title: "Dosen Mana?",
+        text: "Hasil pencarian jamak. Dosen mana yang anda maksud?",
+        icon: "question",
+        html: `
+              <select id="swal-select" class="form-select">
+                <option value="">-- Pilih --</option>
+                ${selectOptions}
+              </select>
+            `,
+        showCancelButton: true,
+        confirmButtonText: "OK",
+        preConfirm: () => {
+          const selected = document.getElementById("swal-select").value;
+          if (!selected) {
+            Swal.showValidationMessage("Silakan pilih salah satu opsi.");
+          }
+          return selected;
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $(this).val(result.value);
+        }
+      });
+    } else {
+      await popUpTimer(
+        "error",
+        "Data tidak ditemukan!",
+        "Jika bersikeras, harap tambahkan data terlebih dahulu.",
+        2000
+      );
+
+      this.value = "";
+    }
+  });
+
+  function detail_prodi(object) {
+    let data = prodi_tab.row(object.closest("tr")).data();
+    form_prodi(true, false, data);
+  }
+
+  let prodi_tab = $("#table_prodi").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    info: false,
+    ajax: {
+      type: "GET",
+      url: "/data_program_studi/get_program_studi",
+      cache: false,
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+    },
+    columns: [
+      // {
+      //   data: "fakultas",
+      //   width: "300px",
+      //   defaultContent: "",
+      // },
+      {
+        data: "program_studi",
+        defaultContent: "",
+      },
+      {
+        data: "status_aktif",
+        width: "10px",
+        defaultContent: "",
+        className: "text-center fully-disabled",
+        render: function (data, type, row) {
+          return `<div class="button-group"><label class="circle-checkbox">
+                  <input type="checkbox" name="status_aktif" ${
+                    data == "AKTIF" ? "checked" : ""
+                  }/>
+                  <span class="checkmark"></span>
+                </label>
+                </div>`;
+        },
+      },
+      {
+        data: "kepala_program_studi",
+        defaultContent: "",
+      },
+      {
+        data: null,
+        width: "10px",
+        render: function () {
+          return `<button class="btn btn-primary btn-sm" onclick="detail_prodi($(this))">Det</button>`;
+        },
+        // orderable: false,
+        className: "text-center",
+      },
+    ],
+  });
+
+  let dosen_lov = $("#table_lov_dosen").DataTable({
+    scrollX: true,
+    scrollY: "50vh",
+    scrollCollapse: true,
+    paging: false,
+    responsive: true,
+    ordering: false,
+    info: false,
+    ajax: {
+      type: "GET",
+      url: "/data_dosen/get_dosen",
+      cache: false,
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+    },
+    columns: [
+      {
+        data: "nip",
+        width: "75px",
+      },
+      {
+        data: "nama",
+        width: "300px",
+      },
+    ],
+  });
 </script>
 {% endblock %}
