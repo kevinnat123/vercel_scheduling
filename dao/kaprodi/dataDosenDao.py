@@ -39,6 +39,14 @@ class dataDosenDao:
                 # dosen.setdefault('matkul_ajar', None)
         return result['data'] if result and result.get('status') else []
     
+    def get_dosen_by_nip(self, nip):
+        print(f"{'':<7}{'[ DAO ]':<8} Get Dosen By NIP (NIP: {nip})")
+        result = self.connection.find_one(
+            db_dosen,
+            {"nip": nip}
+        )
+        return result['data'] if result and result.get('status') else []
+    
     def post_dosen(self, params: dict):
         print(f"{'':<7}{'[ DAO ]':<8} Post Dosen (Parameter: {params})")
         result = { 'status': False }
