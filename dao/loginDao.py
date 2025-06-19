@@ -29,7 +29,7 @@ class loginDao:
         print(f"{'':<7}{'[ DAO ]':<8} Get Prodi")
         result = self.connection.find_many(db_prodi, {"status_aktif": True})
         if result and result.get('status'):
-            list_prodi = [data["nama"] for data in result["data"] if data["status_aktif"] == True]
+            list_prodi = [data["program_studi"] for data in result["data"] if data["status_aktif"] == True]
             return list_prodi
         return None
     
