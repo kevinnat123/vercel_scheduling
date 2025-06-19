@@ -33,18 +33,10 @@ $(document).on("click", ".btn-close-badge", function () {
   if (!retrieveBadgeValues(fieldId).length) $formGroup.attr("hidden", true);
 });
 
-// $(document).on("keydown", "form", function (e) {
-//   if (e.key === "Enter")
-//     if (!$(e.target).val()) popUpTimer("info", "No input");
-//     else {
-//       $(e.target).blur();
-//     }
-// });
-
-$("input[type=text]").on("keydown", function (e) {
+$(document).on("keydown", "form", function (e) {
   if (e.key === "Enter") {
     e.preventDefault();
-    $(this).blur();
+    return false;
   }
 });
 
