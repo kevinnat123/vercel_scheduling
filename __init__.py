@@ -10,6 +10,7 @@ from controller.settingController import setting
 from controller.excelController import export
 
 # ADMIN
+from controller.admin.dataProgramStudiController import program_studi
 from controller.admin.generateJadwalController import generateJadwal
 
 # LABORAN
@@ -45,6 +46,7 @@ def create_app():
     app.register_blueprint(export)
 
     # ADMIN
+    app.register_blueprint(program_studi)
     app.register_blueprint(generateJadwal)
 
     # LABORAN
