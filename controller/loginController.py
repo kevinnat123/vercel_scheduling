@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
+from flask import current_app
 from dao.loginDao import loginDao
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from userModel import User
-from datetime import datetime
+from datetime import datetime, timezone
 
 signin = Blueprint('signin', __name__)
 loginDao = loginDao()
@@ -16,6 +17,12 @@ def check_session():
     print(f"{'[ 🔍 Before request ]':<15} Current Endpoint: {current_endpoint}")
 
     if current_endpoint not in safe_endpoints:
+        # ✅ Cek apakah session usang berdasarkan waktu global
+        if session.get("last_sync") and session["last_sync"] < current_app.last_updated:
+            print(f"{'':<15} 🔁 Session usang, redirect logout")
+            session.clear()
+            return redirect(url_for("signin.logout"))
+        
         # Cek apakah session masih ada
         if not session.get('user') or 'u_id' not in session['user']:
             print(f"{'':<15} ⚠️ Session kosong atau tidak valid")
@@ -80,11 +87,13 @@ def login():
                 session['user']['list_prodi'] = list_prodi
             else:
                 session['user']['list_prodi'] = [session['user']['prodi']]
+            session['last_sync'] = datetime.now(timezone.utc)
             session.modified = True
 
             print(f"{'':<15} {'Session Academic_Details':<30}: {session['academic_details']}")
             print(f"{'':<15} {'Session User':<30}: {session['user']}")
             print(f"{'':<15} {'Session Menu':<30}: {session['menu']}")
+            print(f"{'':<15} {'Session LastSync':<30}: {session['last_sync']}")
             return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
             # return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
 

@@ -2,7 +2,7 @@ from flask import Flask, redirect, url_for
 from flask_login import LoginManager
 from userModel import User
 from dao.loginDao import loginDao
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from controller.loginController import signin
 from controller.dashboardController import dashboard
@@ -75,5 +75,7 @@ def create_app():
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
         return response
+    
+    app.last_updated = datetime.now(timezone.utc)
     
     return app
