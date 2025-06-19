@@ -24,13 +24,6 @@ window.hideLoading = function () {
   document.getElementById("loadingModal").style.display = "none";
 };
 
-$(document).on("keydown", "form", function (e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    return false;
-  }
-});
-
 $(document).on("click", ".btn-close-badge", function () {
   const $badge = $(this).closest("span.badge");
   const $formGroup = $badge.closest("div.form-group");
@@ -38,6 +31,21 @@ $(document).on("click", ".btn-close-badge", function () {
 
   $badge.remove(); // hapus badge
   if (!retrieveBadgeValues(fieldId).length) $formGroup.attr("hidden", true);
+});
+
+// $(document).on("keydown", "form", function (e) {
+//   if (e.key === "Enter")
+//     if (!$(e.target).val()) popUpTimer("info", "No input");
+//     else {
+//       $(e.target).blur();
+//     }
+// });
+
+$("input[type=text]").on("keydown", function (e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    $(this).blur();
+  }
 });
 
 function capitalizeWords(string) {
