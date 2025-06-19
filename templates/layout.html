@@ -334,6 +334,13 @@
         line-height: 1;
       }
 
+      .fully-disabled {
+        pointer-events: none; /* Tidak bisa diklik */
+        user-select: none; /* Tidak bisa di-select */
+        /* opacity: 0.6; /* Opsional: buat tampak "dinonaktifkan" */
+        cursor: default; /* Kursor biasa */
+      }
+
       /* Jika layar kecil, buat 2 kolom */
       @media (max-width: 992px) {
         .card-responsive {
