@@ -39,7 +39,6 @@ class loginDao:
         final_menu = []
         secondary = []
         if user_menu and user_menu.get('status') and user_menu.get('data'):
-            print(f"{'':<30} {user_menu['data']}")
             for x in user_menu['data']:
                 if x['main'] == role: 
                     del x['role'], x['main']
