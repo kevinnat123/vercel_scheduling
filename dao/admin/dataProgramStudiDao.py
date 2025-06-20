@@ -1,7 +1,6 @@
 from dao import Database
 from config import MONGO_DB, MONGO_MAJOR_COLLECTION as db_prodi
-from flask import session, current_app
-from datetime import datetime, timezone
+from flask import session
 
 from global_func import CustomError
 
@@ -46,7 +45,6 @@ class dataProgramStudiDao:
             res = self.connection.insert_one(db_prodi, params)
 
             if res['status'] == True:
-                current_app.last_updated = datetime.now(timezone.utc)
                 result.update({ 'message': res['message'] })
             else:
                 raise CustomError({ 'message': res['message'] })
