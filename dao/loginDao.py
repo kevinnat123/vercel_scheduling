@@ -53,13 +53,9 @@ class loginDao:
     def verify_user(self, u_id, password):
         print(f"{'':<7}{'[ DAO ]':<8} Verify User: {u_id}, {password}")
         user = self.get_user(u_id)
-        print(f"{'':<15} User: {user}")
         if user:
             user_data = user['data']
             stored_password = user_data.get('password', '')
-            print(f"{'':<15} stored_password      : {type(stored_password)}, {stored_password}")
-            print(f"{'':<15} password param       : {type(password)}, {password}")
-            print(f"{'':<15} check_password_hash  : {check_password_hash(stored_password, password)}")
             if check_password_hash(stored_password, password):
                 del user_data['password']
                 session['user'] = user['data']
