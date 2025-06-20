@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
-from flask import current_app
-from dao.loginDao import loginDao
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
-from userModel import User
 from datetime import datetime, timezone
+from userModel import User
+from redis_client import get_last_updated
+from dao.loginDao import loginDao
 
 signin = Blueprint('signin', __name__)
 loginDao = loginDao()
@@ -17,16 +17,20 @@ def check_session():
     print(f"{'[ 🔍 Before request ]':<15} Current Endpoint: {current_endpoint}")
 
     if current_endpoint not in safe_endpoints:
-        # ✅ Cek apakah session usang berdasarkan waktu global
-        if session.get("last_sync") and session["last_sync"] < current_app.last_updated:
-            print(f"{'':<15} 🔁 Session usang, redirect logout")
-            session.clear()
-            return redirect(url_for("signin.logout"))
-        
         # Cek apakah session masih ada
         if not session.get('user') or 'u_id' not in session['user']:
             print(f"{'':<15} ⚠️ Session kosong atau tidak valid")
             return redirect(url_for('signin.logout'))
+
+        # # Cek apakah perlu sinkron ulang
+        # last_synced = session.get('last_synced')
+        # global_last_updated = get_last_updated()
+        # print(f"\n🌐 Global Last Update {global_last_updated}")
+        # print(f"🔄 User's Last Synced {last_synced}\n")
+
+        # if global_last_updated and (not last_synced or last_synced < global_last_updated):
+        #     print("🔁 Session outdated, refreshing from DB...")
+        #     session_generator()
 
         # Jangan reset lifetime kalau hanya /ping
         if not request.path.startswith('/ping'):
@@ -76,24 +80,13 @@ def login():
             user_obj = User(nip, user['data'])
             login_user(user_obj)
 
-            menu = loginDao.get_menu(session['user']['role'])
-            session['menu'] = menu if menu else []
-            session['academic_details'] = get_academic_details()
-
+            session_generator()
             session.permanent = True  # Aktifkan waktu hidup session
 
-            if session['user']['role'] in ["ADMIN", "LABORAN"]:
-                list_prodi = loginDao.get_prodi()
-                session['user']['list_prodi'] = list_prodi
-            else:
-                session['user']['list_prodi'] = [session['user']['prodi']]
-            session['last_sync'] = datetime.now(timezone.utc)
-            session.modified = True
-
-            print(f"{'':<15} {'Session Academic_Details':<30}: {session['academic_details']}")
-            print(f"{'':<15} {'Session User':<30}: {session['user']}")
-            print(f"{'':<15} {'Session Menu':<30}: {session['menu']}")
-            print(f"{'':<15} {'Session LastSync':<30}: {session['last_sync']}")
+            print(f"{'':<15} {'Session Academic_Details':<30}: {session['academic_details']}\n")
+            print(f"{'':<15} {'Session User':<30}: {session['user']}\n")
+            print(f"{'':<15} {'Session Menu':<30}: {session['menu']}\n")
+            print(f"{'':<15} {'Session LastSync':<30}: {session['last_sync']}\n")
             return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
             # return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
 
@@ -133,6 +126,26 @@ def login():
 #                 menu = 'Dashboard', 
 #                 title = 'Dashboard', 
 #             )
+
+def session_generator():
+    user_id = session['user']['u_id']
+    updated_user = loginDao.get_user(user_id)
+    
+    if updated_user:
+        menu = loginDao.get_menu(session['user']['role'])
+        session['menu'] = menu if menu else []
+        session['academic_details'] = get_academic_details()
+
+        if session['user']['role'] in ["ADMIN", "LABORAN"]:
+            list_prodi = loginDao.get_prodi()
+            session['user']['list_prodi'] = list_prodi
+        else:
+            session['user']['list_prodi'] = [session['user']['prodi']]
+        session['last_sync'] = datetime.now(timezone.utc)
+        session.modified = True
+    else:
+        session.clear()  # Pastikan semua session terhapus
+        return redirect(url_for('signin.logout'))
 
 def get_academic_details():
     today = datetime.today()

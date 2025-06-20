@@ -76,6 +76,4 @@ def create_app():
         response.headers["Expires"] = "0"
         return response
     
-    app.last_updated = datetime.now(timezone.utc)
-    
     return app
