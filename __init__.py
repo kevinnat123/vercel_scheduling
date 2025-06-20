@@ -26,7 +26,6 @@ login_manager = LoginManager()
 # Factory function untuk membuat aplikasi Flask
 def create_app():
     app = Flask(__name__)
-    # app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=10)  # SESSION LIFETIME
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)  # SESSION LIFETIME per 1 jam
 
     login_manager.init_app(app)
