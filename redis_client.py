@@ -1,12 +1,13 @@
 # redis_client.py
 import redis
 import os
+import config
 from datetime import datetime, timezone
 
 redis_client = redis.Redis(
-    host=os.environ.get("REDIS_HOST", "localhost"),
-    port=int(os.environ.get("REDIS_PORT", 6379)),
-    password=os.environ.get("REDIS_PASSWORD", None),
+    host=config.REDIS_HOST,
+    port=config.REDIS_PORT,
+    password=config.REDIS_PASSWORD,
     decode_responses=True
 )
 
