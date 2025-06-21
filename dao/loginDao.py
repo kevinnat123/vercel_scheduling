@@ -23,14 +23,17 @@ class loginDao:
     def get_user(self, u_id):
         print(f"{'':<7}{'[ DAO ]':<8} Get User: {u_id}")
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
-        return result if result and result.get('status') else None
+        return {k: v for k, v in result.items if k != "password"} if result and result.get('status') else None
     
     def get_prodi(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get Prodi")
-        result = self.connection.find_many(db_prodi, {"status_aktif": True})
-        if result and result.get('status'):
-            list_prodi = [data["program_studi"] for data in result["data"] if data["status_aktif"] == True]
-            return list_prodi
+        if session['user']['role'] in ["ADMIN", "LABORAN"]:
+            result = self.connection.find_many(db_prodi, {"status_aktif": True})
+            if result and result.get('status'):
+                list_prodi = [data["program_studi"] for data in result["data"] if data["status_aktif"] == True]
+                return list_prodi
+        elif session['user']['role'] == "KEPALA PROGRAM STUDI":
+            return [session['user']['prodi']]
         return None
     
     def get_menu(self, role):
@@ -58,6 +61,5 @@ class loginDao:
             stored_password = user_data.get('password', '')
             if check_password_hash(stored_password, password):
                 del user_data['password']
-                session['user'] = user['data']
                 return {'status': True, 'data': user_data, 'message': 'Login berhasil'}
         return {'status': False, 'message': 'NIP atau password salah'}
