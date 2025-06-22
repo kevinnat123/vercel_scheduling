@@ -71,11 +71,11 @@ def login():
             user_obj = User(nip, user['data'])
             login_user(user_obj)
 
+            session_generator()
             menu = loginDao.get_menu(session['user']['role'])
             session['menu'] = menu if menu else []
             session['academic_details'] = get_academic_details()
 
-            session_generator()
             session.permanent = True  # Aktifkan waktu hidup session
             session.modified = True
 

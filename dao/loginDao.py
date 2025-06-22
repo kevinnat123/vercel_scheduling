@@ -61,8 +61,8 @@ class loginDao:
         if user:
             user_data = user['data']
             stored_password = user_data.get('password', '')
-            print('verify', check_password_hash(stored_password, password))
             if check_password_hash(stored_password, password):
                 del user_data['password']
+                session['user'] = user_data
                 return {'status': True, 'data': user_data, 'message': 'Login berhasil'}
         return {'status': False, 'message': 'NIP atau password salah'}
