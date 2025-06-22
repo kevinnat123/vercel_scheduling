@@ -347,6 +347,7 @@
   }
 
   $("#btn-simpan").on("click", function () {
+    console.warn("button clicked");
     if (!$("#input_prodi").val()) {
       popUpTimer("error", "Nama Program Studi belum diisi!");
       setTimeout(() => {
@@ -379,9 +380,20 @@
       },
       success: async function (res) {
         console.log("[ post_dosen ] ", res);
-        if (res.status === false) {
-          if (res.reVerify) await verifikasiUserPromise();
+        if (res.status === false && res.reVerify) {
+          verificationRes = await verifikasiUserPromise()
+            .then((result) => {
+              return result.status;
+            })
+            .catch((error) => {
+              if (error.message) popUpTimer("error", error.message);
+              return error.status;
+            });
 
+          if (verificationRes) $("#btn-simpan").click();
+        }
+
+        if (res.status === false) {
           if (res.message) await popUpTimer("error", res.message);
           if (res.target)
             setTimeout(() => {
@@ -390,7 +402,7 @@
         } else {
           $("#btn-batal").click();
           popUpTimer("success", res.message);
-          dosen_tab.ajax.reload(null, false);
+          prodi_tab.ajax.reload(null, false);
         }
       },
     });
@@ -471,18 +483,6 @@
     let data = prodi_tab.row(object.closest("tr")).data();
     form_prodi(true, false, data);
   }
-
-  // if (res.needVerification) {
-  //   verificationRes = await verifikasiUserPromise()
-  //     .then((result) => {
-  //       return result.status;
-  //     })
-  //     .catch((error) => {
-  //       if (error.message) popUpTimer("error", error.message);
-  //       return error.status;
-  //     });
-  //   return verificationRes;
-  // }
 
   /**
    * Promise untuk menampilkan verifikasi user.

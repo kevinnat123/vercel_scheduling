@@ -28,6 +28,7 @@ class dataProgramStudiDao:
         result = { 'status': False }
 
         try:
+            print('parameter akses', parameter.get('akses'))
             if not parameter.get('akses', False):
                 raise CustomError({ 'reVerify': True })
                 
@@ -36,7 +37,7 @@ class dataProgramStudiDao:
 
             if not params.get('program_studi'):
                 raise CustomError({ 'message': 'Nama Program Studi belum diisi!', 'target': 'input_prodi' })
-            elif not params.get('status'):
+            elif not params.get('status_aktif'):
                 raise CustomError({ 'message': 'Status Program Studi belum diisi!' })
             
             # Check exist
@@ -46,7 +47,7 @@ class dataProgramStudiDao:
                 
             # Hapus key yang memiliki value kosong
             params["status_aktif"] = True if params.pop("status_aktif", None) == "AKTIF" else False
-            params = {k: v for k, v in params.items() if v}
+            params = {k: v for k, v in params.items() if v or k == "status_aktif"}
                 
             res = self.connection.insert_one(db_prodi, params)
 
