@@ -1,8 +1,11 @@
 from dao import Database
-from config import MONGO_DB, MONGO_MAJOR_COLLECTION as db_prodi
+from config import MONGO_DB, MONGO_MAJOR_COLLECTION as db_prodi, MONGO_USERS_COLLECTION as db_user
 from flask import session
+from werkzeug.security import check_password_hash
 
 from global_func import CustomError
+
+parameter = dict()
 
 class dataProgramStudiDao:
     def __init__(self):
@@ -48,6 +51,43 @@ class dataProgramStudiDao:
                 result.update({ 'message': res['message'] })
             else:
                 raise CustomError({ 'message': res['message'] })
+
+            result.update({ 'status': True })
+        except CustomError as e:
+            result.update({ "message": f"{e.error_dict.get('message')}" })
+            if e.error_dict.get('target'):
+                result.update({ 'target': e.error_dict.get('target') })
+        except Exception as e:
+            print(f"{'':<15} Error: {e}")
+            result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
+
+        return result
+    
+    def user_validation(self, params: dict):
+        print(f"{'':<7}{'[ DAO ]':<8} User Validation")
+        result = { 'status': False }
+
+        try:
+            print(params)
+            parameter["akses"] = False
+
+            if not params.get("nip"):
+                raise CustomError({ 'message': 'NIP belum diisi!' })
+            elif not params.get("password"):
+                raise CustomError({ 'message': 'Password belum diisi!' })
+            
+            user = self.connection.find_one(db_user, {'u_id': params['nip']})
+            print(user)
+            if user.get('status') and user["data"].get("role") in ["ADMIN"]:
+                stored_password = user["data"].get('password', '')
+                if check_password_hash(stored_password, params.get('password', '')):
+                    parameter['akses'] = True
+                else:
+                    raise CustomError({ 'message': "NIP atau password salah!" })
+            elif not user.get('status'):
+                raise CustomError({ 'message': "NIP tidak ditemukan!" })
+            else:
+                raise CustomError({ 'message': 'Anda tidak berhak!' })
 
             result.update({ 'status': True })
         except CustomError as e:

@@ -2,11 +2,13 @@ from flask import render_template, Blueprint, request, jsonify, session, redirec
 from flask.wrappers import Response
 from dao.admin.dataProgramStudiDao import dataProgramStudiDao
 from dao.kaprodi.dataDosenDao import dataDosenDao
+from dao.loginDao import loginDao
 from flask_login import login_required
 
 program_studi = Blueprint('program_studi', __name__)
 dao = dataProgramStudiDao()
 dao_dosen = dataDosenDao()
+dao_login = loginDao()
 
 @program_studi.route("/data_program_studi")
 @login_required
@@ -40,3 +42,23 @@ def program_studi_post_program_studi() -> Response:
     req = request.get_json('data')
     data = dao.post_prodi(req)
     return jsonify( data )
+
+@program_studi.route("/data_program_studi/verifikasi_user", methods=['GET'])
+@login_required
+def program_studi_verifikasi_user() -> Response:
+    print(f"{'[ CONTROLLER ]':<15} Verifikasi User")
+    user = dao_login.get_user(request.args.to_dict().get("nip"))
+    if user and user.get("data") and user["data"].get("role") == "ADMIN":
+        user["data"] = { "nama": user["data"]["nama"] }
+    else:
+        user = { "status": False, "message": "Anda tidak berhak!" }
+    return jsonify( user )
+
+@program_studi.route("/data_program_studi/user_validation", methods=['GET'])
+@login_required
+def program_studi_user_validation() -> Response:
+    print(f"{'[ CONTROLLER ]':<15} User Validation")
+    params = request.args.to_dict()
+    params.pop('_')
+    res = dao.user_validation(params)
+    return jsonify( res )

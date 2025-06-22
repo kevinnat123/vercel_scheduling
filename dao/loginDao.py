@@ -23,6 +23,8 @@ class loginDao:
     def get_user(self, u_id):
         print(f"{'':<7}{'[ DAO ]':<8} Get User: {u_id}")
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
+        if result and result.get('status'):
+            del result["data"]["password"]
         return result if result and result.get('status') else None
     
     def get_prodi(self):
@@ -52,10 +54,11 @@ class loginDao:
 
     def verify_user(self, u_id, password):
         print(f"{'':<7}{'[ DAO ]':<8} Verify User: {u_id}, {password}")
-        user = self.get_user(u_id)
+        user = self.connection.find_one(db_users, {"u_id": u_id})
         if user:
             user_data = user['data']
             stored_password = user_data.get('password', '')
+            print('verify', check_password_hash(stored_password, password))
             if check_password_hash(stored_password, password):
                 del user_data['password']
                 session['user'] = user['data']
