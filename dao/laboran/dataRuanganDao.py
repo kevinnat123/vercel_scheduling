@@ -55,7 +55,7 @@ class dataRuanganDao:
             else:
                 raise CustomError({ 'message': res['message'] })
         except CustomError as e:
-            result.update({ "message": f"{e.error_dict.get('message')}" })
+            result.update( e.error_dict )
         except Exception as e:
             print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
@@ -97,7 +97,7 @@ class dataRuanganDao:
             else:
                 raise CustomError({ 'message': res['message'] })
         except CustomError as e:
-            result.update({ "message": f"{e.error_dict.get('message')}" })
+            result.update( e.error_dict )
         except Exception as e:
             print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
@@ -120,7 +120,7 @@ class dataRuanganDao:
             else:
                 raise CustomError({ 'message': res['message'] })
         except CustomError as e:
-            result.update({ "message": f"{e.error_dict.get('message')}" })
+            result.update( e.error_dict )
         except Exception as e:
             print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })

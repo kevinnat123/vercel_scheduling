@@ -26,7 +26,7 @@ class dataMataKuliahDao:
 
             result.update({ 'status': True, 'message': result.get('message') })
         except CustomError as e:
-            result.update({ "message": f"{e.error_dict.get('message')}" })
+            result.update( e.error_dict )
         except Exception as e:
             print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
@@ -139,9 +139,7 @@ class dataMataKuliahDao:
 
             result.update({ 'status': True })
         except CustomError as e:
-            result.update({ "message": f"{e.error_dict.get('message')}" })
-            if e.error_dict.get('target'):
-                result.update({ 'target': e.error_dict.get('target') })
+            result.update( e.error_dict )
         except Exception as e:
             print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
@@ -232,9 +230,7 @@ class dataMataKuliahDao:
                     
             result.update({ 'status': True })
         except CustomError as e:
-            result.update({ "message": f"{e.error_dict.get('message')}" })
-            if e.error_dict.get('target'):
-                result.update({ 'target': e.error_dict.get('target') })
+            result.update( e.error_dict )
         except Exception as e:
             print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
@@ -290,7 +286,7 @@ class dataMataKuliahDao:
             else:
                 result.update({ 'status': True, 'message': res['message'] })
         except CustomError as e:
-            result.update({ "message": f"{e.error_dict.get('message')}" })
+            result.update( e.error_dict )
         except Exception as e:
             print(f"{'':<15} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
