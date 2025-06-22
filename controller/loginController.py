@@ -22,31 +22,22 @@ def check_session():
             print(f"{'':<15} ⚠️ Session kosong atau tidak valid")
             return redirect(url_for('signin.logout'))
 
-        # # Cek apakah perlu sinkron ulang
-        # last_synced = session.get('last_synced')
-        # global_last_updated = get_last_updated()
-        # print(f"\n🌐 Global Last Update {global_last_updated}")
-        # print(f"🔄 User's Last Synced {last_synced}\n")
-
-        # if global_last_updated and (not last_synced or last_synced < global_last_updated):
-        #     print("🔁 Session outdated, refreshing from DB...")
-        #     session_generator()
-
         # Jangan reset lifetime kalau hanya /ping
         if not request.path.startswith('/ping'):
             print(f"{'':<15} 🔄 Perpanjang lifetime session")
             session.permanent = True
             session.modified = True
 
-        # Opsional: validasi extra user (misal di dashboard)
-        if current_endpoint in ['dashboard.dashboard_index']:
-            user_id_in_session = session['user'].get('u_id')
-            user_id_in_db = loginDao.get_user_id(user_id_in_session)
+        # Validasi extra user (misal di dashboard)
+        user_id_in_session = session['user'].get('u_id')
+        user_id_in_db = loginDao.get_user_id(user_id_in_session)
 
-            if not user_id_in_db or user_id_in_db != user_id_in_session:
-                print(f"{'':<15} 🚫 User tidak valid di database")
-                session.clear()
-                return redirect(url_for('signin.logout'))
+        if not user_id_in_db or user_id_in_db != user_id_in_session:
+            print(f"{'':<15} 🚫 User tidak valid di database")
+            session.clear()
+            return redirect(url_for('signin.logout'))
+        else:
+            session_generator()
 
 @signin.route("/ping")
 def ping():
@@ -80,11 +71,15 @@ def login():
             user_obj = User(nip, user['data'])
             login_user(user_obj)
 
+            menu = loginDao.get_menu(session['user']['role'])
+            session['menu'] = menu if menu else []
+            session['academic_details'] = get_academic_details()
+
             session_generator()
             session.permanent = True  # Aktifkan waktu hidup session
+            session.modified = True
 
             print(f"{'':<15} {'Session Academic_Details':<30}: {session['academic_details']}\n")
-            print(f"{'':<15} {'Session User':<30}: {session['user']}\n")
             print(f"{'':<15} {'Session Menu':<30}: {session['menu']}\n")
             print(f"{'':<15} {'Session LastSync':<30}: {session['last_sync']}\n")
             return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
@@ -129,18 +124,16 @@ def login():
 
 def session_generator():
     user_id = session['user']['u_id']
+    print(f"{'':<15} Session Generator (Old User Id: {user_id})")
     updated_user = loginDao.get_user(user_id)
     
     if updated_user:
-        menu = loginDao.get_menu(session['user']['role'])
-        session['menu'] = menu if menu else []
-        session['academic_details'] = get_academic_details()
+        session["user"] = updated_user
+        print(f"{'':<15} {'New User Session':<30}: {session['user']}")
 
-        if session['user']['role'] in ["ADMIN", "LABORAN"]:
-            list_prodi = loginDao.get_prodi()
-            session['user']['list_prodi'] = list_prodi
-        else:
-            session['user']['list_prodi'] = [session['user']['prodi']]
+        list_prodi = loginDao.get_prodi()
+        session['user']['list_prodi'] = list_prodi
+
         session['last_sync'] = datetime.now(timezone.utc)
         session.modified = True
     else:

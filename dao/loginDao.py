@@ -29,10 +29,13 @@ class loginDao:
     
     def get_prodi(self):
         print(f"{'':<7}{'[ DAO ]':<8} Get Prodi")
-        result = self.connection.find_many(db_prodi, {"status_aktif": True})
-        if result and result.get('status'):
-            list_prodi = [data["program_studi"] for data in result["data"] if data["status_aktif"] == True]
-            return list_prodi
+        if session['user']['role'] in ["ADMIN", "LABORAN"]:
+            result = self.connection.find_many(db_prodi, {"status_aktif": True})
+            if result and result.get('status'):
+                list_prodi = [data["program_studi"] for data in result["data"] if data["status_aktif"] == True]
+                return list_prodi
+        elif session['user']['role'] == "KEPALA PROGRAM STUDI":
+            return [session['user']['prodi']]
         return None
     
     def get_menu(self, role):
@@ -61,6 +64,5 @@ class loginDao:
             print('verify', check_password_hash(stored_password, password))
             if check_password_hash(stored_password, password):
                 del user_data['password']
-                session['user'] = user['data']
                 return {'status': True, 'data': user_data, 'message': 'Login berhasil'}
         return {'status': False, 'message': 'NIP atau password salah'}
