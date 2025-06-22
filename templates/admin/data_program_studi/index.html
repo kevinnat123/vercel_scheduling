@@ -298,6 +298,13 @@
         .prop("selected", false); // Reset dropdown
     });
 
+    $("#verifikasiUser-nip, #verifikasiUser-password").on(
+      "keydown",
+      function (event) {
+        event.key === "Enter" ? $(this).blur() : null;
+      }
+    );
+
     $("#modal-dosen tbody").on("click", "tr", async function () {
       let row = dosen_lov.row(this).data();
       $("#modal-dosen").modal("hide");
@@ -373,7 +380,9 @@
       success: async function (res) {
         console.log("[ post_dosen ] ", res);
         if (res.status === false) {
-          await popUpTimer("error", res.message);
+          if (res.reVerify) await verifikasiUserPromise();
+
+          if (res.message) await popUpTimer("error", res.message);
           if (res.target)
             setTimeout(() => {
               $("#" + res.target).focus();
@@ -485,13 +494,6 @@
       return new Promise((resolve, reject) => {
         // Tampilkan modal verifikasi user
         $("#modal-verifikasiUser").modal("show");
-
-        $("#verifikasiUser-nip, #verifikasiUser-password").on(
-          "keydown",
-          function (event) {
-            event.key === "Enter" ? $(this).blur() : null;
-          }
-        );
 
         // Handle ketika user mengubah NIP dan password
         $("#verifikasiUser-nip").on("change", async function (event) {
