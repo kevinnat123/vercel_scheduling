@@ -1,10 +1,11 @@
 from flask import Flask, redirect, url_for
+from flask import request, session, jsonify
 from flask_login import LoginManager
 from userModel import User
 from dao.loginDao import loginDao
 from datetime import datetime, timedelta, timezone
 
-from controller.loginController import signin
+from controller.loginController import signin, session_generator
 from controller.dashboardController import dashboard
 from controller.settingController import setting
 from controller.excelController import export
@@ -66,6 +67,51 @@ def create_app():
     @app.errorhandler(404)
     def page_not_found(e):
         return redirect(url_for('signin.error404'))
+    
+    @app.route('/favicon.ico')
+    def favicon():
+        return '', 204
+
+    @app.route("/ping")
+    def ping():
+        print(f"{'❤ HEARTBEAT ❤':<15} Session: {True if session.get('user') else False}")
+        is_alive = session.get('user') and 'u_id' in session['user']
+        if not is_alive:
+            return jsonify({'status': False, 'expired': True}), 401
+        return jsonify({'status': True, 'expired': False}), 200
+
+    @app.before_request
+    def check_session():
+        safe_endpoints = ['signin.login', 'signin.logout', 'static', 'signin.ping']
+        current_endpoint = request.endpoint
+
+        if not current_endpoint or current_endpoint in safe_endpoints or "index" in current_endpoint:
+            return
+        
+        print(f"{'[ 🔍 Before request ]':<15} Current Endpoint: {current_endpoint}")
+
+        # Cek apakah session masih ada
+        if not session.get('user') or 'u_id' not in session['user']:
+            print(f"{'':<15} ⚠️ Session kosong atau tidak valid")
+            return redirect(url_for('signin.logout'))
+
+        # Jangan reset lifetime kalau hanya /ping
+        if not request.path.startswith('/ping'):
+            print(f"{'':<15} 🔄 Perpanjang lifetime session")
+            session.permanent = True
+            session.modified = True
+
+        # Validasi extra user (misal di dashboard)
+        user_id_in_session = session['user'].get('u_id')
+        user_id_in_db = loginDao().get_user_id(user_id_in_session)
+
+        if not user_id_in_db or user_id_in_db != user_id_in_session:
+            print(f"{'':<15} 🚫 User tidak valid di database")
+            session.clear()
+            return redirect(url_for('signin.logout'))
+        else:
+            session_generator()
+            return
 
     # Cache control
     @app.after_request

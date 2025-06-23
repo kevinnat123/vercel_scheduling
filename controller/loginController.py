@@ -8,43 +8,6 @@ from dao.loginDao import loginDao
 
 signin = Blueprint('signin', __name__)
 loginDao = loginDao()
-
-@signin.before_request
-def check_session():
-    safe_endpoints = ['signin.login', 'signin.logout', 'static', 'signin.ping']
-    current_endpoint = request.endpoint
-
-    print(f"{'[ 🔍 Before request ]':<15} Current Endpoint: {current_endpoint}")
-
-    if current_endpoint not in safe_endpoints:
-        # Cek apakah session masih ada
-        if not session.get('user') or 'u_id' not in session['user']:
-            print(f"{'':<15} ⚠️ Session kosong atau tidak valid")
-            return redirect(url_for('signin.logout'))
-
-        # Jangan reset lifetime kalau hanya /ping
-        if not request.path.startswith('/ping'):
-            print(f"{'':<15} 🔄 Perpanjang lifetime session")
-            session.permanent = True
-            session.modified = True
-
-        # Validasi extra user (misal di dashboard)
-        user_id_in_session = session['user'].get('u_id')
-        user_id_in_db = loginDao.get_user_id(user_id_in_session)
-
-        if not user_id_in_db or user_id_in_db != user_id_in_session:
-            print(f"{'':<15} 🚫 User tidak valid di database")
-            session.clear()
-            return redirect(url_for('signin.logout'))
-        else:
-            session_generator()
-
-@signin.route("/ping")
-def ping():
-    print(f"{'❤ HEARTBEAT ❤':<15} Session: {True if session.get('user') else False}")
-    if not session.get('user'):
-        return jsonify({'status': False, 'expired': True}), 401
-    return jsonify({'status': True, 'expired': False}), 200
             
 @signin.route("/")
 def home():
