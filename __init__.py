@@ -85,7 +85,7 @@ def create_app():
         safe_endpoints = ['signin.login', 'signin.logout', 'static', 'signin.ping']
         current_endpoint = request.endpoint
 
-        if not current_endpoint or current_endpoint in safe_endpoints or "index" in current_endpoint:
+        if current_endpoint is None or current_endpoint in safe_endpoints or "index" in current_endpoint:
             return
         
         print(f"{'[ 🔍 Before request ]':<15} Current Endpoint: {current_endpoint}")
