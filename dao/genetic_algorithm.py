@@ -1146,7 +1146,7 @@ def genetic_algorithm(matakuliah_list, dosen_list, ruang_list, ukuran_populasi=7
         # CEK BEST GLOBAL
         hitung_fitness(best_individual_global, matakuliah_list, dosen_list, ruang_list, True)
     except Exception as e:
-        print(f"{'[ GA ]':<15} Error: {e}")
+        print(f"{'[ GA ]':<25} Error: {e}")
         return { 'status': False, 'message': e }
     
     return { 'status': True, 'data': convertOutputToDict(best_individual_global) }

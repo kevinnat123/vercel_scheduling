@@ -10,7 +10,7 @@ dao = generateJadwalDao()
 @generateJadwal.route("/generate_jadwal")
 @login_required
 def generateJadwal_index():
-    print(f"{'[ RENDER ]':<15} Generate Jadwal (Role: {session['user']['role']})")
+    print(f"{'[ RENDER ]':<25} Generate Jadwal (Role: {session['user']['role']})")
     if session['user']['role'] != 'ADMIN':
         return redirect(url_for('signin.error403'))
     else:
@@ -28,7 +28,7 @@ def generateJadwal_index():
 @generateJadwal.route("/generate_jadwal/generate", methods=['GET'])
 @login_required
 def generate_jadwal():
-    print(f"{'[ CONTROLLER ]':<15} Generate Jadwal")
+    print(f"{'[ CONTROLLER ]':<25} Generate Jadwal")
 
     try:
         if session['user']['role'] == "ADMIN":
@@ -63,7 +63,7 @@ def generate_jadwal():
     except CustomError as e:
         return jsonify({ 'status': False, 'message': f"{e.error_dict.get('message')}" })
     except Exception as e:
-        print(f"{'[ CONTRO ERROR ]':<15} Error: {e}")
+        print(f"{'[ CONTRO ERROR ]':<25} Error: {e}")
         return jsonify({ 'status': False, 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
     return jsonify({ 'status': True, 'data': best_schedule })
@@ -71,7 +71,7 @@ def generate_jadwal():
 @generateJadwal.route("/generate_jadwal/upload_jadwal", methods=['POST'])
 @login_required
 def upload_jadwal():
-    print(f"{'[ CONTROLLER ]':<15} Upload Jadwal")
+    print(f"{'[ CONTROLLER ]':<25} Upload Jadwal")
     if session['user']['role'] == "ADMIN":
         req = request.get_json('data')
         data = dao.upload_jadwal(req['jadwal'])
@@ -81,7 +81,7 @@ def upload_jadwal():
 @generateJadwal.route("/generate_jadwal/get_simpanan_prodi", methods=["GET"])
 @login_required
 def get_simpanan_prodi():
-    print(f"{'[ CONTROLLER ]':<15} Get Simpanan Prodi")
+    print(f"{'[ CONTROLLER ]':<25} Get Simpanan Prodi")
 
     if session['user']['role'] == "ADMIN":
         data = dao.get_simpanan_prodi(session['user']['list_prodi'])

@@ -8,12 +8,12 @@ class settingDao:
         self.connection = Database(MONGO_DB)
 
     def get_user(self, u_id):
-        print(f"{'':<7}{'[ DAO ]':<8} Get User (u_id: {u_id})")
+        print(f"{'[ DAO ]':<25} Get User (u_id: {u_id})")
         result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         return result if result and result.get('status') else None
 
     def register_new_password(self, oldPassword, newPassword, verifyNewPassword):
-        print(f"{'':<7}{'[ DAO ]':<8} Register New Password")
+        print(f"{'[ DAO ]':<25} Register New Password")
         user = self.get_user(session['user']['u_id'])
         if user:
             user_data = user['data']

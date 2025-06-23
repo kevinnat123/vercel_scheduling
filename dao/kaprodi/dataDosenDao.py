@@ -9,7 +9,7 @@ class dataDosenDao:
         self.connection = Database(MONGO_DB)
 
     def get_dosen(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Dosen")
+        print(f"{'[ DAO ]':<25} Get Dosen")
         if session['user']['role'] == "KEPALA PROGRAM STUDI":
             result = self.connection.find_many(db_dosen, {
                 '$or': [
@@ -26,7 +26,7 @@ class dataDosenDao:
         return result['data'] if result and result.get('status') else []
     
     def get_dosen_prodi(self, prodi):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Dosen Prodi (Prodi: {prodi})")
+        print(f"{'[ DAO ]':<25} Get Dosen Prodi (Prodi: {prodi})")
         result = self.connection.find_many(db_dosen, {
             '$or': [
                 {'prodi': prodi}, 
@@ -40,7 +40,7 @@ class dataDosenDao:
         return result['data'] if result and result.get('status') else []
     
     def get_dosen_by_nip(self, nip):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Dosen By NIP (NIP: {nip})")
+        print(f"{'[ DAO ]':<25} Get Dosen By NIP (NIP: {nip})")
         result = self.connection.find_one(
             db_dosen,
             {"nip": nip}
@@ -48,7 +48,7 @@ class dataDosenDao:
         return result['data'] if result and result.get('status') else []
     
     def post_dosen(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} Post Dosen (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Post Dosen (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -101,13 +101,13 @@ class dataDosenDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
     
     def put_dosen(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} Put Dosen (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Put Dosen (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -195,13 +195,13 @@ class dataDosenDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
     
     def delete_dosen(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} Delete Dosen (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Delete Dosen (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -248,7 +248,7 @@ class dataDosenDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result

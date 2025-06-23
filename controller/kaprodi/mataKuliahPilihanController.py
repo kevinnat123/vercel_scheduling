@@ -10,7 +10,7 @@ dao = mataKuliahPilihanDao()
 @mataKuliahPilihan.route("/mata_kuliah_pilihan")
 @login_required
 def mataKuliahPilihan_index():
-    print(f"{'[ RENDER ]':<15} Mata Kuliah Pilihan (Role: {session['user']['role']})")
+    print(f"{'[ RENDER ]':<25} Mata Kuliah Pilihan (Role: {session['user']['role']})")
     if session['user']['role'] != 'KEPALA PROGRAM STUDI' and session['user']['role'] != "ADMIN":
         return redirect(url_for('signin.error403'))
     else:
@@ -31,7 +31,7 @@ def mataKuliahPilihan_index():
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/get_bidang_minat", methods=['GET'])
 @login_required
 def mataKuliahPilihan_get_bidang_minat():
-    print(f"{'[ CONTROLLER ]':<15} Get Bidang Minat")
+    print(f"{'[ CONTROLLER ]':<25} Get Bidang Minat")
     req = request.args.to_dict()
     print('req', req)
     data = dao.get_bidang_minat(req['prodi'])
@@ -40,7 +40,7 @@ def mataKuliahPilihan_get_bidang_minat():
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/post_matkul", methods=['POST'])
 @login_required
 def mataKuliahPilihan_post_matkul():
-    print(f"{'[ CONTROLLER ]':<15} Post Matkul Pilihan")
+    print(f"{'[ CONTROLLER ]':<25} Post Matkul Pilihan")
     req = request.get_json('data')
     data = dao.post_matkul(req)
     return jsonify( data )
@@ -48,7 +48,7 @@ def mataKuliahPilihan_post_matkul():
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/put_matkul", methods=['POST'])
 @login_required
 def mataKuliahPilihan_put_matkul():
-    print(f"{'[ CONTROLLER ]':<15} Put Matkul Pilihan")
+    print(f"{'[ CONTROLLER ]':<25} Put Matkul Pilihan")
     req = request.get_json('data')
     data = dao.put_matkul(req)
     return jsonify( data )
@@ -56,7 +56,7 @@ def mataKuliahPilihan_put_matkul():
 @mataKuliahPilihan.route("/mata_kuliah_pilihan/delete_data", methods=['POST'])
 @login_required
 def mataKuliahPilihan_delete_data():
-    print(f"{'[ CONTROLLER ]':<15} Delete Matkul Pilihan")
+    print(f"{'[ CONTROLLER ]':<25} Delete Matkul Pilihan")
     req = request.get_json('data')
     data = dao.delete_data(req)
     return jsonify( data )

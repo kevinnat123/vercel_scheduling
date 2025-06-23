@@ -13,7 +13,7 @@ dao_login = loginDao()
 @program_studi.route("/data_program_studi")
 @login_required
 def program_studi_index():
-    print(f"{'[ RENDER ]':<15} Data Program Studi (Role: {session['user']['role']})")
+    print(f"{'[ RENDER ]':<25} Data Program Studi (Role: {session['user']['role']})")
     print('========== ========== ========== ========== RENDER DATA PROGRAM STUDI  ========== ========== ========== ==========')
     if session['user']['role'] not in ["ADMIN"]:
         return redirect(url_for('signin.error403'))
@@ -27,7 +27,7 @@ def program_studi_index():
 @program_studi.route("/data_program_studi/get_program_studi", methods=['GET'])
 @login_required
 def program_studi_get_program_studi() -> Response:
-    print(f"{'[ CONTROLLER ]':<15} Get Program Studi")
+    print(f"{'[ CONTROLLER ]':<25} Get Program Studi")
     data = dao.get_prodi()
     for prodi in data:
         prodi['status_aktif'] = "AKTIF" if prodi["status_aktif"] else "NONAKTIF"
@@ -38,7 +38,7 @@ def program_studi_get_program_studi() -> Response:
 @program_studi.route("/data_program_studi/post_program_studi", methods=['POST'])
 @login_required
 def program_studi_post_program_studi() -> Response:
-    print(f"{'[ CONTROLLER ]':<15} Post Program Studi")
+    print(f"{'[ CONTROLLER ]':<25} Post Program Studi")
     req = request.get_json('data')
     data = dao.post_prodi(req)
     return jsonify( data )
@@ -46,7 +46,7 @@ def program_studi_post_program_studi() -> Response:
 @program_studi.route("/data_program_studi/put_program_studi", methods=['POST'])
 @login_required
 def program_studi_put_program_studi() -> Response:
-    print(f"{'[ CONTROLLER ]':<15} put Program Studi")
+    print(f"{'[ CONTROLLER ]':<25} put Program Studi")
     req = request.get_json('data')
     data = dao.put_prodi(req)
     return jsonify( data )
@@ -54,7 +54,7 @@ def program_studi_put_program_studi() -> Response:
 @program_studi.route("/data_program_studi/verifikasi_user", methods=['GET'])
 @login_required
 def program_studi_verifikasi_user() -> Response:
-    print(f"{'[ CONTROLLER ]':<15} Verifikasi User")
+    print(f"{'[ CONTROLLER ]':<25} Verifikasi User")
     user = dao_login.get_user(request.args.to_dict().get("nip"))
     if user and user.get("data") and user["data"].get("role") == "ADMIN":
         user["data"] = { "nama": user["data"]["nama"] }
@@ -65,7 +65,7 @@ def program_studi_verifikasi_user() -> Response:
 @program_studi.route("/data_program_studi/user_validation", methods=['GET'])
 @login_required
 def program_studi_user_validation() -> Response:
-    print(f"{'[ CONTROLLER ]':<15} User Validation")
+    print(f"{'[ CONTROLLER ]':<25} User Validation")
     params = request.args.to_dict()
     params.pop('_')
     res = dao.user_validation(params)

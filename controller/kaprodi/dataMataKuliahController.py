@@ -8,7 +8,7 @@ dao = dataMataKuliahDao()
 @mataKuliah.route("/data_mata_kuliah")
 @login_required
 def mataKuliah_index():
-    print(f"{'[ RENDER ]':<15} Data Mata Kuliah (Role: {session['user']['role']})")
+    print(f"{'[ RENDER ]':<25} Data Mata Kuliah (Role: {session['user']['role']})")
     if session['user']['role'] not in ["KEPALA PROGRAM STUDI", "ADMIN"]:
         return redirect(url_for('signin.error403'))
     else:
@@ -25,7 +25,7 @@ def mataKuliah_index():
 @mataKuliah.route("/data_mata_kuliah/post_kelompok", methods=["POST"])
 @login_required
 def mataKuliah_tambah_kelompok():
-    print(f"{'[ CONTROLLER ]':<15} Post Kelompok Matakuliah")
+    print(f"{'[ CONTROLLER ]':<25} Post Kelompok Matakuliah")
     data = request.get_json('data')
     nama_baru = data.get("nama")
     
@@ -38,14 +38,14 @@ def mataKuliah_tambah_kelompok():
 @mataKuliah.route("/data_mata_kuliah/get_matkul", methods=['GET'])
 @login_required
 def mataKuliah_get_matkul():
-    print(f"{'[ CONTROLLER ]':<15} Get Matkul")
+    print(f"{'[ CONTROLLER ]':<25} Get Matkul")
     data = dao.get_matkul()
     return jsonify({ 'data': data })
 
 @mataKuliah.route("/data_mata_kuliah/get_matkul_by_prodi", methods=['GET'])
 @login_required
 def mataKuliah_get_matkul_by_prodi():
-    print(f"{'[ CONTROLLER ]':<15} Get Matkul Prodi")
+    print(f"{'[ CONTROLLER ]':<25} Get Matkul Prodi")
     param = request.args.to_dict()
     data = dao.get_matkul_by_prodi(param.get('prodi'))
     return jsonify({ 'data': data })
@@ -53,7 +53,7 @@ def mataKuliah_get_matkul_by_prodi():
 @mataKuliah.route("/data_mata_kuliah/post_matkul", methods=['POST'])
 @login_required
 def mataKuliah_post_matkul():
-    print(f"{'[ CONTROLLER ]':<15} Post Matkul")
+    print(f"{'[ CONTROLLER ]':<25} Post Matkul")
     req = request.get_json('data')
     data = dao.post_matkul(req)
     return jsonify( data )
@@ -61,7 +61,7 @@ def mataKuliah_post_matkul():
 @mataKuliah.route("/data_mata_kuliah/put_matkul", methods=['POST'])
 @login_required
 def mataKuliah_put_matkul():
-    print(f"{'[ CONTROLLER ]':<15} Put Matkul")
+    print(f"{'[ CONTROLLER ]':<25} Put Matkul")
     req = request.get_json('data')
     data = dao.put_matkul(req)
     return jsonify( data )
@@ -69,7 +69,7 @@ def mataKuliah_put_matkul():
 @mataKuliah.route("/data_mata_kuliah/delete_matkul", methods=['POST'])
 @login_required
 def mataKuliah_delete_matkul():
-    print(f"{'[ CONTROLLER ]':<15} Delete Matkul")
+    print(f"{'[ CONTROLLER ]':<25} Delete Matkul")
     req = request.get_json('data')
     data = dao.delete_matkul(req)
     return jsonify( data )

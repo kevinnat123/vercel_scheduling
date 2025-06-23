@@ -12,7 +12,7 @@ class mataKuliahPilihanDao:
         self.connection = Database(MONGO_DB)
 
     def get_listMatkulTersimpan(self, prodi=None):
-        print(f"{'':<7}{'[ DAO ]':<8} Get List Matkul Tersimpan (Prodi: {prodi})")
+        print(f"{'[ DAO ]':<25} Get List Matkul Tersimpan (Prodi: {prodi})")
         if prodi:
             result = self.connection.find_many(
                 db_open_courses, 
@@ -39,7 +39,7 @@ class mataKuliahPilihanDao:
         return result['data'] if result and result.get('status') else []
 
     def get_bidang_minat(self, prodi):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Bidang Minat (Prodi: {prodi})")
+        print(f"{'[ DAO ]':<25} Get Bidang Minat (Prodi: {prodi})")
         result = self.connection.find_one(
             db_users, {'prodi': prodi}, 
         )
@@ -47,7 +47,7 @@ class mataKuliahPilihanDao:
         return result['data']['bidang_minat'] if result and result.get('status') and result['data'].get('bidang_minat') else []
 
     def post_matkul(self, params):
-        print(f"{'':<7}{'[ DAO ]':<8} Post Matkul (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Post Matkul (Parameter: {params})")
         result = { 'status': False }
         
         try:
@@ -101,13 +101,13 @@ class mataKuliahPilihanDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
-        print(f"{'':<15} {result}")
+        print(f"{'':<25} {result}")
         return result
     
     def put_matkul(self, params):
-        print(f"{'':<7}{'[ DAO ]':<8} Put Matkul (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Put Matkul (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -152,7 +152,7 @@ class mataKuliahPilihanDao:
                 raise CustomError({ 'message': 'Data matkul untuk angkatan ' + str(params['angkatan']) + ' belum ada!' })
             
             res = self.connection.update_one(db_open_courses, {'u_id': params['u_id'], 'prodi': params['prodi']}, params)
-            print(f"{'':<15} Update Result: {res}")
+            print(f"{'':<25} Update Result: {res}")
             if res['status'] == False:
                 raise CustomError({ 'message': res['message'] })
             else:
@@ -162,13 +162,13 @@ class mataKuliahPilihanDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
     
     def delete_data(self, req):
-        print(f"{'':<7}{'[ DAO ]':<8} Delete Matkul (Parameter: {req}; {req[5:]})")
+        print(f"{'[ DAO ]':<25} Delete Matkul (Parameter: {req}; {req[5:]})")
         result = { 'status': False }
         
         try:
@@ -182,7 +182,7 @@ class mataKuliahPilihanDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result

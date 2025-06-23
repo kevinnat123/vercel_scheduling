@@ -7,7 +7,7 @@ class dashboardDao:
         self.connection = Database(MONGO_DB)
 
     def get_user(self, u_id=None, prodi=None):
-        print(f"{'':<7}{'[ DAO ]':<8} Get User (u_id: {u_id})")
+        print(f"{'[ DAO ]':<25} Get User (u_id: {u_id})")
         if u_id:
             result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
         elif prodi:
@@ -15,7 +15,7 @@ class dashboardDao:
         return result if result and result.get('status') else None
 
     def update_general(self, params):
-        print(f"{'':<7}{'[ DAO ]':<8} Update General (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Update General (Parameter: {params})")
         if params:
             user = self.get_user(session['user']['u_id'])
             if user:
@@ -34,7 +34,7 @@ class dashboardDao:
         return {'status': False, 'message': 'Tidak ada yang perlu disimpan'}
     
     def update_kelompokMatkul(self, data):
-        print(f"{'':<7}{'[ DAO ]':<8} Update Kelompok Matkul (Parameter: {data})")
+        print(f"{'[ DAO ]':<25} Update Kelompok Matkul (Parameter: {data})")
 
         if data:
             newGroup = [item["kelompok_matkul"] for item in data]
@@ -54,7 +54,7 @@ class dashboardDao:
         return {'status': updateData.get('status'), 'message': updateData.get('message')}
     
     def update_bidangMinat(self, data):
-        print(f"{'':<7}{'[ DAO ]':<8} Update Bidang Minat (Parameter: {data})")
+        print(f"{'[ DAO ]':<25} Update Bidang Minat (Parameter: {data})")
 
         if data:
             newGroup = [item["bidang_minat"] for item in data]
@@ -74,7 +74,7 @@ class dashboardDao:
         return {'status': updateData.get('status'), 'message': updateData.get('message')}
     
     def update_os(self, data):
-        print(f"{'':<7}{'[ DAO ]':<8} Update OS (Parameter: {data})")
+        print(f"{'[ DAO ]':<25} Update OS (Parameter: {data})")
         
         if data:
             newGroup = [item["os"] for item in data]
@@ -92,7 +92,7 @@ class dashboardDao:
         return {'status': updateData.get('status'), 'message': updateData.get('message')}
         
     def update_processor(self, data):
-        print(f"{'':<7}{'[ DAO ]':<8} Update Processor (Parameter: {data})")
+        print(f"{'[ DAO ]':<25} Update Processor (Parameter: {data})")
 
         if data:
             newGroup = [item["processor"] for item in data]
@@ -110,7 +110,7 @@ class dashboardDao:
         return {'status': updateData.get('status'), 'message': updateData.get('message')}
     
     def update_prodi(self, data):
-        print(f"{'':<7}{'[ DAO ]':<8} Update Prodi (Parameter: {data})")
+        print(f"{'[ DAO ]':<25} Update Prodi (Parameter: {data})")
         
         if data:
             newGroup = [item["prodi"] for item in data]

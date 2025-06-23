@@ -17,7 +17,7 @@ dosen = dataDosenDao()
 @export.route("/export/export_to_excel", methods=['POST'])
 @login_required
 def export_to_excel():
-    print(f"{'[ CONTROLLER ]':<15} Download Excel")
+    print(f"{'[ CONTROLLER ]':<25} Download Excel")
     req = request.get_json('data')
     filename = req['filename']
     downloadBy = req['downloadBy']
@@ -38,7 +38,7 @@ def get_current_datetime():
     return datetime.now().strftime('%d-%m-%Y %H-%M-%S')  # 24-hour format
 
 def export_jadwal_to_excel(jadwal_list, matakuliah_list, dosen_list):
-    print(f"{'[ CONTROLLER ]':<15} Building File Excel By Jadwal")
+    print(f"{'[ CONTROLLER ]':<25} Building File Excel By Jadwal")
     output = BytesIO()
 
     fixed_headers = [
@@ -170,7 +170,7 @@ def export_jadwal_to_excel(jadwal_list, matakuliah_list, dosen_list):
     return output
 
 def export_ruangan_to_excel(jadwal_list, matakuliah_list, dosen_list):
-    print(f"{'[ CONTROLLER ]':<15} Building File Excel By Ruangan")
+    print(f"{'[ CONTROLLER ]':<25} Building File Excel By Ruangan")
     output = BytesIO()
 
     hari = ['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU']

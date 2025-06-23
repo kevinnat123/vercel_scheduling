@@ -12,7 +12,7 @@ class dataRuanganDao:
         self.connection = Database(MONGO_DB)
 
     def get_kelas(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Kelas")
+        print(f"{'[ DAO ]':<25} Get Kelas")
         if session['user']['role'] in ["ADMIN", "LABORAN"]:
             result = self.connection.find_many(db_kelas, {}, sort=[("kode", 1)])
             for kelas in result['data']:
@@ -23,7 +23,7 @@ class dataRuanganDao:
         return result['data'] if result and result.get('status') else []
 
     def post_kelas(self, params):
-        print(f"{'':<7}{'[ DAO ]':<8} Post Kelas (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Post Kelas (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -57,13 +57,13 @@ class dataRuanganDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
     
     def put_kelas(self, params):
-        print(f"{'':<7}{'[ DAO ]':<8} Put Kelas (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Put Kelas (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -99,13 +99,13 @@ class dataRuanganDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
     
     def delete_kelas(self, params):
-        print(f"{'':<7}{'[ DAO ]':<8} Delete Kelas (Params: {params})")
+        print(f"{'[ DAO ]':<25} Delete Kelas (Params: {params})")
         result = { 'status': False }
 
         try:
@@ -122,7 +122,7 @@ class dataRuanganDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result

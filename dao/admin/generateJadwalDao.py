@@ -12,12 +12,12 @@ class generateJadwalDao:
         self.connection = Database(MONGO_DB)
 
     def get_dosen(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Dosen")
+        print(f"{'[ DAO ]':<25} Get Dosen")
         result = self.connection.find_many(db_dosen)
         return result['data'] if result and result.get('status') else []
     
     def get_simpanan_prodi(self, list_prodi: list = []):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Simpanan Prodi")
+        print(f"{'[ DAO ]':<25} Get Simpanan Prodi")
         data_simpanan = self.connection.find_many(db_matkul_simpanan, {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }})
         prodi_done = [data["u_id"].split('_')[2] for data in data_simpanan["data"]] if data_simpanan and data_simpanan.get('status') else []
         final_data = []
@@ -30,7 +30,7 @@ class generateJadwalDao:
         # return {k: True if (k.split()[0] + ''.join(hrf[0] for hrf in k.split()[1:])) in prodi_done else False for k in list_prodi}
     
     def get_open_matkul(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul")
+        print(f"{'[ DAO ]':<25} Get Matkul")
         result = self.connection.find_many(db_matkul_simpanan, {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }})
         list_matkul = []
         if result and result.get('status'):
@@ -50,18 +50,18 @@ class generateJadwalDao:
         return list_matkul
     
     def get_kelas(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get kelas")
+        print(f"{'[ DAO ]':<25} Get kelas")
         result = self.connection.find_many(db_kelas)
         return result['data'] if result and result.get('status') else []
 
     def get_jadwal(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get jadwal")
+        print(f"{'[ DAO ]':<25} Get jadwal")
         u_id = str(session['academic_details']['semester_depan']) + "_" + str(session['academic_details']['tahun_ajaran_berikutnya']).replace("/", "-")
         result = self.connection.find_one(db_jadwal, {'u_id': u_id})
         return result['data'] if result and result.get('status') else []
     
     def upload_jadwal(self, jadwal):
-        print(f"{'':<7}{'[ DAO ]':<8} Upload Jadwal")
+        print(f"{'[ DAO ]':<25} Upload Jadwal")
         result = { 'status': False }
 
         try:
@@ -92,8 +92,8 @@ class generateJadwalDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
-        print(f"{'':<15} Result: {result}")
+        print(f"{'':<25} Result: {result}")
         return result

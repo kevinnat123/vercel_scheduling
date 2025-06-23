@@ -10,7 +10,7 @@ class dataProgramStudiDao:
         self.connection = Database(MONGO_DB)
 
     def get_prodi(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Program Studi")
+        print(f"{'[ DAO ]':<25} Get Program Studi")
         if session['user']['role'] == "ADMIN":
             result = self.connection.find_many(
                 db_prodi, 
@@ -22,7 +22,7 @@ class dataProgramStudiDao:
         return result['data'] if result and result.get('status') else []
     
     def post_prodi(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} Post Prodi (session['user']: {params})")
+        print(f"{'[ DAO ]':<25} Post Prodi (session['user']: {params})")
         result = { 'status': False }
 
         try:
@@ -58,13 +58,13 @@ class dataProgramStudiDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
     
     def put_prodi(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} Put Prodi (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Put Prodi (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -107,13 +107,13 @@ class dataProgramStudiDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result
     
     def user_validation(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} User Validation")
+        print(f"{'[ DAO ]':<25} User Validation")
         result = { 'status': False }
 
         try:
@@ -141,7 +141,7 @@ class dataProgramStudiDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result

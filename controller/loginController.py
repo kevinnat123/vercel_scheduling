@@ -11,14 +11,14 @@ loginDao = loginDao()
             
 @signin.route("/")
 def home():
-    print(f"{'[ THROW ]':<15} Login Page / Dashboard")
+    print(f"{'[ THROW ]':<25} Login Page / Dashboard")
     if session.get('user') and 'u_id' in session['user']:
         return redirect(url_for('dashboard.dashboard_index'))
     return redirect(url_for('signin.login'))
     
 @signin.route("/login", methods=['GET', 'POST'])
 def login():
-    print(f"{'[ CONTROLLER ]':<15} Login (Method: {request.method})")
+    print(f"{'[ CONTROLLER ]':<25} Login (Method: {request.method})")
     if session.get('user') and 'u_id' in session['user']:
         return redirect(url_for('dashboard.dashboard_index'))
     
@@ -42,9 +42,9 @@ def login():
             session.permanent = True  # Aktifkan waktu hidup session
             session.modified = True
 
-            print(f"{'':<15} {'Session Academic_Details':<30}: {session['academic_details']}\n")
-            print(f"{'':<15} {'Session Menu':<30}: {session['menu']}\n")
-            print(f"{'':<15} {'Session LastSync':<30}: {session['last_sync']}\n")
+            print(f"{'':<25} {'Session Academic_Details':<30}: {session['academic_details']}\n")
+            print(f"{'':<25} {'Session Menu':<30}: {session['menu']}\n")
+            print(f"{'':<25} {'Session LastSync':<30}: {session['last_sync']}\n")
             return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
             # return jsonify({'status': True, 'redirect_url': url_for('dashboard.dashboard_index')}), 200
 
@@ -54,7 +54,7 @@ def login():
 # @signin.route("/dashboard")
 # @login_required
 # def dashboard():
-#     print(f"{'[ RENDER ]':<15} Dashboard")
+#     print(f"{'[ RENDER ]':<25} Dashboard")
 
 #     # Pastikan session masih valid
 #     if not session.get('user') or 'u_id' not in session['user']:
@@ -87,12 +87,12 @@ def login():
 
 def session_generator():
     user_id = session['user']['u_id']
-    print(f"{'':<15} Session Generator (Old User Id: {user_id})")
+    print(f"{'':<25} Session Generator (Old User Id: {user_id})")
     updated_user = loginDao.get_user(user_id)
     
     if updated_user:
         session["user"] = updated_user["data"]
-        print(f"{'':<15} {'New User Session':<30}: {session['user']}")
+        print(f"{'':<25} {'New User Session':<30}: {session['user']}")
 
         list_prodi = loginDao.get_prodi()
         session['user']['list_prodi'] = list_prodi
@@ -100,6 +100,7 @@ def session_generator():
         session['last_sync'] = datetime.now(timezone.utc)
         session.modified = True
     else:
+        print(f"{'':<25} 🚫 User tidak valid di database")
         session.clear()  # Pastikan semua session terhapus
         return redirect(url_for('signin.logout'))
 
@@ -139,7 +140,7 @@ def get_academic_details():
 @signin.route("/404NotFound")
 @login_required
 def error404():
-    print(f"{'[ RENDER ]':<15} Error 404")
+    print(f"{'[ RENDER ]':<25} Error 404")
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
@@ -148,7 +149,7 @@ def error404():
 @signin.route("/403Forbidden")
 @login_required
 def error403():
-    print(f"{'[ RENDER ]':<15} Error 403")
+    print(f"{'[ RENDER ]':<25} Error 403")
     if not session.get('user') or 'u_id' not in session['user']:
         return redirect(url_for('signin.login'))
 
@@ -156,7 +157,7 @@ def error403():
 
 @signin.route("/logout")
 def logout():
-    print(f"{'[ THROW ]':<15} Logout")
+    print(f"{'[ THROW ]':<25} Logout")
     logout_user()
     session.clear()  # Pastikan semua session terhapus
     return redirect(url_for('signin.login'))

@@ -12,7 +12,7 @@ class dataMataKuliahDao:
         self.connection = Database(MONGO_DB)
 
     def put_kelompok(self, nama_baru):
-        print(f"{'':<7}{'[ DAO ]':<8} Put Kelompok (Data Baru: {nama_baru})")
+        print(f"{'[ DAO ]':<25} Put Kelompok (Data Baru: {nama_baru})")
         result = { 'status': False }
         try:
             if nama_baru.upper() in session['user']['kelompok_matkul']:
@@ -28,14 +28,14 @@ class dataMataKuliahDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         session.modified = True  # Pastikan perubahan tersimpan
         return result
     
     def get_matkul(self):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul")
+        print(f"{'[ DAO ]':<25} Get Matkul")
         if session['user']['role'] == "KEPALA PROGRAM STUDI":
             result = self.connection.find_many(
                 db_matkul, 
@@ -53,7 +53,7 @@ class dataMataKuliahDao:
         return result['data'] if result and result.get('status') else []
     
     def get_matkul_by_prodi(self, prodi=""):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul By Prodi (prodi: {prodi})")
+        print(f"{'[ DAO ]':<25} Get Matkul By Prodi (prodi: {prodi})")
         result = self.connection.find_many(
             db_matkul, 
             {'prodi': prodi}, 
@@ -67,7 +67,7 @@ class dataMataKuliahDao:
         return result['data'] if result and result.get('status') else []
     
     def get_matkul_by_kode(self, list_kode=[]):
-        print(f"{'':<7}{'[ DAO ]':<8} Get Matkul By Kode (list_kode: {str(list_kode)})")
+        print(f"{'[ DAO ]':<25} Get Matkul By Kode (list_kode: {str(list_kode)})")
         result = self.connection.find_many(
             db_matkul, 
             { 'kode': {'$in': list_kode} }, 
@@ -81,7 +81,7 @@ class dataMataKuliahDao:
         return result['data'] if result and result.get('status') else []
     
     def post_matkul(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} Post Matkul (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Post Matkul (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -141,14 +141,14 @@ class dataMataKuliahDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
-        print(f"{'':<15} Result: {result}")
+        print(f"{'':<25} Result: {result}")
         return result
     
     def put_matkul(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} Put Matkul (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Put Matkul (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -232,14 +232,14 @@ class dataMataKuliahDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
-        print(f"{'':<15} Result: {result}")
+        print(f"{'':<25} Result: {result}")
         return result
     
     def delete_matkul(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} Delete Matkul (Parameter: {params})")
+        print(f"{'[ DAO ]':<25} Delete Matkul (Parameter: {params})")
         result = { 'status': False }
 
         try:
@@ -288,7 +288,7 @@ class dataMataKuliahDao:
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
-            print(f"{'':<15} Error: {e}")
+            print(f"{'':<25} Error: {e}")
             result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
 
         return result

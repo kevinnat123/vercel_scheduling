@@ -8,7 +8,7 @@ dashboardDao = dashboardDao()
 @dashboard.route("/dashboard")
 @login_required
 def dashboard_index():
-    print(f"{'[ RENDER ]':<15} Dashboard (Role: {session['user']['role']})")
+    print(f"{'[ RENDER ]':<25} Dashboard (Role: {session['user']['role']})")
     if session['user']['role'] == 'KEPALA PROGRAM STUDI':
         return render_template(
                 '/kaprodi/dashboard.html', 
@@ -39,7 +39,7 @@ def dashboard_index():
 @dashboard.route("/update_general", methods=['POST'])
 @login_required
 def dashboardKaprodi_updateGeneral():
-    print(f"{'[ CONTROLLER ]':<15} Update General")
+    print(f"{'[ CONTROLLER ]':<25} Update General")
     req = request.get_json('data')
 
     result = dashboardDao.update_general(req)
@@ -52,7 +52,7 @@ def dashboardKaprodi_updateGeneral():
 @dashboard.route("/update_kelompok_matkul", methods=['POST'])
 @login_required
 def dashboardKaprodi_updateKelompokMatkul():
-    print(f"{'[ CONTROLLER ]':<15} Update Kelompok Matkul")
+    print(f"{'[ CONTROLLER ]':<25} Update Kelompok Matkul")
     
     req = request.get_json('data')
 
@@ -63,7 +63,7 @@ def dashboardKaprodi_updateKelompokMatkul():
 @dashboard.route("/update_bidang_minat", methods=['POST'])
 @login_required
 def dashboardKaprodi_updateBidangMinat():
-    print(f"{'[ CONTROLLER ]':<15} Update Bidang Minat")
+    print(f"{'[ CONTROLLER ]':<25} Update Bidang Minat")
     
     req = request.get_json('data')
 
@@ -74,7 +74,7 @@ def dashboardKaprodi_updateBidangMinat():
 @dashboard.route("/update_os", methods=['POST'])
 @login_required
 def dashboardLaboran_updateOs():
-    print(f"{'[ CONTROLLER ]':<15} Update OS")
+    print(f"{'[ CONTROLLER ]':<25} Update OS")
     
     req = request.get_json('data')
 
@@ -85,7 +85,7 @@ def dashboardLaboran_updateOs():
 @dashboard.route("/update_processor", methods=['POST'])
 @login_required
 def dashboardLaboran_updateProcessor():
-    print(f"{'[ CONTROLLER ]':<15} Update Processor")
+    print(f"{'[ CONTROLLER ]':<25} Update Processor")
     
     req = request.get_json('data')
 
@@ -96,7 +96,7 @@ def dashboardLaboran_updateProcessor():
 @dashboard.route("/update_prodi", methods=['POST'])
 @login_required
 def dashboardLaboran_updateProdi():
-    print(f"{'[ CONTROLLER ]':<15} Update Prodi")
+    print(f"{'[ CONTROLLER ]':<25} Update Prodi")
     
     req = request.get_json('data')
 

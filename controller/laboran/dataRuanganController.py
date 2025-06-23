@@ -8,7 +8,7 @@ dao = dataRuanganDao()
 @dataRuangan.route("/data_ruangan")
 @login_required
 def dataRuangan_index():
-    print(f"{'[ RENDER ]':<15} Ruang Kelas (Role: {session['user']['role']})")
+    print(f"{'[ RENDER ]':<25} Ruang Kelas (Role: {session['user']['role']})")
     if session['user']['role'] != 'LABORAN' and session['user']['role'] != "ADMIN":
         return redirect(url_for('signin.error403'))
     else:
@@ -21,14 +21,14 @@ def dataRuangan_index():
 @dataRuangan.route("/data_ruangan/get_kelas", methods=['GET'])
 @login_required
 def dataRuangan_get_kelas():
-    print(f"{'[ CONTROLLER ]':<15} Get Kelas")
+    print(f"{'[ CONTROLLER ]':<25} Get Kelas")
     data = dao.get_kelas()
     return jsonify({ "data": data })
     
 @dataRuangan.route("/data_ruangan/post_kelas", methods=['POST'])
 @login_required
 def dataRuangan_post_kelas():
-    print(f"{'[ CONTROLLER ]':<15} Post Kelas")
+    print(f"{'[ CONTROLLER ]':<25} Post Kelas")
     req = request.get_json('data')
     data = dao.post_kelas(req)
     return jsonify( data )
@@ -36,7 +36,7 @@ def dataRuangan_post_kelas():
 @dataRuangan.route("/data_ruangan/put_kelas", methods=['POST'])
 @login_required
 def dataRuangan_put_kelas():
-    print(f"{'[ CONTROLLER ]':<15} Put Kelas")
+    print(f"{'[ CONTROLLER ]':<25} Put Kelas")
     req = request.get_json('data')
     data = dao.put_kelas(req)
     return jsonify( data )
@@ -44,7 +44,7 @@ def dataRuangan_put_kelas():
 @dataRuangan.route("/data_ruangan/delete_kelas", methods=['POST'])
 @login_required
 def dataRuangan_delete_kelas():
-    print(f"{'[ CONTROLLER ]':<15} Delete Kelas")
+    print(f"{'[ CONTROLLER ]':<25} Delete Kelas")
     req = request.get_json('data')
     data = dao.delete_kelas(req)
     return jsonify( data )
