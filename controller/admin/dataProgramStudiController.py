@@ -43,6 +43,14 @@ def program_studi_post_program_studi() -> Response:
     data = dao.post_prodi(req)
     return jsonify( data )
 
+@program_studi.route("/data_program_studi/put_program_studi", methods=['POST'])
+@login_required
+def program_studi_put_program_studi() -> Response:
+    print(f"{'[ CONTROLLER ]':<15} put Program Studi")
+    req = request.get_json('data')
+    data = dao.put_prodi(req)
+    return jsonify( data )
+
 @program_studi.route("/data_program_studi/verifikasi_user", methods=['GET'])
 @login_required
 def program_studi_verifikasi_user() -> Response:

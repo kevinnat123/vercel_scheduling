@@ -285,6 +285,8 @@
 <!-- MODAL LOV DOSEN END -->
 {% endblock %} {% block script %}
 <script>
+  var old_prodi_name = null;
+
   $(document).ready(function () {
     $("#modal-verifikasiUser").on("shown.bs.modal", function () {
       $("#verifikasiUser-nip").click().focus();
@@ -337,6 +339,7 @@
 
     if (data) {
       // $("#input_fakultas").val(data.fakultas);
+      old_prodi_name = data.program_studi;
       $("#input_prodi").val(data.program_studi);
       $("#" + data.status_aktif).prop("checked", true);
       if (data.kepala_program_studi)
@@ -347,7 +350,6 @@
   }
 
   $("#btn-simpan").on("click", function () {
-    console.warn("button clicked");
     if (!$("#input_prodi").val()) {
       popUpTimer("error", "Nama Program Studi belum diisi!");
       setTimeout(() => {
@@ -379,7 +381,7 @@
         hideLoading();
       },
       success: async function (res) {
-        console.log("[ post_dosen ] ", res);
+        console.log("[ post_prodi ] ", res);
         if (res.status === false && res.reVerify) {
           verificationRes = await verifikasiUserPromise()
             .then((result) => {
@@ -408,7 +410,67 @@
     });
   });
 
-  $("#btn-update").on("click", function () {});
+  $("#btn-update").on("click", function () {
+    if (!$("#input_prodi").val()) {
+      popUpTimer("error", "Nama Program Studi belum diisi!");
+      setTimeout(() => {
+        $("#input_prodi").focus();
+      }, 1500);
+      return;
+    } else if (!getCheckedItemValue("rbStatus")[0]) {
+      popUpTimer("error", "Status Program Studi belum diisi!");
+      setTimeout(() => {
+        $("input[name='rbStatus']").focus();
+      }, 1500);
+      return;
+    }
+
+    let params = {
+      old_program_studi: old_prodi_name,
+      program_studi: $("#input_prodi").val(),
+      status_aktif: getCheckedItemValue("rbStatus")[0],
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/data_program_studi/put_program_studi",
+      cache: false,
+      data: JSON.stringify(params),
+      beforeSend: () => {
+        showLoading();
+      },
+      complete: () => {
+        hideLoading();
+      },
+      success: async function (res) {
+        console.log("[ put_prodi ] ", res);
+        if (res.status === false && res.reVerify) {
+          verificationRes = await verifikasiUserPromise()
+            .then((result) => {
+              return result.status;
+            })
+            .catch((error) => {
+              if (error.message) popUpTimer("error", error.message);
+              return error.status;
+            });
+
+          if (verificationRes) $("#btn-update").click();
+        }
+
+        if (res.status === false) {
+          if (res.message) await popUpTimer("error", res.message);
+          if (res.target)
+            setTimeout(() => {
+              $("#" + res.target).focus();
+            }, 1500);
+        } else {
+          $("#btn-batal").click();
+          popUpTimer("success", res.message);
+          prodi_tab.ajax.reload(null, false);
+        }
+      },
+    });
+  });
 
   $("#input_kaprodi").on("keydown", function (event) {
     if (event.key == "Backspace") $(this).val("");

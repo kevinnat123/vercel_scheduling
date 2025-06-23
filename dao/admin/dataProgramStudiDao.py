@@ -5,8 +5,6 @@ from werkzeug.security import check_password_hash
 
 from global_func import CustomError
 
-parameter = dict()
-
 class dataProgramStudiDao:
     def __init__(self):
         self.connection = Database(MONGO_DB)
@@ -24,12 +22,12 @@ class dataProgramStudiDao:
         return result['data'] if result and result.get('status') else []
     
     def post_prodi(self, params: dict):
-        print(f"{'':<7}{'[ DAO ]':<8} Post Prodi (Parameter: {params})")
+        print(f"{'':<7}{'[ DAO ]':<8} Post Prodi (session['user']: {params})")
         result = { 'status': False }
 
         try:
-            print('parameter akses', parameter.get('akses'))
-            if not parameter.get('akses', False):
+            print('session akses', session['user'].get('akses'))
+            if not session['user'].get('akses', False):
                 raise CustomError({ 'reVerify': True })
                 
             if session['user']['role'] != "ADMIN":
@@ -65,13 +63,61 @@ class dataProgramStudiDao:
 
         return result
     
+    def put_prodi(self, params: dict):
+        print(f"{'':<7}{'[ DAO ]':<8} Put Prodi (Parameter: {params})")
+        result = { 'status': False }
+
+        try:
+            print('session akses', session['user'].get('akses'))
+            if not session['user'].get('akses', False):
+                raise CustomError({ 'reVerify': True })
+                
+            if session['user']['role'] not in ["ADMIN"]:
+                raise CustomError({ 'message': 'Anda tidak berhak!' })
+
+            if not params.get('program_studi'):
+                raise CustomError({ 'message': 'Nama Program Studi belum diisi!', 'target': 'input_prodi' })
+            elif not params.get('status_aktif'):
+                raise CustomError({ 'message': 'Status Program Studi belum diisi!' })
+            
+            # Check exist
+            old_program_studi = params.get('old_program_studi')
+            isExist = self.connection.find_one(db_prodi, {'program_studi': old_program_studi})
+            if (isExist['status'] == False and isExist['data'] == None):
+                raise CustomError({ 'message': 'Data prodi ' + params['program_studi'] + ' tidak ditemukan!' })
+
+            params["status_aktif"] = True if params.pop("status_aktif", None) == "AKTIF" else False
+            unset = {k: "" for k, v in params.items() if not v and k not in ["fakultas", "program_studi", "status_aktif"]}
+
+            params = {k: v for k, v in params.items() if v or k not in ["fakultas", "program_studi", "status_aktif"]}
+                
+            res = self.connection.update_one(
+                collection_name = db_prodi, 
+                filter          = {'program_studi': old_program_studi}, 
+                update_data     = params, 
+                unset_data      = unset
+            )
+            
+            if res['status'] == True:
+                result.update({ 'message': res['message'] })
+            else:
+                raise CustomError({ 'message': res['message'] })
+
+            result.update({ 'status': True })
+        except CustomError as e:
+            result.update( e.error_dict )
+        except Exception as e:
+            print(f"{'':<15} Error: {e}")
+            result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
+
+        return result
+    
     def user_validation(self, params: dict):
         print(f"{'':<7}{'[ DAO ]':<8} User Validation")
         result = { 'status': False }
 
         try:
-            print(params)
-            parameter["akses"] = False
+            session['user']["akses"] = False
 
             if not params.get("nip"):
                 raise CustomError({ 'message': 'NIP belum diisi!' })
@@ -79,11 +125,10 @@ class dataProgramStudiDao:
                 raise CustomError({ 'message': 'Password belum diisi!' })
             
             user = self.connection.find_one(db_user, {'u_id': params['nip']})
-            print(user)
             if user.get('status') and user["data"].get("role") in ["ADMIN"]:
                 stored_password = user["data"].get('password', '')
                 if check_password_hash(stored_password, params.get('password', '')):
-                    parameter['akses'] = True
+                    session['user']['akses'] = True
                 else:
                     raise CustomError({ 'message': "NIP atau password salah!" })
             elif not user.get('status'):
@@ -91,6 +136,7 @@ class dataProgramStudiDao:
             else:
                 raise CustomError({ 'message': 'Anda tidak berhak!' })
 
+            session.modified = True
             result.update({ 'status': True })
         except CustomError as e:
             result.update( e.error_dict )
