@@ -12,7 +12,10 @@ class loginDao:
         # # PYTHON 3.7.9 (Method Hash: "pbkdf2:sha256")
         # result = self.connection.insert_one(db_users, {'u_id': u_id, 'role': 'ADMIN', 'password': generate_password_hash(password, method='pbkdf2:sha256')})
         # DEFAULT HASH: "scrypt"
-        result = self.connection.insert_one(db_users, {'u_id': u_id, 'role': role.upper(), 'password': generate_password_hash(password)}, True)
+        result = self.connection.insert_one(
+            collection_name=db_users, 
+            data={'u_id': u_id, 'role': role.upper(), 'password': generate_password_hash(password, method='pbkdf2:sha256'), 'prodi': 'ASD'}
+        )
         return result
     
     def get_user_id(self, u_id):
@@ -60,6 +63,12 @@ class loginDao:
         user = self.connection.find_one(db_users, {"u_id": u_id})
         if user:
             user_data = user['data']
+            if user_data.get('role') == "KEPALA PROGRAM STUDI":
+                prodi_active = self.connection.find_one(db_prodi, {"program_studi": user_data.get('prodi')})
+                if prodi_active["status"] and not prodi_active["data"].get("status_aktif"):
+                    return {'status': False, 'message': 'Program Studi anda sudah di non-aktifkan!'}
+                elif not prodi_active["status"]:
+                    return {'status': False, 'message': 'Program Studi anda tidak ditemukan!'}
             stored_password = user_data.get('password', '')
             if check_password_hash(stored_password, password):
                 del user_data['password']

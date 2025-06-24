@@ -19,6 +19,7 @@ def home():
 @signin.route("/login", methods=['GET', 'POST'])
 def login():
     print(f"{'[ CONTROLLER ]':<25} Login (Method: {request.method})")
+    # loginDao.signUp(u_id="asd", role="KEPALA PROGRAM STUDI", password="asd")
     if session.get('user') and 'u_id' in session['user']:
         return redirect(url_for('dashboard.dashboard_index'))
     
@@ -27,7 +28,6 @@ def login():
         nip = req.get('nip')
         password = req.get('password')
 
-        # user = loginDao.signUp(nip, role="admin", password)
         user = loginDao.verify_user(nip, password)
 
         if user['status']:
