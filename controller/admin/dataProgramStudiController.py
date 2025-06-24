@@ -30,7 +30,6 @@ def program_studi_get_program_studi() -> Response:
     print(f"{'[ CONTROLLER ]':<25} Get Program Studi")
     data = dao.get_prodi()
     for prodi in data:
-        prodi['status_aktif'] = "AKTIF" if prodi["status_aktif"] else "NONAKTIF"
         if prodi.get("kepala_program_studi"):
             prodi["kepala_program_studi"] = dao_dosen.get_dosen_by_nip(prodi["kepala_program_studi"]).get("nama", prodi.get('kepala_program_studi', None))
     return jsonify({ 'data': data })

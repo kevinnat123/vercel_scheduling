@@ -18,6 +18,7 @@ class dataProgramStudiDao:
             )
             if result and result.get('data'):
                 for data in result['data']:
+                    data['status_aktif'] = "AKTIF" if data["status_aktif"] else "NONAKTIF"
                     data.setdefault('kepala_program_studi', None)
         return result['data'] if result and result.get('status') else []
     
