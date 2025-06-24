@@ -205,46 +205,47 @@ class dataDosenDao:
         result = { 'status': False }
 
         try:
-            params = self.connection.find_many(
-                db_dosen, 
-                {'nip': { '$in' : [item['nip'] for item in params] }}, 
-                sort=[("kode", 1)]
-            )
-            if params and params.get('status'):
-                params = params['data']
-                list_nip = [d['nip'] for d in params]
-                list_prodi = [d['prodi'] for d in params]
-            else:
-                raise Exception
+            if session['user']['role'] not in ['ADMIN']:
+                params = self.connection.find_many(
+                    db_dosen, 
+                    {'nip': { '$in' : [item['nip'] for item in params] }}, 
+                    sort=[("kode", 1)]
+                )
+                if params and params.get('status'):
+                    params = params['data']
+                    list_nip = [d['nip'] for d in params]
+                    list_prodi = [d['prodi'] for d in params]
+                else:
+                    raise Exception
 
-            if session['user']['role'] == "KEPALA PROGRAM STUDI":
-                if any(prodi != session['user']['prodi'] for prodi in list_prodi):
-                    raise CustomError({ 'message': 'Anda mengubah program studi diluar program studi anda! (Input Anda: ' + str([prodi for prodi in list_prodi if prodi != session['user']['prodi']]) + ')' })
+                if session['user']['role'] == "KEPALA PROGRAM STUDI":
+                    if any(prodi != session['user']['prodi'] for prodi in list_prodi):
+                        raise CustomError({ 'message': 'Anda mengubah program studi diluar program studi anda! (Input Anda: ' + str([prodi for prodi in list_prodi if prodi != session['user']['prodi']]) + ')' })
 
-            for data_dosen in params:
-                matkul_ajar_dosen = data_dosen.get('matkul_ajar') or []
-                for matkul in matkul_ajar_dosen:
-                    data_matkul = self.connection.find_one(db_matkul, {'nama': matkul})
-                    if data_matkul and data_matkul.get('status'):
-                        data_matkul = data_matkul['data']
-                        data_matkul['dosen_ajar'].remove(data_dosen['nama'])
-                        if data_matkul['dosen_ajar']:
-                            self.connection.update_one(db_matkul, {'nama': matkul}, {'dosen_ajar': data_matkul['dosen_ajar']})
+                for data_dosen in params:
+                    matkul_ajar_dosen = data_dosen.get('matkul_ajar') or []
+                    for matkul in matkul_ajar_dosen:
+                        data_matkul = self.connection.find_one(db_matkul, {'nama': matkul})
+                        if data_matkul and data_matkul.get('status'):
+                            data_matkul = data_matkul['data']
+                            data_matkul['dosen_ajar'].remove(data_dosen['nama'])
+                            if data_matkul['dosen_ajar']:
+                                self.connection.update_one(db_matkul, {'nama': matkul}, {'dosen_ajar': data_matkul['dosen_ajar']})
+                            else:
+                                self.connection.update_one(db_matkul, {'nama': matkul}, {}, {'dosen_ajar': ""})
                         else:
-                            self.connection.update_one(db_matkul, {'nama': matkul}, {}, {'dosen_ajar': ""})
-                    else:
-                        raise Exception
-                
-            res = self.connection.delete_many(
-                db_dosen, 
-                { 
-                    'nip' : { '$in': list_nip }, 
-                }
-            )
-            if res['status'] == False:
-                raise CustomError({ 'message': res['message'] })
-            else:
-                result.update({ 'status': True, 'message': res['message'] })
+                            raise Exception
+                    
+                res = self.connection.delete_many(
+                    db_dosen, 
+                    { 
+                        'nip' : { '$in': list_nip }, 
+                    }
+                )
+                if res['status'] == False:
+                    raise CustomError({ 'message': res['message'] })
+                else:
+                    result.update({ 'status': True, 'message': res['message'] })
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:
