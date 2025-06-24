@@ -15,17 +15,20 @@ class mataKuliahPilihanDao:
         print(f"{'[ DAO ]':<25} Get List Matkul Tersimpan (Prodi: {prodi})")
         if prodi:
             result = self.connection.find_many(
-                db_open_courses, 
-                {
-                    '$and': [
-                        {'prodi': session['user']['prodi']}, 
-                        {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }}
-                    ]
-                }, 
-                sort=[("angkatan", 1)] 
+                collection_name = db_open_courses, 
+                filter          = {
+                        '$and': [
+                            {'prodi': session['user']['prodi']}, 
+                            {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }}
+                        ]
+                    }, 
+                sort            = [ ("angkatan", 1) ] 
             )
         else:
-            result = self.connection.find_many(db_open_courses, sort=[("prodi", 1), ("angkatan", 1)] )
+            result = self.connection.find_many(
+                collection_name = db_open_courses, 
+                sort            = [ ("prodi", 1), ("angkatan", 1) ]
+            )
 
         if result and result.get('status'):
             for data in result['data']:
@@ -41,9 +44,9 @@ class mataKuliahPilihanDao:
     def get_bidang_minat(self, prodi):
         print(f"{'[ DAO ]':<25} Get Bidang Minat (Prodi: {prodi})")
         result = self.connection.find_one(
-            db_users, {'prodi': prodi}, 
+            collection_name = db_users, 
+            filter          = {'prodi': prodi}
         )
-        print('result', result)
         return result['data']['bidang_minat'] if result and result.get('status') and result['data'].get('bidang_minat') else []
 
     def post_matkul(self, params):
@@ -84,14 +87,20 @@ class mataKuliahPilihanDao:
                 'prodi': params['prodi']
             })
 
-            res = self.connection.find_one(db_open_courses, {'u_id': params['u_id']})
+            res = self.connection.find_one(
+                collection_name = db_open_courses, 
+                filter          = {'u_id': params['u_id']}
+            )
             if (res['status'] == True):
                 if not params.get('bidang_minat') and not res['data'].get('bidang_minat'):
                     raise CustomError({ 'message': f"Data matkul untuk angkatan {params['angkatan']} sudah ada!" })
                 elif params.get('bidang_minat') and (params['bidang_minat'] == res['data'].get('bidang_minat')):
                     raise CustomError({ 'message': f"Data matkul untuk angkatan {params['angkatan']} dengan bidang minat {params['bidang_minat']} sudah ada!" })
             
-            res = self.connection.insert_one(db_open_courses, params)
+            res = self.connection.insert_one(
+                collection_name = db_open_courses, 
+                data            = params
+            )
             if res['status'] == True:
                 result.update({ 'message': res['message'], 'data': params['u_id'] })
             else:
@@ -140,7 +149,10 @@ class mataKuliahPilihanDao:
                 'prodi': params['prodi']
             })
 
-            res = self.connection.find_one(db_open_courses, {'u_id': params['u_id']})
+            res = self.connection.find_one(
+                collection_name = db_open_courses, 
+                filter          = {'u_id': params['u_id']}
+            )
             if (res['status'] == True):
                 # CODE BAGIAN INI MEMUSINGKAN T_T
                 if res['data']['u_id'] != u_id and params['angkatan'] == res['data']['angkatan']:
@@ -151,7 +163,14 @@ class mataKuliahPilihanDao:
             elif (res['status'] == False):
                 raise CustomError({ 'message': 'Data matkul untuk angkatan ' + str(params['angkatan']) + ' belum ada!' })
             
-            res = self.connection.update_one(db_open_courses, {'u_id': params['u_id'], 'prodi': params['prodi']}, params)
+            res = self.connection.update_one(
+                collection_name = db_open_courses, 
+                filter          = {
+                        'u_id': params['u_id'], 
+                        'prodi': params['prodi']
+                    }, 
+                update_data     = params
+            )
             print(f"{'':<25} Update Result: {res}")
             if res['status'] == False:
                 raise CustomError({ 'message': res['message'] })
@@ -172,7 +191,10 @@ class mataKuliahPilihanDao:
         result = { 'status': False }
         
         try:
-            res = self.connection.delete_one(db_open_courses, {'u_id': req[5:].upper()})
+            res = self.connection.delete_one(
+                collection_name = db_open_courses, 
+                filter          = {'u_id': req[5:].upper()}
+            )
             if res['status'] == False:
                 raise CustomError({ 'message': res['message'] })
             else:

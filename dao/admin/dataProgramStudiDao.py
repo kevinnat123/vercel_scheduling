@@ -13,8 +13,8 @@ class dataProgramStudiDao:
         print(f"{'[ DAO ]':<25} Get Program Studi")
         if session['user']['role'] == "ADMIN":
             result = self.connection.find_many(
-                db_prodi, 
-                sort=[("status_aktif", -1), ("program_studi", 1)]
+                collection_name = db_prodi, 
+                sort            = [("status_aktif", -1), ("program_studi", 1)]
             )
             if result and result.get('data'):
                 for data in result['data']:
@@ -40,7 +40,9 @@ class dataProgramStudiDao:
                 raise CustomError({ 'message': 'Status Program Studi belum diisi!' })
             
             # Check exist
-            res = self.connection.find_one(db_prodi, {'program_studi': params['program_studi']})
+            res = self.connection.find_one(
+                collection_name = db_prodi, 
+                filter          = {'program_studi': params['program_studi']})
             if (res['status'] == True):
                 raise CustomError({ 'message': 'Data Program Studi sudah ada!' })
                 
@@ -48,7 +50,10 @@ class dataProgramStudiDao:
             params["status_aktif"] = True if params.pop("status_aktif", None) == "AKTIF" else False
             params = {k: v for k, v in params.items() if v or k == "status_aktif"}
                 
-            res = self.connection.insert_one(db_prodi, params)
+            res = self.connection.insert_one(
+                collection_name = db_prodi, 
+                data            = params
+            )
 
             if res['status'] == True:
                 result.update({ 'message': res['message'] })
@@ -83,7 +88,10 @@ class dataProgramStudiDao:
             
             # Check exist
             old_program_studi = params.get('old_program_studi')
-            isExist = self.connection.find_one(db_prodi, {'program_studi': old_program_studi})
+            isExist = self.connection.find_one(
+                collection_name = db_prodi, 
+                filter          = {'program_studi': old_program_studi}
+            )
             if (isExist['status'] == False and isExist['data'] == None):
                 raise CustomError({ 'message': 'Data prodi ' + params['program_studi'] + ' tidak ditemukan!' })
 
@@ -125,7 +133,10 @@ class dataProgramStudiDao:
             elif not params.get("password"):
                 raise CustomError({ 'message': 'Password belum diisi!' })
             
-            user = self.connection.find_one(db_user, {'u_id': params['nip']})
+            user = self.connection.find_one(
+                collection_name = db_user, 
+                filter          = {'u_id': params['nip']}
+            )
             if user.get('status') and user["data"].get("role") in ["ADMIN"]:
                 stored_password = user["data"].get('password', '')
                 if check_password_hash(stored_password, params.get('password', '')):

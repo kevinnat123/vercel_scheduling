@@ -14,7 +14,10 @@ class dataRuanganDao:
     def get_kelas(self):
         print(f"{'[ DAO ]':<25} Get Kelas")
         if session['user']['role'] in ["ADMIN", "LABORAN"]:
-            result = self.connection.find_many(db_kelas, {}, sort=[("kode", 1)])
+            result = self.connection.find_many(
+                collection_name = db_kelas, 
+                sort            = [ ("kode", 1) ]
+            )
             for kelas in result['data']:
                 toCheck = copy.deepcopy(session['user']['list_prodi'])
                 toCheck.extend(["GENERAL"])
@@ -34,7 +37,10 @@ class dataRuanganDao:
             elif not params.get('kapasitas'):
                 raise CustomError({ 'message': 'Kapasitas Ruangan belum diisi!' })
             
-            isExist = self.connection.find_one(db_kelas, {'kode': params['kode']})
+            isExist = self.connection.find_one(
+                collection_name = db_kelas, 
+                filter          = {'kode': params['kode']}
+            )
             if isExist['status'] == True:
                 raise CustomError({ 'message': f"Data dengan Kode Ruangan {params['kode']} sudah ada!" })
 
@@ -49,7 +55,10 @@ class dataRuanganDao:
             #         params.pop(x, None)
             params = {k: v for k, v in params.items() if v}
 
-            res = self.connection.insert_one(db_kelas, params)
+            res = self.connection.insert_one(
+                collection_name = db_kelas, 
+                data            = params
+            )
             if res['status'] == True:
                 result.update({ 'status': True, 'message': res['message'] })
             else:
@@ -74,7 +83,10 @@ class dataRuanganDao:
             elif not params.get('kapasitas'):
                 raise CustomError({ 'message': 'Kapasitas Ruangan belum diisi!' })
             
-            isExist = self.connection.find_one(db_kelas, {'kode': params['kode']})
+            isExist = self.connection.find_one(
+                collection_name = db_kelas, 
+                filter          = {'kode': params['kode']}
+            )
             if isExist['status'] == False:
                 raise CustomError({ 'message': f"Data dengan Kode Ruangan {params['kode']} tidak ada!" })
 
@@ -91,7 +103,12 @@ class dataRuanganDao:
             #         if x not in unset: unset[x] = ""
             params = {k: v for k, v in params.items() if v}
 
-            res = self.connection.update_one(db_kelas, {'kode': params['kode']}, params, unset)
+            res = self.connection.update_one(
+                collection_name = db_kelas, 
+                filter          = {'kode': params['kode']}, 
+                update_data     = params, 
+                unset_data      = unset
+            )
             if res['status'] == True:
                 result.update({ 'status': True, 'message': res['message'] })
             else:
@@ -112,8 +129,8 @@ class dataRuanganDao:
             list_kode = [data["kode"] for data in params]
             
             res = self.connection.delete_many(
-                db_kelas, 
-                {'kode': { '$in': list_kode }}
+                collection_name = db_kelas, 
+                filter          = {'kode': { '$in': list_kode }}
             )
             if res['status'] == True:
                 result.update({ 'status': True, 'message': res['message'] })

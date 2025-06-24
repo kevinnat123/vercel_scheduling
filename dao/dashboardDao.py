@@ -9,9 +9,15 @@ class dashboardDao:
     def get_user(self, u_id=None, prodi=None):
         print(f"{'[ DAO ]':<25} Get User (u_id: {u_id})")
         if u_id:
-            result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
+            result = self.connection.find_one(
+                collection_name = db_users, 
+                filter          = {"u_id": u_id.upper()}
+            )
         elif prodi:
-            result = self.connection.find_one(db_users, {'prodi': prodi})
+            result = self.connection.find_one(
+                collection_name = db_users, 
+                filter          = {'prodi': prodi}
+            )
         return result if result and result.get('status') else None
 
     def update_general(self, params):
@@ -24,7 +30,11 @@ class dashboardDao:
                         return {'status': False, 'message': 'Beban SKS terlalu banyak!'}
                     update_data = {'maks_sks_prodi': params['maks_sks']}
 
-                result = self.connection.update_one(db_users, { 'u_id': session['user']['u_id'] }, update_data)
+                result = self.connection.update_one(
+                    collection_name = db_users, 
+                    filter          = { 'u_id': session['user']['u_id'] }, 
+                    update_data     = update_data
+                )
                 if result and result.get('status') == True:
                     session['user']['maks_sks_prodi'] = params['maks_sks']
                     session.modified = True  # Pastikan perubahan tersimpan
@@ -43,7 +53,10 @@ class dashboardDao:
         else:
             return {'status': False, 'message': 'Data tidak valid'}
 
-        updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'kelompok_matkul': newGroup})
+        updateData = self.connection.update_one(
+            collection_name = db_users, 
+            filter          = {'u_id': session['user']['u_id']}, 
+            update_data     = {'kelompok_matkul': newGroup})
         
         if updateData and updateData['status']:
             session['user']['kelompok_matkul'] = newGroup
@@ -63,13 +76,20 @@ class dashboardDao:
         else:
             return {'status': False, 'message': 'Data tidak valid'}
 
-        updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'bidang_minat': newGroup})
+        updateData = self.connection.update_one(
+            collection_name = db_users, 
+            filter          = {'u_id': session['user']['u_id']}, 
+            update_data     = {'bidang_minat': newGroup}
+        )
 
         if updateData and updateData['status']:
             session['user']['bidang_minat'] = newGroup
             session.modified = True
         else:
-            self.connection.find_one(db_users, {'u_id': session['user']['u_id']})
+            self.connection.find_one(
+                collection_name = db_users, 
+                filter          = {'u_id': session['user']['u_id']}
+            )
 
         return {'status': updateData.get('status'), 'message': updateData.get('message')}
     
@@ -83,7 +103,11 @@ class dashboardDao:
         else:
             return {'status': False, 'message': 'Data tidak valid'}
 
-        updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'list_os': newGroup})
+        updateData = self.connection.update_one(
+            collection_name = db_users, 
+            filter          = {'u_id': session['user']['u_id']}, 
+            update_data     = {'list_os': newGroup}
+        )
         
         if updateData and updateData['status']:
             session['user']['list_os'] = newGroup
@@ -101,7 +125,11 @@ class dashboardDao:
         else:
             return {'status': False, 'message': 'Data tidak valid'}
 
-        updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'list_processor': newGroup})
+        updateData = self.connection.update_one(
+            collection_name = db_users, 
+            filter          = {'u_id': session['user']['u_id']}, 
+            update_data     = {'list_processor': newGroup}
+        )
         
         if updateData and updateData['status']:
             session['user']['list_processor'] = newGroup
@@ -119,7 +147,11 @@ class dashboardDao:
         else:
             return {'status': False, 'message': 'Data tidak valid'}
 
-        updateData = self.connection.update_one(db_users, {'u_id': session['user']['u_id']}, {'list_prodi': newGroup})
+        updateData = self.connection.update_one(
+            collection_name = db_users, 
+            filter          = {'u_id': session['user']['u_id']}, 
+            update_data     = {'list_prodi': newGroup}
+        )
         
         if updateData and updateData['status']:
             session['user']['list_prodi'] = newGroup

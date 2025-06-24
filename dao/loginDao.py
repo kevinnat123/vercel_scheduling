@@ -13,19 +13,30 @@ class loginDao:
         # result = self.connection.insert_one(db_users, {'u_id': u_id, 'role': 'ADMIN', 'password': generate_password_hash(password, method='pbkdf2:sha256')})
         # DEFAULT HASH: "scrypt"
         result = self.connection.insert_one(
-            collection_name=db_users, 
-            data={'u_id': u_id, 'role': role.upper(), 'password': generate_password_hash(password, method='pbkdf2:sha256'), 'prodi': 'ASD'}
+            collection_name = db_users, 
+            data            = {
+                    'u_id': u_id, 
+                    'role': role.upper(), 
+                    'password': generate_password_hash(password, method='pbkdf2:sha256'), 
+                    'prodi': 'ASD'
+                }
         )
         return result
     
     def get_user_id(self, u_id):
         print(f"{'[ DAO ]':<25} Get User ID: {u_id}")
-        result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
+        result = self.connection.find_one(
+            collection_name = db_users, 
+            filter          = {"u_id": u_id.upper()}
+        )
         return result['data']['u_id'] if result and result.get('status') else None
 
     def get_user(self, u_id):
         print(f"{'[ DAO ]':<25} Get User: {u_id}")
-        result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
+        result = self.connection.find_one(
+            collection_name = db_users, 
+            filter          = {"u_id": u_id.upper()}
+        )
         if result and result.get('status'):
             del result["data"]["password"]
         return result if result and result.get('status') else None
@@ -33,7 +44,10 @@ class loginDao:
     def get_prodi(self):
         print(f"{'[ DAO ]':<25} Get Prodi")
         if session['user']['role'] in ["ADMIN", "LABORAN"]:
-            result = self.connection.find_many(db_prodi, {"status_aktif": True})
+            result = self.connection.find_many(
+                collection_name = db_prodi, 
+                filter          = {"status_aktif": True}
+            )
             if result and result.get('status'):
                 list_prodi = [data["program_studi"] for data in result["data"] if data["status_aktif"] == True]
                 return list_prodi
@@ -43,7 +57,11 @@ class loginDao:
     
     def get_menu(self, role):
         print(f"{'[ DAO ]':<25} get menu: {role}")
-        user_menu = self.connection.find_many(db_urls, {"role": role})
+        user_menu = self.connection.find_many(
+            collection_name = db_urls, 
+            filter          = {"role": role}
+        )
+        # Sort menu berdasarkan main role
         final_menu = []
         secondary = []
         if user_menu and user_menu.get('status') and user_menu.get('data'):
@@ -60,11 +78,17 @@ class loginDao:
 
     def verify_user(self, u_id, password):
         print(f"{'[ DAO ]':<25} Verify User: {u_id}, {password}")
-        user = self.connection.find_one(db_users, {"u_id": u_id})
+        user = self.connection.find_one(
+            collection_name = db_users, 
+            filter          = {"u_id": u_id}
+        )
         if user:
             user_data = user['data']
             if user_data.get('role') == "KEPALA PROGRAM STUDI":
-                prodi_active = self.connection.find_one(db_prodi, {"program_studi": user_data.get('prodi')})
+                prodi_active = self.connection.find_one(
+                    collection_name = db_prodi, 
+                    filter          = {"program_studi": user_data.get('prodi')}
+                )
                 if prodi_active["status"] and not prodi_active["data"].get("status_aktif"):
                     return {'status': False, 'message': 'Program Studi anda sudah di non-aktifkan!'}
                 elif not prodi_active["status"]:

@@ -13,17 +13,26 @@ class generateJadwalDao:
 
     def get_dosen(self):
         print(f"{'[ DAO ]':<25} Get Dosen")
-        result = self.connection.find_many(db_dosen)
+        result = self.connection.find_many(
+            collection_name = db_dosen
+        )
         return result['data'] if result and result.get('status') else []
     
     def get_simpanan_prodi(self, list_prodi: list = []):
         print(f"{'[ DAO ]':<25} Get Simpanan Prodi")
-        data_simpanan = self.connection.find_many(db_matkul_simpanan, {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }})
+        data_simpanan = self.connection.find_many(
+            collection_name = db_matkul_simpanan, 
+            filter          = {
+                    'u_id': { 
+                        "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() 
+                    }
+                }
+        )
         prodi_done = [data["u_id"].split('_')[2] for data in data_simpanan["data"]] if data_simpanan and data_simpanan.get('status') else []
         final_data = []
         for prodi in list_prodi:
             final_data.append({
-                "prodi": prodi, 
+                "prodi" : prodi, 
                 "status": True if (prodi.split()[0] + ''.join(hrf[0] for hrf in prodi.split()[1:])) in prodi_done else False
             })
         return sorted(final_data, key=lambda x: x["status"], reverse=True)
@@ -31,7 +40,14 @@ class generateJadwalDao:
     
     def get_open_matkul(self):
         print(f"{'[ DAO ]':<25} Get Matkul")
-        result = self.connection.find_many(db_matkul_simpanan, {'u_id': { "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() }})
+        result = self.connection.find_many(
+            collection_name = db_matkul_simpanan, 
+            filter          = {
+                    'u_id': { 
+                        "$regex": "^" + (session['academic_details']['tahun_ajaran_berikutnya'].replace("/","-") + "_" + session['academic_details']['semester_depan']).upper() 
+                    }
+                }
+        )
         list_matkul = []
         if result and result.get('status'):
             resultData = [data for data in result['data']] # [ [{}], [{}] ]
@@ -51,13 +67,18 @@ class generateJadwalDao:
     
     def get_kelas(self):
         print(f"{'[ DAO ]':<25} Get kelas")
-        result = self.connection.find_many(db_kelas)
+        result = self.connection.find_many(
+            collection_name = db_kelas
+        )
         return result['data'] if result and result.get('status') else []
 
     def get_jadwal(self):
         print(f"{'[ DAO ]':<25} Get jadwal")
         u_id = str(session['academic_details']['semester_depan']) + "_" + str(session['academic_details']['tahun_ajaran_berikutnya']).replace("/", "-")
-        result = self.connection.find_one(db_jadwal, {'u_id': u_id})
+        result = self.connection.find_one(
+            collection_name = db_jadwal, 
+            filter          = {'u_id': u_id}
+        )
         return result['data'] if result and result.get('status') else []
     
     def upload_jadwal(self, jadwal):
@@ -65,30 +86,39 @@ class generateJadwalDao:
         result = { 'status': False }
 
         try:
-            u_id = str(session['academic_details']['semester_depan']) + "_" + str(session['academic_details']['tahun_ajaran_berikutnya']).replace("/", "-")
-            res = self.connection.find_one(db_jadwal, {'u_id': u_id})
-            data = {
-                "u_id": u_id,
-                "jadwal": jadwal
-            }
-            if (res['status'] == True):
-                if session['user']['role'] == "ADMIN":
-                    res = self.connection.update_one(db_jadwal, {'u_id': data['u_id']}, data)
+            if session['user']['role'] == "ADMIN":
+                u_id = str(session['academic_details']['semester_depan']) + "_" + str(session['academic_details']['tahun_ajaran_berikutnya']).replace("/", "-")
+                res = self.connection.find_one(
+                    collection_name = db_jadwal, 
+                    filter          = {'u_id': u_id}
+                )
+                data = {
+                    "u_id": u_id,
+                    "jadwal": jadwal
+                }
+                if (res['status'] == True):
+                    res = self.connection.update_one(
+                        collection_name = db_jadwal, 
+                        filter          = {'u_id': data['u_id']}, 
+                        update_data     = data
+                    )
 
                     if res['status'] == True:
                         result.update({ 'message': 'Jadwal untuk semester ' + session['academic_details']['semester_depan'] + ' tahun ajaran ' + session['academic_details']['tahun_ajaran_berikutnya'] + ' berhasil diperbaharui!' })
                     else:
                         raise CustomError({ 'message': res['message'] })
-            else:
-                if session['user']['role'] == "ADMIN":
-                    res = self.connection.insert_one(db_jadwal, data)
+                else:
+                    res = self.connection.insert_one(
+                        collection_name = db_jadwal, 
+                        data            = data
+                    )
 
                     if res['status'] == True:
                         result.update({ 'message': 'Jadwal untuk semester ' + session['academic_details']['semester_depan'] + ' tahun ajaran ' + session['academic_details']['tahun_ajaran_berikutnya'] + ' berhasil ditambahkan!' })
                     else:
                         raise CustomError({ 'message': res['message'] })
 
-            result.update({ 'status': True })
+                result.update({ 'status': True })
         except CustomError as e:
             result.update( e.error_dict )
         except Exception as e:

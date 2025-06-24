@@ -9,7 +9,10 @@ class settingDao:
 
     def get_user(self, u_id):
         print(f"{'[ DAO ]':<25} Get User (u_id: {u_id})")
-        result = self.connection.find_one(db_users, {"u_id": u_id.upper()})
+        result = self.connection.find_one(
+            collection_name = db_users, 
+            filter          = {"u_id": u_id.upper()}
+        )
         return result if result and result.get('status') else None
 
     def register_new_password(self, oldPassword, newPassword, verifyNewPassword):
@@ -25,9 +28,9 @@ class settingDao:
                 
                 if (newPassword == verifyNewPassword):
                     register_user_password = self.connection.update_one(
-                        db_users, 
-                        { 'u_id': session['user']['u_id'] }, 
-                        { 'password': generate_password_hash(newPassword) }
+                        collection_name = db_users, 
+                        filter          = { 'u_id': session['user']['u_id'] }, 
+                        update_data     = { 'password': generate_password_hash(newPassword) }
                     )
                     if register_user_password and register_user_password['status']:
                         return {'status': True, 'message': 'Password berhasil disimpan!'}
