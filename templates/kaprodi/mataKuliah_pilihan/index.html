@@ -872,7 +872,6 @@
         .DataTable()
         .data()
         .toArray();
-      console.warn(inputData);
 
       if (cardId.slice(-3) === "ALL") slicedKey = cardId.slice(-3);
       else slicedKey = cardId.slice(-4); // Ambil tahun
@@ -1013,7 +1012,6 @@
         if (bidang_minat.length) {
           $("#input_bidang_minat").prop("disabled", false);
 
-          console.log(bidang_minat);
           await bidang_minat.forEach((element) => {
             $("#input_bidang_minat").append(
               `<option value="` + element + `">` + element + `</option>`
