@@ -24,7 +24,7 @@ def mataKuliahPilihan_index():
                 list_prodi = session['user']['list_prodi'],
                 maks_sks = int(session['user']['maks_sks_prodi'])
                     if session['user']['role'] == "KEPALA PROGRAM STUDI"
-                    else 0,
+                    else 20,
                 data_sebelum = dao.get_listMatkulTersimpan(session['user'].get('prodi'))
             )
     

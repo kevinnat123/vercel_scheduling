@@ -1,5 +1,6 @@
 from dao import Database
 from config import MONGO_DB, MONGO_COURSES_COLLECTION as db_courses, MONGO_OPEN_COURSES_COLLECTION as db_open_courses, MONGO_USERS_COLLECTION as db_users
+from config import MONGO_MAJOR_COLLECTION as db_prodi
 from flask import session
 
 from dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
@@ -44,10 +45,17 @@ class mataKuliahPilihanDao:
     def get_bidang_minat(self, prodi):
         print(f"{'[ DAO ]':<25} Get Bidang Minat (Prodi: {prodi})")
         result = self.connection.find_one(
-            collection_name = db_users, 
-            filter          = {'prodi': prodi}
+            collection_name = db_prodi, 
+            filter          = { 'program_studi': prodi }
         )
-        return result['data']['bidang_minat'] if result and result.get('status') and result['data'].get('bidang_minat') else []
+        if result and result.get('status'):
+            if result['data'].get('kelompok_matkul'):
+                bidang_minat = [
+                    " ".join(data.split()[2::]) for data in result['data']['kelompok_matkul'] 
+                    if data.startswith("BIDANG MINAT")
+                ]
+                return bidang_minat
+        return []
 
     def post_matkul(self, params):
         print(f"{'[ DAO ]':<25} Post Matkul (Parameter: {params})")
