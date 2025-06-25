@@ -22,6 +22,18 @@ class dataProgramStudiDao:
                     data.setdefault('kepala_program_studi', None)
         return result['data'] if result and result.get('status') else []
     
+    def get_prodi_by_kaprodi(self, nip):
+        print(f"{'[ DAO ]':<25} Get Program Studi By Kaprodi")
+        if session['user']['role'] in ["ADMIN", "KEPALA PROGRAM STUDI"]:
+            result = self.connection.find_one(
+                collection_name = db_prodi, 
+                filter          = { 'kepala_program_studi': nip }
+            )
+            if result and result.get('data'):
+                result['data']['status_aktif'] = "AKTIF" if result['data']["status_aktif"] else "NONAKTIF"
+                result['data'].setdefault('kepala_program_studi', None)
+        return result['data'] if result and result.get('status') else []
+    
     def post_prodi(self, params: dict):
         print(f"{'[ DAO ]':<25} Post Prodi (session['user']: {params})")
         result = { 'status': False }
