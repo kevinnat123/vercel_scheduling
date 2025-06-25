@@ -286,7 +286,6 @@
     });
 
     if (data_sebelum) generateDataContainers(data_sebelum);
-    if (prodi) changedProdi(prodi);
 
     $("#modal-matkul tbody").on("click", "tr", async function () {
       let row = matkul_lov.row(this).data();
@@ -348,23 +347,17 @@
       $("#input_bidang_minat").prop("disabled", true);
     }
 
-    if (prodi) {
-      $("#input_prodi").prop("disabled", true);
-      $("#input_prodi").val(prodi);
-    }
+    if (prodi) $("#input_prodi").prop("disabled", true);
 
     if (data) {
       $("#input_angkatan").val(data.angkatan);
       $("#input_jumlah_mahasiswa").val(data.jumlah_mahasiswa);
-      $("#input_prodi").val(data.prodi);
+      await $("#input_prodi").val(prodi ? prodi : data.prodi);
       $("#input_bidang_minat").children().filter(":not(.default)").remove(); // hapus semua list bidang_minat
-      await changedProdi(data.prodi);
+      await changedProdi($("#input_prodi").val());
       $("#input_bidang_minat").val(data.bidang_minat);
       matkul_tab.clear().rows.add(data.list_matkul).draw();
     }
-
-    if (!prodi && $("#input_prodi").val())
-      changedProdi($("#input_prodi").val());
 
     $("#card-form").prop("hidden", hidden ? true : false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -393,25 +386,30 @@
 
   function generateNewDataContainer(data) {
     let tableId = data.u_id + "_tab"; // data.u_id + data.bidang_minat?data.bidang_minat:'' + "_tab"
+    let slicedId = data.u_id.split("_");
+    let kode_prodi = "-" + slicedId[2];
+    let angkatan = "-" + (slicedId.length == 5 ? slicedId[4] : slicedId[3]);
 
-    let bidang_minat = data.bidang_minat
-      ? data.bidang_minat
-          .split(" ")
-          .map((word) => word[0])
-          .join("")
-      : "";
+    let bidang_minat =
+      "-" +
+      (data.bidang_minat
+        ? data.bidang_minat
+            .split(" ")
+            .map((word) => word[0])
+            .join("")
+        : "");
 
-    bidang = data.bidang_minat
+    let bidang = data.bidang_minat
       ? `
           <div class="form-group row align-items-center">
             <label for=${
-              "bidang_minat" + bidang_minat + data.angkatan
+              "bidang_minat" + kode_prodi + bidang_minat + angkatan
             } class="col-2 col-form-label text-end fw-bold">
                 Bidang Minat
             </label>
             <div class="col">
                 <input type="text" class="form-control" id=${
-                  "bidang_minat" + bidang_minat + data.angkatan
+                  "bidang_minat" + kode_prodi + bidang_minat + angkatan
                 }
                     value="${data.bidang_minat}" autocomplete="off" disabled />
             </div>
@@ -419,18 +417,18 @@
       `
       : ``;
 
-    program_studi = prodi
+    let program_studi = prodi
       ? ""
       : `
           <div class="form-group row align-items-center">
             <label for=${
-              "prodi" + bidang_minat + data.angkatan
+              "prodi" + kode_prodi + bidang_minat + angkatan
             } class="col-2 col-form-label text-end fw-bold">
                 Bidang Minat
             </label>
             <div class="col">
                 <input type="text" class="form-control" id=${
-                  "prodi" + bidang_minat + data.angkatan
+                  "prodi" + kode_prodi + bidang_minat + angkatan
                 }
                     value="${data.prodi}" autocomplete="off" disabled />
             </div>
@@ -472,25 +470,25 @@
                 <div class="form-group row align-items-center">
                     <div class="mt-2 d-flex justify-content-end align-items-center" style="padding-bottom: 10px">
                         <button type="button" id="${
-                          "simpan_group" + data.angkatan
+                          "simpan_group" + kode_prodi + angkatan
                         }" class="btn btn-primary me-2" style="display: none;">
                             <i class="fas fa-plus fa-fw"></i><span> Simpan Perubahan</span>
                         </button>
                         <button type="button" id="${
-                          "hapus_group" + data.angkatan
+                          "hapus_group" + kode_prodi + angkatan
                         }" class="btn btn-primary" style="display: none;">
                             <i class="fas fa-plus fa-fw"></i><span> Hapus Matkul</span>
                         </button>
                     </div>
 
                     <label for="${
-                      "angkatan" + bidang_minat + data.angkatan
+                      "angkatan" + kode_prodi + bidang_minat + angkatan
                     }" class="col-2 col-form-label text-end fw-bold">
                         Angkatan
                     </label>
                     <div class="col-2">
                         <input type="text" class="form-control text-center" id="${
-                          "angkatan" + bidang_minat + data.angkatan
+                          "angkatan" + kode_prodi + bidang_minat + angkatan
                         }"
                             value="${
                               data.angkatan
@@ -500,13 +498,16 @@
                     <div class="col"></div>
 
                     <label for="${
-                      "jumlah_mahasiswa" + bidang_minat + data.angkatan
+                      "jumlah_mahasiswa" + kode_prodi + bidang_minat + angkatan
                     }" class="col-4 col-form-label text-end">
                         Jumlah Mahasiswa Aktif
                     </label>
                     <div class="col-2">
                         <input type="text" class="form-control numberOnly" id="${
-                          "jumlah_mahasiswa" + bidang_minat + data.angkatan
+                          "jumlah_mahasiswa" +
+                          kode_prodi +
+                          bidang_minat +
+                          angkatan
                         }"
                             value="${
                               data.jumlah_mahasiswa
@@ -854,35 +855,39 @@
     if (cardId) {
       console.log("[ cardId ]", cardId);
       let cardElement = $("#" + cardId);
+      let slicedId = cardId.substring(5).split("_");
+
       let tableId = cardId.substring(5) + "_tab";
       let inputs = cardElement.find("input, select, textarea"); // Ambil semua input
+      let kode_prodi = slicedId[2];
+      let angkatan = slicedId.length == 5 ? slicedId[5] : slicedId[4];
 
-      let data = {};
+      let inputData = {};
       inputs.each(function () {
         let name = $(this).attr("id"); // Gunakan name atau id sebagai key
         let value = $(this).val();
-        data[name] = value;
+        inputData[name.split("-")[0]] = value;
       });
-      data["list_matkul"] = $("#" + tableId)
+      inputData["list_matkul"] = $("#" + tableId)
         .DataTable()
         .data()
         .toArray();
+      console.warn(inputData);
 
-      console.log("[ data ]", data);
       if (cardId.slice(-3) === "ALL") slicedKey = cardId.slice(-3);
       else slicedKey = cardId.slice(-4); // Ambil tahun
 
-      let cleanedData = Object.keys(data).reduce((acc, key) => {
-        const newKey = key.endsWith(slicedKey)
-          ? key.replace(new RegExp(slicedKey + "$"), "")
-          : key;
-        acc[newKey] = data[key];
-        return acc;
-      }, {}); // hapus tahun dari key data
-      console.log("[ cleanedData ]", cleanedData);
-      cleanedData["prodi"] = cleanedData["list_matkul"][0]["prodi"];
+      // let cleanedData = Object.keys(inputData).reduce((acc, key) => {
+      //   const newKey = key.endsWith(slicedKey)
+      //     ? key.replace(new RegExp(slicedKey + "$"), "")
+      //     : key;
+      //   acc[newKey] = inputData[key];
+      //   return acc;
+      // }, {}); // hapus tahun dari key inputData
+      // cleanedData["prodi"] = cleanedData["list_matkul"][0]["prodi"];
+      // console.log("[ cleanedData ]", cleanedData);
 
-      form_matkul(true, false, cleanedData);
+      form_matkul(true, false, inputData);
     }
   }
 
@@ -1008,6 +1013,7 @@
         if (bidang_minat.length) {
           $("#input_bidang_minat").prop("disabled", false);
 
+          console.log(bidang_minat);
           await bidang_minat.forEach((element) => {
             $("#input_bidang_minat").append(
               `<option value="` + element + `">` + element + `</option>`
