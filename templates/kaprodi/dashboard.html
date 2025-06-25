@@ -18,15 +18,15 @@
     <div class="card-content">
       <form role="form" class="form-horizontal" id="frmGeneral">
         <div class="form-group row">
-          <label for="input-maks_sks" class="col-3 col-form-label"
+          <label for="input-maks_sks" class="col-2 col-form-label"
             >Maks. SKS</label
           >
-          <div class="col">
+          <div class="col-2">
             <input
               type="text"
               class="form-control text-end numberOnly"
               id="input-maks_sks"
-              value="{{ session['user'].get('maks_sks_prodi') }}"
+              value="{{ maks_sks }}"
               autocomplete="off"
             />
           </div>
@@ -100,7 +100,7 @@
   </div>
 </div>
 
-<div class="card close-able" id="card-bidang_minat">
+<!-- <div class="card close-able" id="card-bidang_minat">
   <div class="card-body">
     <div class="row align-items-center justify-content-between mb-3">
       <h4 id="formTitle" class="col btn-toggle-card">
@@ -166,11 +166,12 @@
       </form>
     </div>
   </div>
-</div>
+</div> -->
 {% endblock %} {% block script %}
 <script>
   const list_matkul = JSON.parse(`{{ kelompok_matkul | tojson | safe }}`);
   const list_bidang_minat = JSON.parse(`{{ bidang_minat | tojson | safe }}`);
+  var maks_sks = "{{ maks_sks | safe }}";
   var json_matkul = list_matkul.map((kelompok) => ({
     kelompok_matkul: kelompok,
   }));
@@ -217,8 +218,7 @@
       success: async function (res) {
         if (res.status == false) popUpTimer("error", res.message);
         else {
-          $("#frmPassword")[0].reset();
-          $("#input-maks_sks").val(params["maks_sks"]);
+          $("#input-maks_sks").val(params.maks_sks);
           await popUpTimer("success", res.message);
         }
       },
@@ -233,15 +233,17 @@
   });
 
   function tambahKelompok(data) {
-    let newData = String(data).toUpperCase();
-    let isExist = json_matkul.findIndex(
-      (kelompok) => kelompok.kelompok_matkul === newData
-    );
-    if (isExist !== -1)
-      returnpopUpTimer("error", "Data Kelompok Matkul ini sudah ada!");
+    if (data) {
+      let newData = String(data).toUpperCase();
+      let isExist = json_matkul.findIndex(
+        (kelompok) => kelompok.kelompok_matkul === newData
+      );
+      if (isExist !== -1)
+        return popUpTimer("error", "Data Kelompok Matkul ini sudah ada!");
 
-    json_matkul.push({ kelompok_matkul: newData });
-    kelompok_tab.clear().rows.add(json_matkul).draw(false);
+      json_matkul.push({ kelompok_matkul: newData });
+      kelompok_tab.clear().rows.add(json_matkul).draw(false);
+    } else return;
   }
 
   $("#btn-simpanKelompok").on("click", function () {
@@ -310,15 +312,17 @@
   });
 
   function tambahBidangMinat(data) {
-    let newData = String(data).toUpperCase();
-    let isExist = json_bidang_minat.findIndex(
-      (bidang_minat) => bidang_minat.bidang_minat === newData
-    );
-    if (isExist !== -1)
-      returnpopUpTimer("error", "Data Bidang Minat ini sudah ada!");
+    if (data) {
+      let newData = String(data).toUpperCase();
+      let isExist = json_bidang_minat.findIndex(
+        (bidang_minat) => bidang_minat.bidang_minat === newData
+      );
+      if (isExist !== -1)
+        return popUpTimer("error", "Data Bidang Minat ini sudah ada!");
 
-    json_bidang_minat.push({ bidang_minat: newData });
-    bidang_minat_tab.clear().rows.add(json_bidang_minat).draw(false);
+      json_bidang_minat.push({ bidang_minat: newData });
+      bidang_minat_tab.clear().rows.add(json_bidang_minat).draw(false);
+    } else return;
   }
 
   $("#btn-simpanBidangMinat").on("click", function () {
@@ -470,7 +474,7 @@
         className: "text-center",
         render: function (data, type, row) {
           return `
-              <input type="checkbox" name="cbKelompok"/>
+              <input type="checkbox" name="cbBidangMinat"/>
             `;
         },
       },

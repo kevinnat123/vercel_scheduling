@@ -1,6 +1,7 @@
 from dao import Database
-from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users
+from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_MAJOR_COLLECTION as db_prodi
 from flask import session
+from global_func import CustomError
 
 class dashboardDao:
     def __init__(self):
@@ -22,76 +23,106 @@ class dashboardDao:
 
     def update_general(self, params):
         print(f"{'[ DAO ]':<25} Update General (Parameter: {params})")
-        if params:
-            user = self.get_user(session['user']['u_id'])
-            if user:
+        result = { 'status': False }
+
+        try:
+            if session['user']['role'] in ["KEPALA PROGRAM STUDI"]:
                 if params.get('maks_sks'):
                     if params['maks_sks'] > 50:
-                        return {'status': False, 'message': 'Beban SKS terlalu banyak!'}
-                    update_data = {'maks_sks_prodi': params['maks_sks']}
+                        raise CustomError({ 'message': 'Beban SKS terlalu banyak!' })
+                    
+                    res = self.connection.update_one(
+                        collection_name = db_prodi,
+                        filter          = { 'program_studi': session['user']['prodi'] },
+                        update_data     = { 'maks_sks': params['maks_sks'] }
+                    )
 
-                result = self.connection.update_one(
-                    collection_name = db_users, 
-                    filter          = { 'u_id': session['user']['u_id'] }, 
-                    update_data     = update_data
-                )
-                if result and result.get('status') == True:
-                    session['user']['maks_sks_prodi'] = params['maks_sks']
-                    session.modified = True  # Pastikan perubahan tersimpan
-                return {'status': result.get('status'), 'message': result.get('message')}
-                
-            return {'status': False, 'message': 'User Not Found'}
-        return {'status': False, 'message': 'Tidak ada yang perlu disimpan'}
+                    if res['status'] == True:
+                        result.update({ 'message': res['message'] })
+                    else:
+                        raise CustomError({ 'message': res['message'] })
+                else:
+                    raise CustomError({ 'message': 'Tidak ada yang perlu disimpan'})
+            else:
+                raise CustomError({ 'message': 'Akses SKS maksimum hanya bisa diakses kaprodi!' })
+            
+            result.update({ 'status': True })
+        except CustomError as e:
+            result.update( e.error_dict )
+        except Exception as e:
+            print(f"{'':<25} Error: {e}")
+            result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
+        print(f"{'':<25} {result}")
+        return result
     
     def update_kelompokMatkul(self, data):
         print(f"{'[ DAO ]':<25} Update Kelompok Matkul (Parameter: {data})")
+        result = { 'status': False }
 
-        if data:
-            newGroup = [item["kelompok_matkul"] for item in data]
-        elif data == []:
-            newGroup = data
-        else:
-            return {'status': False, 'message': 'Data tidak valid'}
+        try:
+            if session['user']['role'] in ["KEPALA PROGRAM STUDI"]:
+                if data:
+                    newGroup = [item["kelompok_matkul"] for item in data if item['kelompok_matkul']]
+                elif data == []:
+                    newGroup = data
+                else:
+                    raise CustomError({ 'message': 'Data tidak valid' })
 
-        updateData = self.connection.update_one(
-            collection_name = db_users, 
-            filter          = {'u_id': session['user']['u_id']}, 
-            update_data     = {'kelompok_matkul': newGroup})
-        
-        if updateData and updateData['status']:
-            session['user']['kelompok_matkul'] = newGroup
-            session.modified = True
-        else:
-            self.connection.find_one(db_users, {'u_id': session['user']['u_id']})
+                res = self.connection.update_one(
+                    collection_name = db_prodi, 
+                    filter          = { 'program_studi': session['user']['prodi'] }, 
+                    update_data     = { 'kelompok_matkul': newGroup }
+                )
 
-        return {'status': updateData.get('status'), 'message': updateData.get('message')}
+                if res['status'] == True:
+                    result.update({ 'message': res['message'] })
+                else:
+                    raise CustomError({ 'message': res['message'] })
+            else:
+                raise CustomError({ 'message': 'Kelompok Matkul hanya bisa diakses kaprodi!' })
+            
+            result.update({ 'status': True })
+        except CustomError as e:
+            result.update( e.error_dict )
+        except Exception as e:
+            print(f"{'':<25} Error: {e}")
+            result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
+        print(f"{'':<25} {result}")
+        return result
     
     def update_bidangMinat(self, data):
         print(f"{'[ DAO ]':<25} Update Bidang Minat (Parameter: {data})")
+        result = { 'status': False }
 
-        if data:
-            newGroup = [item["bidang_minat"] for item in data]
-        elif data == []:
-            newGroup = data
-        else:
-            return {'status': False, 'message': 'Data tidak valid'}
+        try:
+            if session['user']['role'] in ["KEPALA PROGRAM STUDI"]:
+                if data:
+                    newGroup = [item["bidang_minat"] for item in data if item['bidang_minat']]
+                elif data == []:
+                    newGroup = data
+                else:
+                    raise CustomError({ 'message': 'Data tidak valid' })
 
-        updateData = self.connection.update_one(
-            collection_name = db_users, 
-            filter          = {'u_id': session['user']['u_id']}, 
-            update_data     = {'bidang_minat': newGroup}
-        )
+                res = self.connection.update_one(
+                    collection_name = db_prodi, 
+                    filter          = { 'program_studi': session['user']['prodi'] }, 
+                    update_data     = { 'bidang_minat': newGroup }
+                )
 
-        if updateData and updateData['status']:
-            session['user']['bidang_minat'] = newGroup
-            session.modified = True
-        else:
-            self.connection.find_one(
-                collection_name = db_users, 
-                filter          = {'u_id': session['user']['u_id']}
-            )
-
-        return {'status': updateData.get('status'), 'message': updateData.get('message')}
+                if res['status'] == True:
+                    result.update({ 'message': res['message'] })
+                else:
+                    raise CustomError({ 'message': res['message'] })
+            else:
+                raise CustomError({ 'message': 'Bidang Minat prodi hanya bisa diakses kaprodi!' })
+            result.update({ 'status': True })
+        except CustomError as e:
+            result.update( e.error_dict )
+        except Exception as e:
+            print(f"{'':<25} Error: {e}")
+            result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
+        print(f"{'':<25} {result}")
+        return result
     
     def update_os(self, data):
         print(f"{'[ DAO ]':<25} Update OS (Parameter: {data})")

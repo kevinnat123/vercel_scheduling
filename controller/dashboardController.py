@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from dao.dashboardDao import dashboardDao
+from dao.loginDao import loginDao
+from dao.admin.dataProgramStudiDao import dataProgramStudiDao
 from flask_login import login_user, logout_user, login_required
 
 dashboard = Blueprint('dashboard', __name__)
@@ -10,21 +12,25 @@ dashboardDao = dashboardDao()
 def dashboard_index():
     print(f"{'[ RENDER ]':<25} Dashboard (Role: {session['user']['role']})")
     if session['user']['role'] == 'KEPALA PROGRAM STUDI':
-        return render_template(
-                '/kaprodi/dashboard.html', 
-                menu = 'Dashboard', 
-                title = 'Dashboard', 
-                prodi = session['user']['prodi'],
-                kelompok_matkul = session['user']['kelompok_matkul'],
-                bidang_minat = session['user']['bidang_minat']
-            )
+        prodiInfo = dataProgramStudiDao().get_prodi_by_kaprodi(session['user']['u_id'])
+        if prodiInfo:
+            return render_template(
+                    '/kaprodi/dashboard.html', 
+                    menu = 'Dashboard', 
+                    title = 'Dashboard', 
+                    prodi = session['user']['prodi'],
+                    maks_sks = prodiInfo.get('maks_sks', 0),
+                    kelompok_matkul = prodiInfo.get('kelompok_matkul', []),
+                    bidang_minat = prodiInfo.get('bidang_minat', [])
+                )
+        else:
+            print(f"{'💥💥💥💥💥':<25} 💣 Program Studi User tidak ditemukan")
+            return redirect(url_for('signin.error403'))
     elif session['user']['role'] == 'LABORAN':
         return render_template(
                 '/laboran/dashboard.html', 
                 menu = 'Dashboard', 
                 title = 'Dashboard', 
-                list_os = session['user']['list_os'],
-                list_processor = session['user']['list_processor']
             )
     elif session['user']['role'] == 'ADMIN':
         return render_template(
@@ -41,35 +47,24 @@ def dashboard_index():
 def dashboardKaprodi_updateGeneral():
     print(f"{'[ CONTROLLER ]':<25} Update General")
     req = request.get_json('data')
-
-    result = dashboardDao.update_general(req)
-
-    if (result.get('status') == False and result.get('message') == 'User Not Found'):
-        return redirect(url_for('signin.logout'))
-            
-    return jsonify( result )
+    data = dashboardDao.update_general(req)
+    return jsonify( data )
 
 @dashboard.route("/update_kelompok_matkul", methods=['POST'])
 @login_required
 def dashboardKaprodi_updateKelompokMatkul():
     print(f"{'[ CONTROLLER ]':<25} Update Kelompok Matkul")
-    
     req = request.get_json('data')
-
-    result = dashboardDao.update_kelompokMatkul(req)
-
-    return jsonify( result )
+    data = dashboardDao.update_kelompokMatkul(req)
+    return jsonify( data )
 
 @dashboard.route("/update_bidang_minat", methods=['POST'])
 @login_required
 def dashboardKaprodi_updateBidangMinat():
     print(f"{'[ CONTROLLER ]':<25} Update Bidang Minat")
-    
     req = request.get_json('data')
-
-    result = dashboardDao.update_bidangMinat(req)
-
-    return jsonify( result )
+    data = dashboardDao.update_bidangMinat(req)
+    return jsonify( data )    
 
 @dashboard.route("/update_os", methods=['POST'])
 @login_required
