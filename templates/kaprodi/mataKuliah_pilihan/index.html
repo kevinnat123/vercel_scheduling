@@ -330,6 +330,7 @@
     $("#frm")[0].reset();
     $("#card-form span.badge").remove();
     $("#input_search").val("").trigger("input");
+    $("#input_bidang_minat").children().filter(":not(.default)").remove(); // hapus semua list bidang_minat
 
     // $("#field_pakar").attr("hidden", true);
     // $("#field_matkul_ajar").attr("hidden", true);
@@ -371,7 +372,6 @@
       $("#input_angkatan").val(data.angkatan);
       $("#input_jumlah_mahasiswa").val(data.jumlah_mahasiswa);
       $("#input_prodi").val(prodi ? prodi : data.prodi);
-      $("#input_bidang_minat").children().filter(":not(.default)").remove(); // hapus semua list bidang_minat
       await changedProdi($("#input_prodi").val());
       $("#input_bidang_minat").val(data.bidang_minat);
       matkul_tab.clear().rows.add(data.list_matkul).draw();
