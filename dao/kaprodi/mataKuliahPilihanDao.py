@@ -54,8 +54,10 @@ class mataKuliahPilihanDao:
                     " ".join(data.split()[2::]) for data in result['data']['kelompok_matkul'] 
                     if data.startswith("BIDANG MINAT")
                 ]
-                return bidang_minat
-        return []
+        return {
+            "bidang_minat": bidang_minat if result.get('status') and result['data'].get('kelompok_matkul') else [],
+            "maks_sks": result['data'].get('maks_sks', 20)
+        }
 
     def post_matkul(self, params):
         print(f"{'[ DAO ]':<25} Post Matkul (Parameter: {params})")

@@ -266,7 +266,7 @@
 {% endblock %} {% block script %}
 <script>
   const prodi = "{{ prodi | safe }}";
-  const maks_sks = Number("{{ maks_sks | safe }}");
+  var maks_sks = 0;
   const data_sebelum = JSON.parse(`{{ data_sebelum | tojson | safe }}`);
   let data_angkatan = JSON.parse(JSON.stringify(data_sebelum)); // deepCopy data_sebelum
 
@@ -1019,7 +1019,8 @@
         hideLoading();
       },
       success: async function (res) {
-        let bidang_minat = res.data;
+        let bidang_minat = res.data.bidang_minat;
+        maks_sks = res.data.maks_sks;
 
         if (bidang_minat.length) {
           $("#input_bidang_minat").prop("disabled", false);
