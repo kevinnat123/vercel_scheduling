@@ -14,7 +14,10 @@ class generateJadwalDao:
     def get_dosen(self):
         print(f"{'[ DAO ]':<25} Get Dosen")
         result = self.connection.find_many(
-            collection_name = db_dosen
+            collection_name = db_dosen,
+            filter          = {
+                'status': { '$ne': 'TIDAK_AKTIF' }
+            }
         )
         return result['data'] if result and result.get('status') else []
     

@@ -310,7 +310,8 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                                 len(set(d.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
                             ) if matkul.get('bidang') or matkul.get('dosen_ajar') 
                             else True) and 
-                            d["nip"] not in [sesi_lain.kode_dosen for sesi_lain in jadwal if sesi_lain.kode_matkul == sesi_dosen.kode_matkul]
+                            d["nip"] not in [sesi_lain.kode_dosen for sesi_lain in jadwal if sesi_lain.kode_matkul == sesi_dosen.kode_matkul] and
+                            d['status'] != "TIDAK_AKTIF"
                     ]
                     if dosen_pakar:
                         sesi_dosen.kode_dosen = rand_dosen_pakar(list_dosen_pakar=dosen_pakar, dict_beban_sks_dosen=beban_dosen)["nip"]
@@ -426,7 +427,8 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                 #                                 (dosen.get('nama') or '') in (matkul.get('dosen_ajar') or []) or 
                 #                                 len(set(dosen.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
                 #                             ) if matkul.get('bidang') or matkul.get('dosen_ajar') 
-                #                             else True) and dosen["nip"] not in excluded_dosen
+                #                             else True) and dosen["nip"] not in excluded_dosen and
+                #                             dosen['status'] != "TIDAK_AKTIF"
                 #                     ]
                                     
                 #                     if dosen_pakar:
@@ -600,7 +602,8 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
                     (dosen.get('nama') or '') in (matkul.get('dosen_ajar') or []) or 
                     len(set(dosen.get('pakar') or []) & set(matkul.get('bidang') or [])) > 0
                 ) if matkul.get('bidang') or matkul.get('dosen_ajar') 
-                else True)
+                else True) and
+                dosen['status'] != "TIDAK_AKTIF"
         ]
 
         while putaran_kelas > 0:
@@ -1136,8 +1139,8 @@ def genetic_algorithm(matakuliah_list, dosen_list, ruang_list, ukuran_populasi=7
             # best_individual_global = copy.deepcopy(gen_best_individual)
 
             avg = sum(fitness_scores) / len(fitness_scores)
-            print(f"[Gen {gen}] [({len(populasi)} population)] AVG : {round(avg, 2):<10} BEST ALLTIME: {best_fitness_global}")
-            print(f"{f'[Gen {gen}]':<10}Min: {min(fitness_scores):<5}Max: {max(fitness_scores):<5}Best Gen: {hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True)}")
+            print(f"[Gen {gen}] [({len(populasi)} population)] AVG : {round(avg, 2):<10}")
+            print(f"{f'[Gen {gen}]':<10}Worst: {min(fitness_scores):<5}Best: {hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True):<5}BEST ALLTIME: {best_fitness_global}")
             print(f"gen best fitness {gen_best_fitness}")
             # hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True)
             print(f"{'':<5}Missing: {find_missing_course(best_individual_global, matakuliah_list)}\n") if find_missing_course(best_individual_global, matakuliah_list) else print("\n")
