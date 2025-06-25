@@ -94,9 +94,10 @@
               id="input_matkul"
               placeholder="Tekan 'F9' untuk lihat list dosen | Input kata kunci"
               autocomplete="off"
-            /><button type="button" id="copy_data" class="btn btn-primary">
+            />
+            <!-- <button type="button" id="copy_data" class="btn btn-primary">
               Copy Data Lain
-            </button>
+            </button> -->
           </div>
         </div>
       </div>
@@ -161,14 +162,29 @@
 
 <div class="card">
   <div class="card-body">
-    <button
-      type="button"
-      class="btn btn-primary"
-      id="btn-tambah"
-      onclick="form_matkul(false)"
-    >
-      <i class="fas fa-plus fa-fw"></i><span> Tambah Data</span>
-    </button>
+    <div class="row align-items-center">
+      <div class="col-3">
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="btn-tambah"
+          onclick="form_matkul(false)"
+        >
+          <i class="fas fa-plus fa-fw"></i><span> Tambah Data</span>
+        </button>
+      </div>
+      <div class="col"></div>
+      <div class="col-5 d-flex align-items-center">
+        <label for="input_search" class="me-2 mb-0 fw-bold">Search</label>
+        <input
+          type="text"
+          class="form-control"
+          id="input_search"
+          placeholder="Search something..."
+          autocomplete="off"
+        />
+      </div>
+    </div>
   </div>
 </div>
 
@@ -305,12 +321,16 @@
       }
     }
 
+    $(".btn-edit").css("display", "none");
+    $(".btn-hapus").css("display", "none");
     return true; // Tidak ada elemen yang memiliki kedua class
   }
 
-  function clear_form() {
+  async function clear_form() {
     $("#frm")[0].reset();
     $("#card-form span.badge").remove();
+    $("#input_search").val("").trigger("input");
+
     // $("#field_pakar").attr("hidden", true);
     // $("#field_matkul_ajar").attr("hidden", true);
     // $(".preferensi_detail").attr("hidden", true);
@@ -332,11 +352,6 @@
       $("#btn-simpan").attr("hidden", false);
       $("#btn-update").attr("hidden", true);
 
-      $(".data_angkatan").removeClass("active-card"); // Hapus highlight dari card lain
-      if (isNoActiveCard()) {
-        $(".btn-edit").css("display", "none");
-        $(".btn-hapus").css("display", "none");
-      }
       $("#input_angkatan").prop("disabled", false);
       $("#input_bidang_minat").prop("disabled", false);
     } else {
@@ -347,12 +362,15 @@
       $("#input_bidang_minat").prop("disabled", true);
     }
 
-    if (prodi) $("#input_prodi").prop("disabled", true);
+    if (prodi) {
+      $("#input_prodi").prop("disabled", true);
+      $("#input_prodi").val(prodi);
+    }
 
     if (data) {
       $("#input_angkatan").val(data.angkatan);
       $("#input_jumlah_mahasiswa").val(data.jumlah_mahasiswa);
-      await $("#input_prodi").val(prodi ? prodi : data.prodi);
+      $("#input_prodi").val(prodi ? prodi : data.prodi);
       $("#input_bidang_minat").children().filter(":not(.default)").remove(); // hapus semua list bidang_minat
       await changedProdi($("#input_prodi").val());
       $("#input_bidang_minat").val(data.bidang_minat);
@@ -360,6 +378,8 @@
     }
 
     $("#card-form").prop("hidden", hidden ? true : false);
+    $(".data_angkatan").removeClass("active-card"); // Hapus highlight dari card lain
+    await isNoActiveCard();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -378,10 +398,7 @@
       generateNewDataContainer(element); // buat card baru
     });
 
-    if (isNoActiveCard()) {
-      $(".btn-edit").css("display", "none");
-      $(".btn-hapus").css("display", "none");
-    }
+    await isNoActiveCard();
   }
 
   function generateNewDataContainer(data) {
@@ -853,14 +870,13 @@
   async function editData() {
     let cardId = $(".active-card").attr("id");
     if (cardId) {
-      console.log("[ cardId ]", cardId);
       let cardElement = $("#" + cardId);
       let slicedId = cardId.substring(5).split("_");
 
       let tableId = cardId.substring(5) + "_tab";
       let inputs = cardElement.find("input, select, textarea"); // Ambil semua input
       let kode_prodi = slicedId[2];
-      let angkatan = slicedId.length == 5 ? slicedId[5] : slicedId[4];
+      let angkatan = slicedId.length == 5 ? slicedId[4] : slicedId[3];
 
       let inputData = {};
       inputs.each(function () {
@@ -873,19 +889,6 @@
         .data()
         .toArray();
 
-      if (cardId.slice(-3) === "ALL") slicedKey = cardId.slice(-3);
-      else slicedKey = cardId.slice(-4); // Ambil tahun
-
-      // let cleanedData = Object.keys(inputData).reduce((acc, key) => {
-      //   const newKey = key.endsWith(slicedKey)
-      //     ? key.replace(new RegExp(slicedKey + "$"), "")
-      //     : key;
-      //   acc[newKey] = inputData[key];
-      //   return acc;
-      // }, {}); // hapus tahun dari key inputData
-      // cleanedData["prodi"] = cleanedData["list_matkul"][0]["prodi"];
-      // console.log("[ cleanedData ]", cleanedData);
-
       form_matkul(true, false, inputData);
     }
   }
@@ -894,8 +897,19 @@
     let cardId = $(".active-card").attr("id");
     if (cardId) {
       let cardElement = $("#" + cardId);
+      let slicedText = cardId.substring(5).split("_");
+      // prodi + bidang + angkatan
+      let decisionText = [slicedText[2]]
+        .concat(
+          slicedText.length == 5
+            ? [slicedText[3], slicedText[4]]
+            : slicedText[3]
+        )
+        .join(" - ");
+
       let decision = await Swal.fire({
         title: "Yakin akan hapus data ini?",
+        text: "data: " + decisionText,
         showCancelButton: true,
         confirmButtonText: "Yakin",
         cancelButtonText: "Batalkan",
@@ -932,10 +946,7 @@
               ); // update data_angkatan
               cardElement.remove(); // hapus card
 
-              if (isNoActiveCard()) {
-                $(".btn-edit").css("display", "none");
-                $(".btn-hapus").css("display", "none");
-              }
+              await isNoActiveCard();
 
               $("#btn-batal").click();
             }
@@ -1024,9 +1035,33 @@
     });
   }
 
+  $("#input_search").on("input", function () {
+    let value = $(this).val().toLowerCase();
+
+    if (value) {
+      let searchRegex = new RegExp(value, "i"); // i = ignore case
+
+      let result = data_angkatan
+        .filter((obj) =>
+          Object.values(obj).some(
+            (val) => typeof val === "string" && searchRegex.test(val)
+          )
+        )
+        .map((obj) => obj.u_id);
+
+      data_angkatan.forEach((element) => {
+        result.includes(element.u_id)
+          ? $("#card_" + element.u_id).prop("hidden", false)
+          : $("#card_" + element.u_id).prop("hidden", true);
+      });
+    } else
+      data_angkatan.forEach((element) => {
+        $("#card_" + element.u_id).prop("hidden", false);
+      });
+  });
+
   // CHECKBOX
   // Event ketika cbMatkulTabAll di-click
-
   $('input[name="cbMatkulTabAll"]').on("change", function () {
     let isChecked = $(this).prop("checked");
     $('input[name="cbMatkulTab"]').prop("checked", isChecked);
