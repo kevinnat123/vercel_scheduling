@@ -310,7 +310,7 @@
     $("#modal-dosen tbody").on("click", "tr", async function () {
       let row = dosen_lov.row(this).data();
       $("#modal-dosen").modal("hide");
-      $("#input_kepala_program_studi").val(row["nama"]);
+      $("#input_kaprodi").val(row["nama"]);
     });
   });
 
@@ -367,6 +367,7 @@
     let params = {
       program_studi: $("#input_prodi").val(),
       status_aktif: getCheckedItemValue("rbStatus")[0],
+      kepala_program_studi: $("#input_kaprodi").val(),
     };
 
     $.ajax({
@@ -429,6 +430,7 @@
       old_program_studi: old_prodi_name,
       program_studi: $("#input_prodi").val(),
       status_aktif: getCheckedItemValue("rbStatus")[0],
+      kepala_program_studi: $("#input_kaprodi").val(),
     };
 
     $.ajax({
