@@ -1,5 +1,6 @@
 from dao import Database
 from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_URLS_COLLECTION as db_urls, MONGO_MAJOR_COLLECTION as db_prodi
+from global_func import CustomError
 from flask import session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -78,24 +79,46 @@ class loginDao:
 
     def verify_user(self, u_id, password):
         print(f"{'[ DAO ]':<25} Verify User: {u_id}, {password}")
-        user = self.connection.find_one(
-            collection_name = db_users, 
-            filter          = {"u_id": u_id}
-        )
-        if user:
-            user_data = user['data']
-            if user_data.get('role') == "KEPALA PROGRAM STUDI":
-                prodi_active = self.connection.find_one(
-                    collection_name = db_prodi, 
-                    filter          = {"program_studi": user_data.get('prodi')}
-                )
-                if prodi_active["status"] and not prodi_active["data"].get("status_aktif"):
-                    return {'status': False, 'message': 'Program Studi anda sudah di non-aktifkan!'}
-                elif not prodi_active["status"]:
-                    return {'status': False, 'message': 'Program Studi anda tidak ditemukan!'}
-            stored_password = user_data.get('password', '')
-            if check_password_hash(stored_password, password):
-                del user_data['password']
-                session['user'] = user_data
-                return {'status': True, 'data': user_data, 'message': 'Login berhasil'}
-        return {'status': False, 'message': 'NIP atau password salah'}
+        result = { 'status': False }
+
+        try:
+            user = self.connection.find_one(
+                collection_name = db_users, 
+                filter          = {"u_id": u_id}
+            )
+            if user.get('status'):
+                user_data = user['data']
+                if user_data.get('role') == "KEPALA PROGRAM STUDI":
+                    prodi_user = self.connection.find_one(
+                        collection_name = db_prodi, 
+                        filter          = {"program_studi": user_data.get('prodi')}
+                    )
+                    if not prodi_user["status"]:
+                        raise CustomError({ 'message': 'Program Studi anda tidak ditemukan!' })
+                    prodi_data = prodi_user.get('data', {})
+
+                    if prodi_data.get("kepala_program_studi") != u_id:
+                        self.connection.update_one(
+                            collection_name = db_users,
+                            filter          = {"u_id": u_id},
+                            update_data     = {"role": "EX KEPALA PROGRAM STUDI"}
+                        )
+                        raise CustomError({ 'message': 'Kepala Program Studi sudah diubah oleh Admin!' })
+                    elif prodi_data.get("kepala_program_studi") == u_id:
+                        if not prodi_data.get("status_aktif"):
+                            raise CustomError({ 'message': 'Program Studi anda sudah di non-aktifkan!' })
+                stored_password = user_data.get('password', '')
+                if check_password_hash(stored_password, password):
+                    del user_data['password']
+                    session['user'] = user_data
+                    result.update({'data': user_data, 'message': 'Login berhasil'})
+            else:
+                raise CustomError({ 'message': 'NIP atau password salah' })
+            result.update({ 'status': True })
+        except CustomError as e:
+            result.update( e.error_dict )
+        except Exception as e:
+            print(f"{'':<25} Error: {e}")
+            result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
+
+        return result
