@@ -1,5 +1,6 @@
 from dao import Database
 from config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_COURSES_COLLECTION as db_matkul, MONGO_LECTURERS_COLLECTION as db_dosen
+from config import MONGO_MAJOR_COLLECTION as db_prodi
 from flask import session
 
 from global_func import CustomError
@@ -11,33 +12,17 @@ class dataMataKuliahDao:
     def __init__(self):
         self.connection = Database(MONGO_DB)
 
-    def put_kelompok(self, nama_baru):
-        print(f"{'[ DAO ]':<25} Put Kelompok (Data Baru: {nama_baru})")
-        result = { 'status': False }
-        try:
-            if nama_baru.upper() in session['user']['kelompok_matkul']:
-                raise CustomError({ 'message': 'Kelompok dengan nama ' + nama_baru.upper() + ' sudah ada!' })
+    def get_kelompok(self, prodi):
+        print(f"{'[ DAO ]':<25} Get Kelompok (Prodi: {prodi})")
+        result = self.connection.find_one(
+            collection_name = db_prodi, 
+            filter          = { 'program_studi': prodi }
+        )
+        if result and result.get('status'):
+            if result['data'].get('kelompok_matkul'):
+                return result['data']['kelompok_matkul']
+        return []
 
-            session['user']['kelompok_matkul'].extend([nama_baru.upper()])
-            result = self.connection.update_one(
-                collection_name = db_users, 
-                filter          = { 'u_id': session['user']['u_id'] }, 
-                update_data     = { 'kelompok_matkul': session['user']['kelompok_matkul'] }
-            )
-            if result and result.get('status') == False:
-                session['user']['kelompok_matkul'].remove(nama_baru.upper())
-                raise CustomError({ 'message': result.get('message') })
-
-            result.update({ 'status': True, 'message': result.get('message') })
-        except CustomError as e:
-            result.update( e.error_dict )
-        except Exception as e:
-            print(f"{'':<25} Error: {e}")
-            result.update({ 'message': 'Terjadi kesalahan sistem. Harap hubungi Admin.' })
-
-        session.modified = True  # Pastikan perubahan tersimpan
-        return result
-    
     def get_matkul(self):
         print(f"{'[ DAO ]':<25} Get Matkul")
         if session['user']['role'] == "KEPALA PROGRAM STUDI":

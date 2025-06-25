@@ -19,22 +19,18 @@ def mataKuliah_index():
                 prodi = session['user']['prodi'] 
                     if session['user']['role'] == "KEPALA PROGRAM STUDI"
                     else "",
-                list_prodi = session['user']['list_prodi']
+                list_prodi = session['user']['list_prodi'],
             )
     
-@mataKuliah.route("/data_mata_kuliah/post_kelompok", methods=["POST"])
+@mataKuliah.route("/data_mata_kuliah/get_kelompok", methods=['GET'])
 @login_required
-def mataKuliah_tambah_kelompok():
-    print(f"{'[ CONTROLLER ]':<25} Post Kelompok Matakuliah")
-    data = request.get_json('data')
-    nama_baru = data.get("nama")
+def mataKuliah__get_kelompok():
+    print(f"{'[ CONTROLLER ]':<25} Get Kelompok")
+    req = request.args.to_dict()
+    print('req', req)
+    data = dao.get_kelompok(req['prodi'])
+    return jsonify({ 'data': data })
     
-    if nama_baru:
-        data = dao.put_kelompok(nama_baru)
-        return jsonify(data)
-
-    return jsonify({"status": False}), 400
-
 @mataKuliah.route("/data_mata_kuliah/get_matkul", methods=['GET'])
 @login_required
 def mataKuliah_get_matkul():
