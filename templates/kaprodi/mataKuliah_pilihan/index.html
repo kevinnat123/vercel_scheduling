@@ -366,6 +366,7 @@
     if (prodi) {
       $("#input_prodi").prop("disabled", true);
       $("#input_prodi").val(prodi);
+      if (update == false) await changedProdi($("#input_prodi").val());
     }
 
     if (data) {
