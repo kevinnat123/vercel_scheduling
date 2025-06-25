@@ -112,8 +112,10 @@ class loginDao:
                     del user_data['password']
                     session['user'] = user_data
                     result.update({'data': user_data, 'message': 'Login berhasil'})
+                else:
+                    raise CustomError({ 'message': 'NIP atau password salah' })
             else:
-                raise CustomError({ 'message': 'NIP atau password salah' })
+                raise CustomError({ 'message': 'Anda tidak punya akun!' })
             result.update({ 'status': True })
         except CustomError as e:
             result.update( e.error_dict )

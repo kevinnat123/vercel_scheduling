@@ -91,6 +91,8 @@ def session_generator():
     updated_user = loginDao.get_user(user_id)
     
     if updated_user:
+        if session['user'].get('akses'):
+            updated_user['data']['akses'] = session['user']['akses']
         session["user"] = updated_user["data"]
         print(f"{'':<25} {'New User Session':<30}: {session['user']}")
 
