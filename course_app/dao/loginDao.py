@@ -1,16 +1,15 @@
 from course_app.dao import Database
-from course_app.database import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_URLS_COLLECTION as db_urls, MONGO_MAJOR_COLLECTION as db_prodi
+from course_app.config import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_URLS_COLLECTION as db_urls, MONGO_MAJOR_COLLECTION as db_prodi
 from course_app.global_func import CustomError
 from flask import session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 class loginDao:
     def __init__(self):
-        print(f"self {MONGO_DB}")
         self.connection = Database(MONGO_DB)
 
     def signUp(self, u_id, role, password):
-        print(f"{'[ DAO ]':<25} Sign Up User: {u_id}")
+        print(f"{'[ DAO ]':<25} Sign Up Usser: {u_id}")
         # # PYTHON 3.7.9 (Method Hash: "pbkdf2:sha256")
         # result = self.connection.insert_one(db_users, {'u_id': u_id, 'role': 'ADMIN', 'password': generate_password_hash(password, method='pbkdf2:sha256')})
         # DEFAULT HASH: "scrypt"

@@ -1,5 +1,5 @@
 from course_app.dao import Database
-from course_app.database import MONGO_DB, MONGO_LECTURERS_COLLECTION as db_dosen, MONGO_COURSES_COLLECTION as db_matkul
+from course_app.config import MONGO_DB, MONGO_LECTURERS_COLLECTION as db_dosen, MONGO_COURSES_COLLECTION as db_matkul
 from flask import session
 
 from course_app.global_func import CustomError

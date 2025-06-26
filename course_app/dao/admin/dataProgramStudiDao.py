@@ -1,6 +1,6 @@
 from course_app.dao import Database
-from course_app.database import MONGO_DB, MONGO_MAJOR_COLLECTION as db_prodi, MONGO_USERS_COLLECTION as db_user
-from course_app.database import MONGO_LECTURERS_COLLECTION as db_dosen
+from course_app.config import MONGO_DB, MONGO_MAJOR_COLLECTION as db_prodi, MONGO_USERS_COLLECTION as db_user
+from course_app.config import MONGO_LECTURERS_COLLECTION as db_dosen
 from flask import session
 from werkzeug.security import generate_password_hash, check_password_hash
 
