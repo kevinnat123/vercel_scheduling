@@ -89,6 +89,7 @@ class loginDao:
                 collection_name = db_users, 
                 filter          = {"u_id": u_id}
             )
+            print(user, db_users)
             if user.get('status'):
                 user_data = user['data']
                 if user_data.get('role') == "KEPALA PROGRAM STUDI":

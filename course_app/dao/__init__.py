@@ -30,6 +30,7 @@ class Database:
         try:
             collection = self.get_collection(collection_name)
             result = collection.find_one(filter)
+            print('db ', collection, result)
             if result:
                 result['_id'] = str(result['_id']) 
                 del result['_id']
