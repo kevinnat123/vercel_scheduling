@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 class loginDao:
     def __init__(self):
+        print(f"self {MONGO_DB}")
         self.connection = Database(MONGO_DB)
 
     def signUp(self, u_id, role, password):
@@ -82,6 +83,7 @@ class loginDao:
         result = { 'status': False }
 
         try:
+            print("enter trycatch")
             user = self.connection.find_one(
                 collection_name = db_users, 
                 filter          = {"u_id": u_id}

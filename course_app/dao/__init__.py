@@ -5,6 +5,7 @@ import sys
 class Database:
     def __init__(self, dbname):
         try:
+            print(f"model db {dbname}")
             self.connection = MongoClient(database.MONGO_URI)
             self.db = self.connection[dbname]
         except errors.ConnectionFailure as conn_fail:
