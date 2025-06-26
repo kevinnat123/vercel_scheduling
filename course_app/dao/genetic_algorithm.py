@@ -335,18 +335,15 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                 excluded_room = []
                 # Repair Jadwal Dosen Bentrok
                 while conflict and attempt <= max_attempt:
-                    # print(sesi_dosen.kode_matkul, sesi_dosen.kode_dosen, sesi_dosen.sks_akademik, sesi_dosen.hari)
                     available_room_schedule = find_available_schedule(jadwal_ruangan, sesi_dosen.kode_ruangan, sesi_dosen.hari)
                     available_lecturer_schedule = find_available_schedule(jadwal_dosen, sesi_dosen.kode_dosen, sesi_dosen.hari)
 
                     # Sesuaikan dengan jadwal team jika team teaching
                     if matkul.get('team_teaching'):
-                        # print(f"bfr   {sesi_dosen.kode_matkul} {matkul['kode']} : {available_lecturer_schedule}")
                         for sesi_lain in jadwal:
                             if sesi_lain.kode_matkul == sesi_dosen.kode_matkul and sesi_lain.kode_dosen != sesi_dosen.kode_dosen:
                                 other_lecturer_schedule = find_available_schedule(jadwal_dosen, sesi_lain.kode_dosen, sesi_dosen.hari)
                                 available_lecturer_schedule = list(set(available_lecturer_schedule) & set(other_lecturer_schedule))
-                        # print(f"aftr  {sesi_dosen.kode_matkul} {matkul['kode']} : {available_lecturer_schedule}")
                     
                     available_schedule = list(set(available_room_schedule) & set(available_lecturer_schedule))
                     
@@ -364,10 +361,6 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
 
                     if not status:
                         excluded_day.append(sesi_dosen.hari)
-                        # print('DOSEN pil ', pilihan_hari_dosen)
-                        # print('DOSEN exc ', excluded_day)
-                        # print('DOSEN     ', [d for d in pilihan_hari_dosen if d not in excluded_day])
-                        # print('      ', available_schedule)
                         if all(d in excluded_day for d in preferensi_hari_dosen):
                             excluded_day = []
                             excluded_room.append(sesi_dosen.kode_ruangan)
@@ -511,7 +504,6 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
                 excluded_room = []
                 # 2. Repair Jadwal Asisten
                 while conflict and attempt <= max_attempt:
-                    # print(sesi_asisten.kode_matkul, sesi_asisten.kode_dosen, sesi_asisten.sks_akademik, sesi_asisten.hari)
                     available_room_schedule = find_available_schedule(jadwal_ruangan, sesi_asisten.kode_ruangan, sesi_asisten.hari)
 
                     status = False
@@ -528,10 +520,6 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
 
                     if not status:
                         excluded_day.append(sesi_asisten.hari)
-                        # print('ASISTEN pil ', suggested_hari_asisten)
-                        # print('ASISTEN exc ', excluded_day)
-                        # print('ASISTEN     ', [d for d in suggested_hari_asisten if d not in excluded_day])
-                        # print('      ', available_room_schedule)
                         if all(d in excluded_day for d in suggested_hari_asisten):
                             excluded_day = []
                             excluded_room.append(sesi_asisten.kode_ruangan)
@@ -569,7 +557,6 @@ def repair_jadwal(jadwal, matakuliah_list, dosen_list, ruang_list):
     return jadwal
 
 def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
-    # print(f"{'':<8}{'[ GA ]':<7} Generate Jadwal")
     jadwal = []
     pilihan_hari_dosen = ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT"]
     pilihan_hari_asisten: list[str] = copy.deepcopy(pilihan_hari_dosen)
@@ -660,10 +647,6 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
 
                         if not status:
                             excluded_day.append(hari_dosen)
-                            # print('DOSEN pil ', pilihan_hari_dosen)
-                            # print('DOSEN exc ', excluded_day)
-                            # print('DOSEN     ', [d for d in pilihan_hari_dosen if d not in excluded_day])
-                            # print('      ', available_schedule)
                             if all(d in excluded_day for d in preferensi_hari):
                                 excluded_day = []
                                 excluded_room.append(ruang_dosen['kode'])
@@ -689,7 +672,6 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
                     while conflict and attempt <= max_attempt:
                         excluded_dosen.append(dosen['nip'])
                         if all(dosen["nip"] in excluded_dosen for dosen in dosen_pakar):
-                            # print('dosen full')
                             hitung_dosen = jumlah_dosen
                             break
                         else:
@@ -723,8 +705,6 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
 
             # Penentuan kelas asistensi yang tidak terintegrasi dengan kelas dosen
             if matkul.get('asistensi') and not matkul.get('integrated_class'):
-                # print(f"{matkul['nama']:<50} praktikum: {matkul.get('asistensi'):<10} integrated: {matkul.get('integrated_class')}")
-                # print(f"kapasitas ruangan dosen {ruang_dosen['kapasitas']}; {min(40, max(40, ruang_dosen['kapasitas']))}")
                 suggested_hari_asisten = pilihan_hari_asisten[pilihan_hari_dosen.index(hari_dosen):]
                 hari_asisten = random.choice(suggested_hari_asisten)
 
@@ -760,10 +740,6 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
 
                     if not status:
                         excluded_day.append(hari_asisten)
-                        # print('ASISTEN pil ', suggested_hari_asisten)
-                        # print('ASISTEN exc ', excluded_day)
-                        # print('ASISTEN     ', [d for d in suggested_hari_asisten if d not in excluded_day])
-                        # print('      ', available_room_schedule)
                         if all(d in excluded_day for d in suggested_hari_asisten):
                             excluded_day = []
                             excluded_room.append(ruangan['kode'])
@@ -800,7 +776,6 @@ def generate_jadwal(matakuliah_list, dosen_list, ruang_list):
     return jadwal
 
 def generate_populasi(matakuliah_list, dosen_list, ruang_list, ukuran_populasi):
-    print(f"{'':<8}{'[ GA ]':<7} Generate Generasi Pertama")
     return [generate_jadwal(matakuliah_list, dosen_list, ruang_list) for _ in range(ukuran_populasi)]
 
 def hitung_fitness(jadwal, matakuliah_list, dosen_list, ruang_list, detail=False):
@@ -947,8 +922,7 @@ def hitung_fitness(jadwal, matakuliah_list, dosen_list, ruang_list, detail=False
         print(f"{'solo team':<50}: {hitung_solo_team}")
         print(f"{'pelanggaran preferensi':<50}: {pelanggaran_preferensi}")
 
-    # print(f"{'final fitness':<50} : {max(0, 1000 - penalti)}")
-    # return max(0, 1000 - penalti)
+    return max(0, 1000 - penalti)
     return 1000-penalti
 
 def roulette_selection(populasi, fitness_scores):
@@ -1139,11 +1113,12 @@ def genetic_algorithm(matakuliah_list, dosen_list, ruang_list, ukuran_populasi=7
             # best_individual_global = copy.deepcopy(gen_best_individual)
 
             avg = sum(fitness_scores) / len(fitness_scores)
-            print(f"[Gen {gen}] [({len(populasi)} population)] AVG : {round(avg, 2):<10}")
-            print(f"{f'[Gen {gen}]':<10}Worst: {min(fitness_scores):<5}Best: {hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True):<5}BEST ALLTIME: {best_fitness_global}")
-            print(f"gen best fitness {gen_best_fitness}")
-            # hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True)
-            print(f"{'':<5}Missing: {find_missing_course(best_individual_global, matakuliah_list)}\n") if find_missing_course(best_individual_global, matakuliah_list) else print("\n")
+            if int(gen) % 20 == 0:
+                print(f"[Gen {gen}] [({len(populasi)} population)] AVG : {round(avg, 2):<10}")
+                print(f"{f'[Gen {gen}]':<10}Worst: {min(fitness_scores):<5}Best: {hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True):<5}BEST ALLTIME: {best_fitness_global}")
+                print(f"gen best fitness {gen_best_fitness}")
+                # hitung_fitness(gen_best_individual, matakuliah_list, dosen_list, ruang_list, True)
+                print(f"{'':<5}Missing: {find_missing_course(best_individual_global, matakuliah_list)}\n") if find_missing_course(best_individual_global, matakuliah_list) else print("\n")
 
         print(f"GLOBAL BEST FITNESS {best_fitness_global}, LAST GEN WORST INDIVIDUAL {min(fitness_scores)}")
         # CEK BEST GLOBAL
