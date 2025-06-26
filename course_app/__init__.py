@@ -1,32 +1,35 @@
 from flask import Flask, redirect, url_for
 from flask import request, session, jsonify
 from flask_login import LoginManager
-from userModel import User
-from dao.loginDao import loginDao
 from datetime import datetime, timedelta, timezone
 
-from controller.loginController import signin, session_generator
-from controller.dashboardController import dashboard
-from controller.settingController import setting
-from controller.excelController import export
+from course_app.userModel import User
+from course_app.dao.loginDao import loginDao
+
+from course_app.controller.loginController import signin, session_generator
+from course_app.controller.dashboardController import dashboard
+from course_app.controller.settingController import setting
+from course_app.controller.excelController import export
 
 # ADMIN
-from controller.admin.dataProgramStudiController import program_studi
-from controller.admin.generateJadwalController import generateJadwal
+from course_app.controller.admin.dataProgramStudiController import program_studi
+from course_app.controller.admin.generateJadwalController import generateJadwal
 
 # LABORAN
-from controller.laboran.dataRuanganController import dataRuangan
+from course_app.controller.laboran.dataRuanganController import dataRuangan
 
 # KAPRODI
-from controller.kaprodi.dataDosenController import dosen
-from controller.kaprodi.dataMataKuliahController import mataKuliah
-from controller.kaprodi.mataKuliahPilihanController import mataKuliahPilihan
+from course_app.controller.kaprodi.dataDosenController import dosen
+from course_app.controller.kaprodi.dataMataKuliahController import mataKuliah
+from course_app.controller.kaprodi.mataKuliahPilihanController import mataKuliahPilihan
 
 login_manager = LoginManager()
 
 # Factory function untuk membuat aplikasi Flask
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__,
+            static_folder="course_app/static",
+            template_folder="course_app/templates")
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)  # SESSION LIFETIME per 1 jam
 
     login_manager.init_app(app)
