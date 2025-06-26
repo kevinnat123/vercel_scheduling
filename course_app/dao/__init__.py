@@ -4,6 +4,8 @@ import sys
 
 class Database:
     def __init__(self, dbname):
+        print(f"[DEBUG] MONGO_URI = {database.MONGO_URI}")
+        self.db = None
         try:
             self.connection = MongoClient(database.MONGO_URI)
             self.db = self.connection[dbname]
