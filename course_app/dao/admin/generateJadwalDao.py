@@ -1,9 +1,9 @@
-from dao import Database
+from course_app.dao import Database
 from database import MONGO_DB, MONGO_LECTURERS_COLLECTION as db_dosen, MONGO_OPEN_COURSES_COLLECTION as db_matkul_simpanan, MONGO_CLASSES_COLLECTION as db_kelas
 from database import MONGO_SCHEDULE_COLLECTION as db_jadwal
 from flask import session
-from dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
-from global_func import CustomError
+from course_app.dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
+from course_app.global_func import CustomError
 
 dao_matkul = dataMataKuliahDao()
 

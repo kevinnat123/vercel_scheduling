@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, jsonify, session, redirec
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from datetime import datetime, timezone
-from userModel import User
-from dao.loginDao import loginDao
+from course_app.userModel import User
+from course_app.dao.loginDao import loginDao
 
 signin = Blueprint('signin', __name__)
 loginDao = loginDao()

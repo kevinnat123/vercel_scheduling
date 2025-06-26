@@ -1,10 +1,10 @@
-from dao import Database
+from course_app.dao import Database
 from database import MONGO_DB, MONGO_MAJOR_COLLECTION as db_prodi, MONGO_USERS_COLLECTION as db_user
 from database import MONGO_LECTURERS_COLLECTION as db_dosen
 from flask import session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from global_func import CustomError
+from course_app.global_func import CustomError
 
 class dataProgramStudiDao:
     def __init__(self):

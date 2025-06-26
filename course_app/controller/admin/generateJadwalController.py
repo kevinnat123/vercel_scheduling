@@ -1,8 +1,8 @@
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for
-from dao.admin.generateJadwalDao import generateJadwalDao
-from dao import genetic_algorithm as ga
+from course_app.dao.admin.generateJadwalDao import generateJadwalDao
+from course_app.dao import genetic_algorithm as ga
 from flask_login import login_required
-from global_func import CustomError
+from course_app.global_func import CustomError
 
 generateJadwal = Blueprint('generateJadwal', __name__)
 dao = generateJadwalDao()

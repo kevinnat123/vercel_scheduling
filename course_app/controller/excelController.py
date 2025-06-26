@@ -6,9 +6,9 @@ from collections import defaultdict
 import xlsxwriter
 import random
 
-from dao.admin.generateJadwalDao import generateJadwalDao
-from dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
-from dao.kaprodi.dataDosenDao import dataDosenDao
+from course_app.dao.admin.generateJadwalDao import generateJadwalDao
+from course_app.dao.kaprodi.dataMataKuliahDao import dataMataKuliahDao
+from course_app.dao.kaprodi.dataDosenDao import dataDosenDao
 export = Blueprint('export', __name__)
 dao = generateJadwalDao()
 matkul = dataMataKuliahDao()

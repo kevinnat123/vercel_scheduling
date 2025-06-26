@@ -1,8 +1,8 @@
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for
 from flask.wrappers import Response
-from dao.admin.dataProgramStudiDao import dataProgramStudiDao
-from dao.kaprodi.dataDosenDao import dataDosenDao
-from dao.loginDao import loginDao
+from course_app.dao.admin.dataProgramStudiDao import dataProgramStudiDao
+from course_app.dao.kaprodi.dataDosenDao import dataDosenDao
+from course_app.dao.loginDao import loginDao
 from flask_login import login_required
 
 program_studi = Blueprint('program_studi', __name__)

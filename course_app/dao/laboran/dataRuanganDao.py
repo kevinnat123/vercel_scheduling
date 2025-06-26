@@ -1,9 +1,9 @@
-from dao import Database
+from course_app.dao import Database
 from database import MONGO_DB, MONGO_CLASSES_COLLECTION as db_kelas
 from flask import session
 import copy
 
-from global_func import CustomError
+from course_app.global_func import CustomError
 
 # PRAKTIKUM_RELATED = ['os', 'processor', 'ram', 'storage']
 

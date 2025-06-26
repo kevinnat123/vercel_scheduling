@@ -1,9 +1,9 @@
-from dao import Database
+from course_app.dao import Database
 from database import MONGO_DB, MONGO_USERS_COLLECTION as db_users, MONGO_COURSES_COLLECTION as db_matkul, MONGO_LECTURERS_COLLECTION as db_dosen
 from database import MONGO_MAJOR_COLLECTION as db_prodi
 from flask import session
 
-from global_func import CustomError
+from course_app.global_func import CustomError
 
 ASISTENSI_RELATED = ['asistensi', 'tipe_kelas_asistensi', 'integrated_class']
 TEAM_TEACHING_RELATED = ['team_teaching', 'jumlah_dosen']

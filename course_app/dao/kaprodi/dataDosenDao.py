@@ -1,8 +1,8 @@
-from dao import Database
+from course_app.dao import Database
 from database import MONGO_DB, MONGO_LECTURERS_COLLECTION as db_dosen, MONGO_COURSES_COLLECTION as db_matkul
 from flask import session
 
-from global_func import CustomError
+from course_app.global_func import CustomError
 
 class dataDosenDao:
     def __init__(self):

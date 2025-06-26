@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
-from dao.settingDao import settingDao
+from course_app.dao.settingDao import settingDao
 from flask_login import login_user, logout_user, login_required
 
 setting = Blueprint('setting', __name__)

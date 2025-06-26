@@ -1,5 +1,5 @@
 from flask import render_template, Blueprint, request, jsonify, session, redirect, url_for
-from dao.laboran.dataRuanganDao import dataRuanganDao
+from course_app.dao.laboran.dataRuanganDao import dataRuanganDao
 from flask_login import login_required
 
 dataRuangan = Blueprint('dataRuangan', __name__)

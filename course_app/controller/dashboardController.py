@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
-from dao.dashboardDao import dashboardDao
-from dao.loginDao import loginDao
-from dao.admin.dataProgramStudiDao import dataProgramStudiDao
+from course_app.dao.dashboardDao import dashboardDao
+from course_app.dao.loginDao import loginDao
+from course_app.dao.admin.dataProgramStudiDao import dataProgramStudiDao
 from flask_login import login_user, logout_user, login_required
 
 dashboard = Blueprint('dashboard', __name__)
