@@ -4,8 +4,6 @@ from course_app.global_func import CustomError
 from flask import session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from course_app import database
-
 class loginDao:
     def __init__(self):
         self.connection = Database(MONGO_DB)
@@ -81,7 +79,6 @@ class loginDao:
 
     def verify_user(self, u_id, password):
         print(f"{'[ DAO ]':<25} Verify User: {u_id}, {password}")
-        print(MONGO_DB)
         result = { 'status': False }
 
         try:
