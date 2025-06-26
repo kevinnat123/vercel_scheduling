@@ -1,11 +1,11 @@
 from pymongo import MongoClient, errors
-import mongoConfig
+from course_app import configDatabase
 import sys
 
 class Database:
     def __init__(self, dbname):
         try:
-            self.connection = MongoClient(mongoConfig.MONGO_URI)
+            self.connection = MongoClient(configDatabase.MONGO_URI)
             self.db = self.connection[dbname]
         except errors.ConnectionFailure as conn_fail:
             print(f"Gagal Membuat Koneksi | {conn_fail}")
