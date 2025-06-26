@@ -1,5 +1,5 @@
 from pymongo import MongoClient, errors
-from course_app import mongoConfig
+import mongoConfig
 import sys
 
 class Database:
