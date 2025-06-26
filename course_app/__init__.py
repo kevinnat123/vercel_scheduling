@@ -2,6 +2,7 @@ from flask import Flask, redirect, url_for
 from flask import request, session, jsonify
 from flask_login import LoginManager
 from datetime import datetime, timedelta, timezone
+import os
 
 from course_app.userModel import User
 from course_app.dao.loginDao import loginDao
@@ -28,9 +29,12 @@ login_manager = LoginManager()
 # Factory function untuk membuat aplikasi Flask
 def create_app():
     print("[Vercel] create_app() called")
+    template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+
     app = Flask(__name__,
-            static_folder="course_app/static",
-            template_folder="course_app/templates")
+            static_folder=static_dir,
+            template_folder=template_dir)
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)  # SESSION LIFETIME per 1 jam
 
     login_manager.init_app(app)
