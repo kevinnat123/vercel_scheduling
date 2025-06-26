@@ -3,7 +3,6 @@ from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from datetime import datetime, timezone
 from userModel import User
-from redis_client import get_last_updated
 from dao.loginDao import loginDao
 
 signin = Blueprint('signin', __name__)
