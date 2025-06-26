@@ -27,6 +27,7 @@ login_manager = LoginManager()
 
 # Factory function untuk membuat aplikasi Flask
 def create_app():
+    print("[Vercel] create_app() called")
     app = Flask(__name__,
             static_folder="course_app/static",
             template_folder="course_app/templates")
