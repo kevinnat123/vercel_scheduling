@@ -81,6 +81,7 @@ class loginDao:
 
     def verify_user(self, u_id, password):
         print(f"{'[ DAO ]':<25} Verify User: {u_id}, {password}")
+        print(MONGO_DB)
         result = { 'status': False }
 
         try:
