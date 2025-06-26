@@ -78,7 +78,7 @@ class dataDosenDao:
                 raise CustomError({ 'message': 'Nama belum diisi!', 'target': 'input_nama' })
             elif not params.get("status"):
                 raise CustomError({ 'message': 'Status Dosen belum diisi!' })
-            elif not params.get('prodi'):
+            elif not params.get('prodi') and params.get('status') == "TETAP":
                 raise CustomError({ 'message': 'Program Studi belum diisi!' })
             
             # Check exist
@@ -150,7 +150,7 @@ class dataDosenDao:
                 raise CustomError({ 'message': 'Nama belum diisi!', 'target': 'input_nama' })
             elif not params.get('status'):
                 raise CustomError({ 'message': 'Status Dosen belum diisi!' })
-            elif not params.get('prodi'):
+            elif not params.get('prodi') and params.get('status') == "TETAP":
                 raise CustomError({ 'message': 'Program Studi belum diisi!' })
             
             # Check exist
