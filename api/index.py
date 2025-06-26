@@ -13,7 +13,8 @@ from pymongo import MongoClient
 def handler(request, response):
     try:
         client = MongoClient(os.getenv("MONGO_URI"))
-        db = client.get_database()  # atau db = client['db_course_scheduling']
+        db = client['db_course_scheduling']
+        # db = client.get_database()  # atau db = client['db_course_scheduling']
         return response.json({"status": True, "msg": "MongoDB Connected"})
     except Exception as e:
-        return response.json({"status": False, "error": str(e)})
+        return response.json({"status": False, "error": "💥 FAILED " + str(e) })
