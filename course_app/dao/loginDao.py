@@ -81,7 +81,6 @@ class loginDao:
 
     def verify_user(self, u_id, password):
         print(f"{'[ DAO ]':<25} Verify User: {u_id}, {password}")
-        print(f"[DEBUG] MONGO_URI = {database.MONGO_URI}")
         result = { 'status': False }
 
         try:
@@ -89,7 +88,6 @@ class loginDao:
                 collection_name = db_users, 
                 filter          = {"u_id": u_id}
             )
-            print(user, db_users)
             if user.get('status'):
                 user_data = user['data']
                 if user_data.get('role') == "KEPALA PROGRAM STUDI":

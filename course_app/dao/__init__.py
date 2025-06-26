@@ -4,7 +4,6 @@ import sys
 
 class Database:
     def __init__(self, dbname):
-        self.db = None
         try:
             self.connection = MongoClient(database.MONGO_URI)
             self.db = self.connection[dbname]
@@ -30,7 +29,6 @@ class Database:
         try:
             collection = self.get_collection(collection_name)
             result = collection.find_one(filter)
-            print('db ', collection, result)
             if result:
                 result['_id'] = str(result['_id']) 
                 del result['_id']
