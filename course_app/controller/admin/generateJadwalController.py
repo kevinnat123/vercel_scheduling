@@ -56,7 +56,8 @@ def generate_jadwal():
             if best_schedule and best_schedule.get('status') == False:
                 raise CustomError({ 'message': best_schedule.get('message') })
             else:
-                print("Final Schedule Fitness\n", ga.hitung_fitness( jadwal=best_schedule['data'], matakuliah_list=data_matkul, dosen_list=data_dosen, ruang_list=data_ruang, detail=True ))
+                print("Final Schedule Fitness\n")
+                ga.hitung_fitness( jadwal=best_schedule['data'], matakuliah_list=data_matkul, dosen_list=data_dosen, ruang_list=data_ruang, detail=True )
             
             # print([schedule for schedule in best_schedule['data'] if schedule['program_studi'] == 'S1 SISTEM INFORMASI'])
             dao.upload_jadwal(best_schedule['data'])
