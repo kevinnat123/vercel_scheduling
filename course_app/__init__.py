@@ -35,7 +35,7 @@ def create_app():
     app = Flask(__name__,
             static_folder=static_dir,
             template_folder=template_dir)
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)  # SESSION LIFETIME per 1 jam
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=15)  # SESSION LIFETIME per 1 jam
 
     login_manager.init_app(app)
     login_manager.login_view = 'signin.login'
