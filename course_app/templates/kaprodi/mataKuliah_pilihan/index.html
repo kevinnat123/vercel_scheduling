@@ -819,9 +819,7 @@
 
           // Mencari indeks elemen dengan angkatan '2021'
           let index = data_angkatan.findIndex(
-            (item) =>
-              item.angkatan === params.angkatan &&
-              item.bidang_minat === params.bidang_minat
+            (item) => item.u_id === params.u_id
           );
 
           // Jika ditemukan, ganti elemen tersebut, jika tidak, tambahkan data baru
@@ -1163,7 +1161,7 @@
 
           if (columnData == "jumlah_kelas")
             $(this).html(
-              `<input type="text" class="form-control text-end numberOnly"value="${
+              `<input type="text" class="form-control text-end numberOnly" value="${
                 data[columnData] || ""
               }"/>`
             );
